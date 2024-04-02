@@ -45,7 +45,8 @@ SegLoader, Segment, SegProcess = infer_network.get_3d_UNet, SlidingWindowPredict
 class Ensemble_Seg(nn.Module):
     def __init__(self, data_name: str = None,  ##seg preprocess args
                  seg_fp: str = None, spacing=np.array([3, 3, 3]),
-                 do_prep=False, do_infer=False,is_cect=False,cont=False):  ##seg args
+                 do_prep=False, do_infer=False,is_cect=False,cont=False,
+                 patch_size = 64, batch_size=4,overlap=0.5):  ##seg args
         super().__init__()
 
         print("")
@@ -59,7 +60,9 @@ class Ensemble_Seg(nn.Module):
         self.data_name = data_name
         self.is_cect = is_cect
         self.cont = cont
-
+        self.patch_size = patch_size
+        self.batch_size = batch_size
+        self.overlap = overlap
         # ### SEG PREPROCESS ###
         self.preprocessed_name = str(spacing[0]) + ',' + str(spacing[1]) + ',' + str(spacing[2]) + "mm"
         self.spacing = spacing
@@ -163,13 +166,13 @@ class Ensemble_Seg(nn.Module):
 
         for foldpath in model_files:
             self.SegModel = SegLoader(1, 2, 6, 2, filters=32, filters_max=1024)
-            b = 64
             sm = torch.load(join(path, foldpath, "network_weights"), map_location='cpu')
             self.SegModel.load_state_dict(sm)
             self.SegModel.to(self.seg_dev)
             self.SegModel.eval()
 
-            self.Segment.append(Segment(self.SegModel, [b, b, b], batch_size=4, overlap=0.5))
+            self.Segment.append(Segment(self.SegModel, [self.patch_size, self.patch_size, self.patch_size],
+                                        batch_size=self.batch_size, overlap=self.overlap))
 
     def seg_pred(self, data_tpl, do_postprocessing=True):
 

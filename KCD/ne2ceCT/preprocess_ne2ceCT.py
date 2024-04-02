@@ -50,11 +50,11 @@ def Segmentation_Preparation(home, seg_spacing=np.array([4,4,4]),
     print("")
 
 if __name__ == "__main__":
-    Segmentation_Preparation(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([2,2,2]),
-                             data_name='coltea_nat',preprocessed_name='coltea_nat_2', is_cect=False)
+    # Segmentation_Preparation(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([2,2,2]),
+    #                          data_name='cropped_tcia_ncct',preprocessed_name='tcia_cmd_2_ncct', is_cect=False)
 
     Segmentation_Preparation(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([2,2,2]),
-                             data_name='coltea_art',preprocessed_name='coltea_art_2', is_cect=True)
+                             data_name='cropped_tcia_cect',preprocessed_name='tcia_cmd_2_cect', is_cect=True)
 
     # Segmentation_Preparation(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([2,2,2]),
     #                          data_name='add_cect',preprocessed_name='add_cect_2', is_cect=False)
