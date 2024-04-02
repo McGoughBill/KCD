@@ -17,7 +17,7 @@ def get_3d_featureoutput_unet(in_channels, out_channels, n_stages,filters=32, fi
     return infer_network.UNet_featureoutput(in_channels, out_channels, kernel_sizes, False, filters_max=filters_max, filters=filters, )
 
 spacing = 2
-batch_size = 8
+batch_size = 4
 out_dim = 2
 epochs = int(sys.argv[1])
 l1_weight = float(sys.argv[2])
