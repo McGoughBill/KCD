@@ -28,10 +28,10 @@ def linear_coreg(moving,fixed,initial_transform,
 
     if moving_mask :
         # mask image using intensity thresholding
-        mmask = sitk.IntensityWindowing(moving, windowMinimum=-900, windowMaximum=1000)
+        mmask = sitk.IntensityWindowing(moving, windowMinimum=-200, windowMaximum=300)
         registration_method.SetMetricMovingMask( mmask>0)
     if fixed_mask:
-        fmask = sitk.IntensityWindowing(fixed, windowMinimum=-900, windowMaximum=1000)
+        fmask = sitk.IntensityWindowing(fixed, windowMinimum=-200, windowMaximum=300)
         registration_method.SetMetricFixedMask( fmask>0)
 
     # Don't optimize in-place, we would possibly like to run this cell multiple times.
@@ -71,10 +71,10 @@ def nonlinear_coreg(moving,fixed,
 
     if moving_mask :
         # mask image using intensity thresholding
-        mmask = sitk.IntensityWindowing(moving, windowMinimum=-900, windowMaximum=1000)
+        mmask = sitk.IntensityWindowing(moving, windowMinimum=-200, windowMaximum=300)
         registration_method.SetMetricMovingMask( mmask>0)
     if fixed_mask:
-        fmask = sitk.IntensityWindowing(fixed, windowMinimum=-900, windowMaximum=1000)
+        fmask = sitk.IntensityWindowing(fixed, windowMinimum=-200, windowMaximum=300)
         registration_method.SetMetricFixedMask( fmask>0)
 
 
@@ -89,7 +89,7 @@ def nonlinear_coreg(moving,fixed,
     registration_method.AddCommand(sitk.sitkIterationEvent, lambda: plot_values(registration_method))
 
     registration_method.SetInterpolator(sitk.sitkLinear)
-    registration_method.SetOptimizerAsGradientDescent(learningRate=1, numberOfIterations=100,
+    registration_method.SetOptimizerAsGradientDescent(learningRate=1, numberOfIterations=20,
                                                       convergenceMinimumValue=1e-7, convergenceWindowSize=10)
 
     final_transform = registration_method.Execute(fixed_image, moving)
