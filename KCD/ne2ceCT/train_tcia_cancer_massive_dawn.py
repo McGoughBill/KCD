@@ -64,7 +64,7 @@ if __name__ == '__main__':
     print(dataset.cases)
 
     dataset.apply_foldsplit(split_ratio=0.9)
-    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers=10)
+    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers=32)
 
 
     model_T = get_3d_featureoutput_unet(1, out_dim, 7,  filters=32, filters_max=1024).to(dev)
