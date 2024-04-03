@@ -6,6 +6,7 @@ import torch.multiprocessing as mp
 torch.multiprocessing.set_sharing_strategy('file_system')
 import argparse
 import torch.distributed as dist
+from datetime import timedelta
 
 from KCD.ne2ceCT.dataloader import CrossPhaseDataset
 from KCD.ne2ceCT.loss_function import PyramidalLatentSimilarityLoss
@@ -160,7 +161,7 @@ def main_worker(gpu,args):
                 T = model_T(ce)
             S = model_S(ne)
             loss = loss_func(T, S)
-            dist.all_reduce(loss, op=dist.ReduceOp.SUM) / world_size
+            dist.all_reduce(loss, op=dist.ReduceOp.SUM)
 
             # backward
             loss.backward()
