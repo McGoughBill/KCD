@@ -26,6 +26,9 @@ for nii_label in npy_label_list:
     print(nii_label)
     if '.DS_Store' in nii_label:
         continue
+
+    if nii_label=='KiTS-00101.nii.gz':
+        continue
     try:
         image = nib.load(os.path.join(nii_image_loc, nii_label))
         label = nib.load(os.path.join(nii_label_loc, nii_label))
@@ -72,7 +75,12 @@ for nii_label in npy_label_list:
     affine = np.eye(4)*np.append(spacing_vector,1)
 
     # create masked nifti image and save
-    masked_nifti = nib.Nifti1Image(np.rot90(masked_image,3), affine=affine)
+    masked_nifti = nib.Nifti1Image(
+        np.flip(
+            np.flip(
+                np.rot90(
+                masked_image,3),0),2),
+        affine=affine)
 
     #reshape back into original shape
     masked_nifti = nib.as_closest_canonical(masked_nifti)
