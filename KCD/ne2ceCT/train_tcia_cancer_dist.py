@@ -45,8 +45,8 @@ def parse_option():
     parser.add_argument('--spacing', default=2, type=int, help='spacing')
     parser.add_argument('--dist-url', default='tcp://127.0.0.1:23456', type=str, help='distributed url')
 
-
     args = parser.parse_args()
+    print('args parsed')
 
     return args
 
@@ -99,10 +99,11 @@ def main_worker(gpu,args):
 
     assert os.path.exists(dataset_ne_path) and os.path.exists(dataset_ce_path)
     ne2ceCT_path = os.path.join(os.environ['OV_DATA_BASE'], 'ne2ceCT', 'cropped_tcia_{}_cancer'.format(spacing),
-                                'l1{}_l2{}_var{}_cov{}_{}lr_{}lg_{}bs_{}ep_{}gpus'.format(l1_weight,
+                                'l1{}_l2{}_var{}_cov{}_cce{}_{}lr_{}lg_{}bs_{}ep_{}gpus'.format(l1_weight,
                                                                                    l2_weight,
                                                                                    var_loss_weight,
                                                                                    cov_loss_weight,
+                                                                                   cce_weight,
                                                                                    lr_max,
                                                                                    loss_gamma,
                                                                                    batch_size,

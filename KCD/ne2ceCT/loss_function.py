@@ -119,8 +119,6 @@ class PyramidalLatentSimilarityLoss(nn.Module):
         loss = 0
         for i in range(len(feature_list1)):
             loss += self.similarity_loss(feature_list1[i], feature_list2[i])
-
-        print()
         return loss
 
 
