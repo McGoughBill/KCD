@@ -36,8 +36,8 @@ if __name__ == '__main__':
     # axs[1].axis('off')
     # plt.show()
 
-    dataset = CrossPhaseDataset(ne_data_path, ce_data_path, device='cpu', is_train=False)
-    dataset.apply_foldsplit(split_ratio=0)
+    dataset = CrossPhaseDataset(ne_data_path, ce_data_path, device='cpu', is_train=True)
+    dataset.apply_foldsplit(split_ratio=1)
 
     # get an inference sample
 
@@ -66,7 +66,8 @@ if __name__ == '__main__':
     latent_nc_from_ce = (latent_nc_from_ce - latent_nc_from_ce.min()) / (latent_nc_from_ce.max() - latent_nc_from_ce.min())
 
     channel = 16
-    slice = 50
+    # set slice index to the slice of image with the highest sum of pixel values
+    slice = np.argmax(ne[0, 0, :, :, :].sum(dim=1).sum(dim=1).cpu().detach().numpy())
 
     # plot a 3 row 2 column set of plots
     # top row is the ce image and the nc image
