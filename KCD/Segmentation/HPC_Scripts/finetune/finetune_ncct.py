@@ -12,7 +12,7 @@ spacing = 2
 fold = int(sys.argv[1])
 
 # preprocessed_name = '4mm_binary'
-preprocessed_name = '2mm_binary'
+preprocessed_name = '2mm_binary_canceronly'
 # preprocessed_name='4mm_binary_test'
 model_name = '6,3x3x3,32_finetune_fromkits23_cect'
 # model_name = 'del'
@@ -50,7 +50,7 @@ del model_params['network']['n_blocks_list']
 del model_params['network']['stochdepth_rate']
 del model_params['training']['loss_params']
 
-lr=0.00001
+lr=0.000001
 model_params['data']['folders'] = ['images', 'labels']
 model_params['data']['keys'] = ['image', 'label']
 model_params['training']['num_epochs'] = 100

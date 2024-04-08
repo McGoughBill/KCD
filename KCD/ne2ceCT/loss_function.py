@@ -12,6 +12,8 @@ def off_diagonal(x):
     assert n == m
     return x.flatten()[:-1].view(n - 1, n + 1)[:, 1:].flatten()
 
+
+
 class LatentSimilarityLoss(nn.Module):
     def __init__(self, l2_weight = 0, l1_weight = 0, cce_weight = 0, cos_weight = 0,
                  var_loss_weight = 0, cov_loss_weight=0,out_dim= 2):
@@ -80,14 +82,21 @@ class LatentSimilarityLoss(nn.Module):
 
                 std_x = torch.sqrt(x.var(dim=0) + 0.0001) # find variance across dimension n (b*x*y*z, d)
                 std_y = torch.sqrt(y.var(dim=0) + 0.0001)
+                # print(std_x.shape)
+                # print('Mean inter-sample std deviation: {:.5f}'.format(std_x.mean() + std_y.mean()))
+
                 var_loss = torch.mean(F.relu(1 - std_x)) / 2 + torch.mean(F.relu(1 - std_y)) / 2
+                # print(var_loss)
                 loss += torch.clamp(var_loss,0,1)*self.var_loss_weight
                 if self.cov_loss_weight>0:
                     cov_x = (x.T @ x) / (x.shape[0] - 1)
                     cov_y = (y.T @ y) / (x.shape[0] - 1)
+                    # print(cov_x.shape)
+                    # print('Mean intra-sample covariance: {:.5f}'.format(off_diagonal(cov_x).mean() + off_diagonal(cov_y).mean()))
                     cov_loss = off_diagonal(cov_x).pow(2).mean() + off_diagonal(cov_y).pow(2).mean()
+                    # print(cov_loss)
                     loss += torch.clamp(cov_loss,0,1)*self.cov_loss_weight
-        return loss * (1e3/(d**3))
+        return loss / d
 
 
 
@@ -110,6 +119,8 @@ class PyramidalLatentSimilarityLoss(nn.Module):
         loss = 0
         for i in range(len(feature_list1)):
             loss += self.similarity_loss(feature_list1[i], feature_list2[i])
+
+        print()
         return loss
 
 

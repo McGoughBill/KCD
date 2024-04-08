@@ -20,8 +20,8 @@ def Segmentation_Preparation(home, seg_spacing=np.array([4,4,4]),
                                                   apply_windowing=True,
                                                   target_spacing=seg_spacing,
                                                   pooling_stride=None,
-                                                  window=np.array([-556.0, 309.2]),
-                                                  scaling=np.array([199.5, 71.6]),
+                                                  window=np.array([-48, 280]),
+                                                  scaling=np.array([55.6, 65.34]),
                                                   lb_classes=None,
                                                   reduce_lb_to_single_class=False,
                                                   lb_min_vol=None,
@@ -34,8 +34,8 @@ def Segmentation_Preparation(home, seg_spacing=np.array([4,4,4]),
                                                   apply_windowing=True,
                                                   target_spacing=seg_spacing,
                                                   pooling_stride=None,
-                                                  window=np.array([-116., 130.]),
-                                                  scaling=np.array([41.301857, 12.257426]),
+                                                  window=np.array([-116, 130.]),
+                                                  scaling=np.array([41.3, 12.3]),
                                                   lb_classes=None,
                                                   reduce_lb_to_single_class=False,
                                                   lb_min_vol=None,
@@ -50,8 +50,14 @@ def Segmentation_Preparation(home, seg_spacing=np.array([4,4,4]),
     print("")
 
 if __name__ == "__main__":
-    # Segmentation_Preparation(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([2,2,2]),
-    #                          data_name='cropped_tcia_ncct',preprocessed_name='tcia_cmd_2_ncct', is_cect=False)
+    Segmentation_Preparation(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([2,2,2]),
+                             data_name='abdominal_tcia_ncct',preprocessed_name='tcia_cmd_2_ncct', is_cect=False)
+
+    Segmentation_Preparation(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([2,2,2]),
+                             data_name='abdominal_tcia_cect',preprocessed_name='tcia_cmd_2_cect', is_cect=True)
+
+    Segmentation_Preparation(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([2,2,2]),
+                             data_name='cropped_tcia_ncct',preprocessed_name='tcia_cmd_2_ncct', is_cect=False)
 
     Segmentation_Preparation(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([2,2,2]),
                              data_name='cropped_tcia_cect',preprocessed_name='tcia_cmd_2_cect', is_cect=True)

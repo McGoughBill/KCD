@@ -73,7 +73,7 @@ def main_worker(gpu,args):
                                 init_method=args.dist_url,
                                 world_size=args.world_size,
                                 rank=args.rank,
-                                timeout=timedelta(60))
+                                timeout=timedelta(1800))
     torch.cuda.set_device(args.gpu)
     print(args.rank, ' gpu', args.gpu)
     if args.rank == 0:
@@ -153,6 +153,7 @@ def main_worker(gpu,args):
     for epoch in range(epochs):
         dataloader.dataset.is_train = True
         model_S.train()
+        torch.cuda.empty_cache()
         for i, (ne, ce) in enumerate(dataloader):
             # forward
             ne = ne.cuda(args.gpu)
@@ -186,6 +187,9 @@ def main_worker(gpu,args):
                 f.write(train_string)
 
         dataloader.dataset.is_train = False
+        # clear torch cache
+        torch.cuda.empty_cache()
+
         with torch.no_grad():
             model_S.eval()
             for i, (ne, ce) in enumerate(dataloader):
@@ -198,6 +202,7 @@ def main_worker(gpu,args):
                     running_val_loss = loss.item()
                 else:
                     running_val_loss = weight * running_val_loss + (1 - weight) * loss.item()
+        dist.barrier()
         if args.rank == 0:
             val_string = f'Val Loss: {running_val_loss:.4E}\n'
             with open(log_path, 'a') as f:
@@ -217,6 +222,7 @@ def main_worker(gpu,args):
             ax = fig.add_subplot(1, 1, 1)
             ax.plot(losses)
             plt.savefig(os.path.join(ne2ceCT_path, 'losses.png'))
+        dist.barrier()
 
 
 if __name__ == '__main__':

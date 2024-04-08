@@ -17,12 +17,11 @@ spacing = 2
 fold = int(sys.argv[1])
 
 # preprocessed_name = '4mm_binary'
-preprocessed_name = '2mm_binary'
+preprocessed_name = '2mm_binary_canceronly_alt'
 # preprocessed_name='4mm_binary_test'
-# pretrain_ds = str(sys.argv[2])
-# ne2ceCT = str(sys.argv[3])
-# model_name = '6,3x3x3,32_finetune_from_'+pretrain_ds+'_'+ne2ceCT
-model_name = '6,3x3x3,32_finetune_from_all_2_l125.0_l20.0_var0.1_cov10.0_5e-05lr_0.99998lg_80bs_5000ep'
+pretrain_ds = str(sys.argv[2])
+ne2ceCT = str(sys.argv[3])
+model_name = '6,3x3x3,32_finetune_from_'+pretrain_ds+'_'+ne2ceCT
 
 # model_name = 'del'
 
@@ -59,7 +58,7 @@ del model_params['network']['n_blocks_list']
 del model_params['network']['stochdepth_rate']
 del model_params['training']['loss_params']
 
-lr=0.00001
+lr=0.000001
 model_params['data']['folders'] = ['images', 'labels']
 model_params['data']['keys'] = ['image', 'label']
 model_params['training']['num_epochs'] = 100
@@ -77,11 +76,7 @@ model_params['data']['trn_dl_params']['batch_size']=32
 model_params['data']['val_dl_params']['epoch_len']=50
 
 for vf in vfs:
-
-    # path_to_model = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/trained_models/kits23_nooverlap/2mm_alllabel/alllabel_long/fold_0/network_weights'
-    # path_to_model = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/trained_models/kits23_nooverlap/2mm_binary_canceronly/6,3x3x3,32_justcancer/fold_1/network_weights'
-    # path_to_model = '/media/mcgoug01/Crucial X6/ovseg_test/ne2ceCT/coltea_4_legacy_outs/network_weights'
-    # path_to_model = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/ne2ceCT/{}/{}/network_weights'.format(pretrain_ds,ne2ceCT)
+    path_to_model = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/ne2ceCT/{}/{}/network_weights'.format(pretrain_ds,ne2ceCT)
 
     model = SegmentationModel(val_fold=vf,
                                         data_name=data_name,

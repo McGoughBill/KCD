@@ -1,11 +1,11 @@
 import os
-os.environ['OV_DATA_BASE'] = "/home/wcm23/rds/hpc-work/FineTuningKITS23"
+os.environ['OV_DATA_BASE'] = "/bask/projects/p/phwq4930-renal-canc/data/seg_data"
 from KCD.Segmentation.ovseg.preprocessing.SegmentationPreprocessing import SegmentationPreprocessing
 
-data_name = 'coreg_ncct'
-spacing = 1
+data_name = 'masked_coreg_ncct'
+spacing = 2
 
-preprocessed_name = '1mm_binary_canceronly'
+preprocessed_name = '2mm_binary_canceronly'
 
 lb_classes = [2]
 
