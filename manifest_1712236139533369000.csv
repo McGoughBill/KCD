@@ -1,0 +1,4 @@
+ID,name,versionNumber,contentType,dataFileSizeBytes,createdBy,createdOn,modifiedBy,modifiedOn,parentId,synapseURL,dataFileMD5Hex,path,error
+syn3553734,Abdomen.zip,1,application/zip,41718564692,3324696,1428967542212,3324696,1428967542212,syn3376386,https://www.synapse.org/#!Synapse:syn3553734.1,2d537aeebc985c02580f0f66b1f44d93,/Users/mcgoug01/Downloads/btcv/Abdomen.zip,
+syn3379050,RawData.zip,1,application/zip,1643648324,3324696,1427294346368,3324696,1427294346368,syn3376386,https://www.synapse.org/#!Synapse:syn3379050.1,e8e3fc9604eadc34c47067e2332f8ea1,/Users/mcgoug01/Downloads/btcv/RawData.zip,
+syn3380218,Reg-Training-Testing.zip,1,application/zip,15837307600,3324696,1427306254705,3324696,1427306254705,syn3376386,https://www.synapse.org/#!Synapse:syn3380218.1,628d9afeacabfb10ef0afa37eef6c069,/Users/mcgoug01/Downloads/btcv/Reg-Training-Testing.zip,
