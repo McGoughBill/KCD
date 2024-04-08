@@ -1,5 +1,0 @@
-"ID","name","versionNumber","contentType","dataFileSizeBytes","createdBy","createdOn","modifiedBy","modifiedOn","parentId","synapseURL","dataFileMD5Hex"
-"syn3553734","Abdomen.zip","1","application/zip","41718564692","3324696","1428967542212","3324696","1428967542212","syn3376386","https://www.synapse.org/#!Synapse:syn3553734.1","2d537aeebc985c02580f0f66b1f44d93"
-"syn3379050","RawData.zip","1","application/zip","1643648324","3324696","1427294346368","3324696","1427294346368","syn3376386","https://www.synapse.org/#!Synapse:syn3379050.1","e8e3fc9604eadc34c47067e2332f8ea1"
-"syn3380218","Reg-Training-Testing.zip","1","application/zip","15837307600","3324696","1427306254705","3324696","1427306254705","syn3376386","https://www.synapse.org/#!Synapse:syn3380218.1","628d9afeacabfb10ef0afa37eef6c069"
-"syn3380229","Reg-Training-Training.zip","1","application/zip","24237506808","3324696","1427307185862","3324696","1427307185862","syn3376386","https://www.synapse.org/#!Synapse:syn3380229.1","de25564da958855f2a4c46bd90c2f8e8"

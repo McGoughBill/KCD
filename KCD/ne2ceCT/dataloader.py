@@ -21,7 +21,7 @@ class CrossPhaseDataset(Dataset):
         self.device = device
 
         #save cases as a list of cases present in both ne_path and ce_path
-        self.cases = [case for case in os.listdir(ne_path) if case in os.listdir(ce_path)]
+        self.cases = [case for case in os.listdir(ne_path) if case in os.listdir(ce_path) and case.endswith('.npy')]
         self.cases = np.random.permutation(np.array(self.cases))
 
         assert (len(self.cases) > 0)
@@ -143,11 +143,13 @@ class CrossPhaseDataset(Dataset):
             transforms = None
             case = self.test_cases[idx % (len(self.test_cases)-1)]
 
+        print(case)
 
-        ne = torch.Tensor(np.load(os.path.join(self.ne_path, case)))
-        ce = torch.Tensor(np.load(os.path.join(self.ce_path, case)))
+        ne = torch.Tensor(np.load(os.path.join(self.ne_path, case),allow_pickle=True))
+        ce = torch.Tensor(np.load(os.path.join(self.ce_path, case),allow_pickle=True))
         # get random patch indices
         ne,ce,indices = self._get_random_patch_indices(ne,ce, self.patch_size)
+        print(indices,ce.shape,ne.shape)
         ne_patch = ne[0, indices[0]:indices[0]+self.patch_size, indices[1]:indices[1]+self.patch_size, indices[2]:indices[2]+self.patch_size]
         ce_patch = ce[0, indices[0]:indices[0]+self.patch_size, indices[1]:indices[1]+self.patch_size, indices[2]:indices[2]+self.patch_size]
 
