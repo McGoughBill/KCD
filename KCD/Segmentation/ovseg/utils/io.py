@@ -235,7 +235,6 @@ def read_data_tpl_from_nii(folder, case,additional_channels = 0):
         # in case we don't find a label file let's return without
         return data_tpl
     elif len(label_files) == 1:
-        print(label_files)
         lb, spacing, had_z_first = read_nii(label_files[0])
         if np.max(spacing - data_tpl['spacing']) > 1e-4:
             raise ValueError('Found not matching spacings for case {}.'.format(case))
