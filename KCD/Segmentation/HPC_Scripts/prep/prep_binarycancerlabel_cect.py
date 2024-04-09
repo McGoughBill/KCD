@@ -9,6 +9,14 @@ preprocessed_name = '1mm_binary_canceronly'
 
 lb_classes = [2]
 target_spacing=[spacing]*3
+kits33_nooverlap_canc_properties = {'median_shape': [103., 512., 512.],
+                                'median_spacing': [4., 0.78125, 0.78125],
+                                'fg_percentiles' : [-500.,  281.],
+                                'percentiles': [0.5, 99.5],
+                                'scaling_foreground': [ 234.7703,  -375.88345],
+                                'n_fg_classes': 1,
+                                'scaling_global': [ 123.38048, -470.74335],
+                                'scaling_window' : [ 121.11153, -470.54962]}
 
 prep = SegmentationPreprocessing(apply_resizing=True, 
                                     apply_pooling=False, 
