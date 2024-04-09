@@ -1,5 +1,5 @@
 import os
-os.environ['OV_DATA_BASE'] = "/bask/projects/p/phwq4930-renal-canc/data/seg_data/"
+os.environ['OV_DATA_BASE'] = "/Users/mcgoug01/Library/CloudStorage/OneDrive-CRUKCambridgeInstitute/SecondYear/Segmentation/seg_data"
 from KCD.Segmentation.ovseg.preprocessing.SegmentationPreprocessing import SegmentationPreprocessing
 
 data_name = 'all_add'
@@ -23,6 +23,9 @@ prep = SegmentationPreprocessing(apply_resizing=True,
                                     lb_classes=lb_classes,
                                     target_spacing=target_spacing,
                                     reduce_lb_to_single_class = True,
+                                     window=[-500, 281],
+                                     scaling=[234.7703, -375.88345],
+                                     pooling_stride=None,
                                     dataset_properties=kits33_nooverlap_canc_properties)
 
 prep.initialise_preprocessing()

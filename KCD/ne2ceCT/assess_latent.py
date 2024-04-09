@@ -19,6 +19,9 @@ if __name__ == '__main__':
     nc2ceCT_model = get_3d_featureoutput_unet(1, 2, 6)
     nc2ceCT_model.load_state_dict(torch.load('/Users/mcgoug01/Downloads/assessing_latent/ne2ceCT_model', map_location='cpu'))
 
+    ce_model.eval()
+    nc2ceCT_model.eval()
+
     ce_data_path = '/Users/mcgoug01/Downloads/assessing_latent/ce'
     ne_data_path = '/Users/mcgoug01/Downloads/assessing_latent/nc'
 
@@ -65,7 +68,7 @@ if __name__ == '__main__':
     latent_ce = (latent_ce - latent_ce.min()) / (latent_ce.max() - latent_ce.min())
     latent_nc_from_ce = (latent_nc_from_ce - latent_nc_from_ce.min()) / (latent_nc_from_ce.max() - latent_nc_from_ce.min())
 
-    channel = 16
+    channel = 3
     # set slice index to the slice of image with the highest sum of pixel values
     slice = np.argmax(ne[0, 0, :, :, :].sum(dim=1).sum(dim=1).cpu().detach().numpy())
 

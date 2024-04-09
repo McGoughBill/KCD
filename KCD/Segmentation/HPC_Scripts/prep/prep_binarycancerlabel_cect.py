@@ -22,6 +22,9 @@ prep = SegmentationPreprocessing(apply_resizing=True,
                                     apply_pooling=False, 
                                     apply_windowing=True,
                                     lb_classes=lb_classes,
+                                 window = [-500, 281],
+                                 scaling=[234.7703, -375.88345],
+                                 pooling_stride=None,
                                     target_spacing=target_spacing,
                                     reduce_lb_to_single_class = True)
 

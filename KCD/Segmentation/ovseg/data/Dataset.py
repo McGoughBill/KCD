@@ -174,10 +174,10 @@ class raw_Dataset(object):
                 labelfolder = 'labels' + self.image_folder[6:]
                 if labelfolder in all_lb_folders:
                     self.scans = [scan[:-7] for scan in listdir(join(self.raw_path,
-                                                                     labelfolder))]
+                                                                     labelfolder)) if scan.endswith('.nii.gz')]
                 else:
                     self.scans = [scan[:-7] for scan in listdir(join(self.raw_path,
-                                                                     self.image_folder))]
+                                                                     self.image_folder)) if scan.endswith('.nii.gz')]
             else:
                 self.scans = scans
             print('Using scans: ', self.scans)
