@@ -5,7 +5,14 @@ from KCD.ne2ceCT.dataloader import CrossPhaseDataset
 from KCD.Segmentation.Inference import infer_network
 import matplotlib.pyplot as plt
 import numpy as np
+from sklearn.decomposition import SparsePCA as PCA
 
+# this script loads the trained models and uses them to generate latent spaces for the same patient
+# in CECT and NCCT. It then compares the latent spaces and the output spaces of the models
+# to assess the similarity between the two modalities. The nc2ceCT model is trained to match
+# the latent spaces of the two modalities, so should hopefully be more similar in latent space than
+# the ce model just naively applied to the nc data. We visualise the latent spaces with the first
+# 3 principal components of the CE model's latent space on CE data, assuming this is 'the answer'.
 
 def get_3d_featureoutput_unet(in_channels, out_channels, n_stages,filters=32, filters_max=1024):
     kernel_sizes = n_stages * [(3, 3, 3)]
@@ -17,27 +24,13 @@ if __name__ == '__main__':
     ce_model.load_state_dict(torch.load('/Users/mcgoug01/Downloads/assessing_latent/ce_model', map_location='cpu'))
 
     nc2ceCT_model = get_3d_featureoutput_unet(1, 2, 6)
-    nc2ceCT_model.load_state_dict(torch.load('/Users/mcgoug01/Downloads/assessing_latent/ne2ceCT_model', map_location='cpu'))
+    nc2ceCT_model.load_state_dict(torch.load('/Users/mcgoug01/Downloads/assessing_latent/network_weights', map_location='cpu'))
 
     ce_model.eval()
     nc2ceCT_model.eval()
 
     ce_data_path = '/Users/mcgoug01/Downloads/assessing_latent/ce'
     ne_data_path = '/Users/mcgoug01/Downloads/assessing_latent/nc'
-
-    # # display the same slice in the same image from each data path
-    # ce = np.load(os.path.join(ce_data_path, os.listdir(ce_data_path)[1]),allow_pickle=True)[0]
-    # ne = np.load(os.path.join(ne_data_path, os.listdir(ne_data_path)[1]),allow_pickle=True)[0]
-    #
-    # plt.switch_backend('TkAgg')
-    # fig, axs = plt.subplots(1, 2)
-    # axs[0].imshow(ne[50, :, :].T)
-    # axs[0].set_title('NC')
-    # axs[0].axis('off')
-    # axs[1].imshow(ce[50, :, :].T)
-    # axs[1].set_title('CE')
-    # axs[1].axis('off')
-    # plt.show()
 
     dataset = CrossPhaseDataset(ne_data_path, ce_data_path, device='cpu', is_train=True)
     dataset.apply_foldsplit(split_ratio=1)
@@ -68,9 +61,23 @@ if __name__ == '__main__':
     latent_ce = (latent_ce - latent_ce.min()) / (latent_ce.max() - latent_ce.min())
     latent_nc_from_ce = (latent_nc_from_ce - latent_nc_from_ce.min()) / (latent_nc_from_ce.max() - latent_nc_from_ce.min())
 
-    channel = 3
-    # set slice index to the slice of image with the highest sum of pixel values
-    slice = np.argmax(ne[0, 0, :, :, :].sum(dim=1).sum(dim=1).cpu().detach().numpy())
+    latent_ce_reshape = latent_ce.view(latent_ce.shape[0], -1).T
+    latent_nc_reshape = latent_nc.view(latent_nc.shape[0], -1).T
+    latent_nc_from_ce_reshape = latent_nc_from_ce.view(latent_nc_from_ce.shape[0], -1).T
+
+    pca = PCA(n_components=3)
+    pca.fit(latent_ce_reshape.cpu().detach().numpy())
+    latent_ce_pca = pca.transform(latent_ce_reshape.cpu().detach().numpy())
+    latent_nc_pca = pca.transform(latent_nc_reshape.cpu().detach().numpy())
+    latent_nc_from_ce_pca = pca.transform(latent_nc_from_ce_reshape.cpu().detach().numpy())
+
+    # reshape the latent spaces to 3D, back to the original shape
+    latent_nc_pca = latent_nc_pca.T.reshape(3,latent_nc.shape[1],latent_nc.shape[2],latent_nc.shape[3])
+    latent_ce_pca = latent_ce_pca.T.reshape(3,latent_ce.shape[1],latent_ce.shape[2],latent_ce.shape[3])
+    latent_nc_from_ce_pca = latent_nc_from_ce_pca.T.reshape(3,latent_nc_from_ce.shape[1],latent_nc_from_ce.shape[2],latent_nc_from_ce.shape[3])
+
+    # set slice index to the slice with the maximum difference between latent_nc_pca and latent_nc_from_ce_pca
+    slice = np.argmax(np.abs(latent_nc_pca - latent_nc_from_ce_pca).mean(axis=(0,2,3)))
 
     # plot a 3 row 2 column set of plots
     # top row is the ce image and the nc image
@@ -78,23 +85,23 @@ if __name__ == '__main__':
     # bottom row is the nc latent space from the ce model and the difference between the ce and nc latent spaces
     plt.switch_backend('TkAgg')
     fig, axs = plt.subplots(3, 2)
-    axs[0, 0].imshow(ne[0, 0, slice, :, :].T.cpu().detach().numpy())
+    axs[0, 0].imshow(ne[0, 0, slice, :, :].T.cpu().detach().numpy(), cmap='gray', vmin=-3, vmax=3)
     #add title
     axs[0, 0].set_title('NC')
     axs[0, 0].axis('off')
-    axs[0, 1].imshow(ce[0, 0, slice, :, :].T.cpu().detach().numpy())
+    axs[0, 1].imshow(ce[0, 0, slice, :, :].T.cpu().detach().numpy(), cmap='gray', vmin=-3, vmax=3)
     axs[0, 1].set_title('CE')
     axs[0, 1].axis('off')
-    axs[1, 0].imshow(latent_nc[channel:channel+3, slice, :, :].T.cpu().detach().numpy())
+    axs[1, 0].imshow(latent_nc_pca[:, slice, :, :].T)
     axs[1, 0].set_title('NC latent')
     axs[1, 0].axis('off')
-    axs[1, 1].imshow(latent_ce[channel:channel+3, slice, :, :].T.cpu().detach().numpy())
+    axs[1, 1].imshow(latent_ce_pca[:, slice, :, :].T)
     axs[1, 1].set_title('CE latent')
     axs[1, 1].axis('off')
-    axs[2, 0].imshow(latent_nc_from_ce[channel:channel+3, slice, :, :].T.cpu().detach().numpy())
+    axs[2, 0].imshow(latent_nc_from_ce_pca[:, slice, :, :].T)
     axs[2, 0].set_title('NC latent from CE model')
     axs[2, 0].axis('off')
-    axs[2, 1].imshow((latent_ce - latent_nc)[channel:channel+3, slice, :, :].T.cpu().detach().numpy())
+    axs[2, 1].imshow((latent_ce_pca - latent_nc_pca)[:, slice, :, :].T)
     axs[2, 1].set_title('Difference between CE and NC latent')
     axs[2, 1].axis('off')
 
@@ -106,16 +113,17 @@ if __name__ == '__main__':
     for output in zip(original_nc, original_ce,original_nc_from_ce):
         nc_l,ce_l,ne_from_ce_l = output
         if nc_l.shape[1] == 2:
-            abs_diff_output += torch.abs(nc_l - ce_l).mean()
-            abs_diff_ce_output += torch.abs(ne_from_ce_l - ce_l).mean()
+            # add the cross entropy difference between the output spaces
+            abs_diff_output += (torch.nn.CrossEntropyLoss()(nc_l, ce_l.argmax(dim=1)) + torch.nn.CrossEntropyLoss()(ce_l, nc_l.argmax(dim=1)))/2
+            abs_diff_ce_output += (torch.nn.CrossEntropyLoss()(ne_from_ce_l, ce_l.argmax(dim=1)) + torch.nn.CrossEntropyLoss()(ce_l, ne_from_ce_l.argmax(dim=1)))/2
         else:
             abs_diff_latent += torch.abs(nc_l - ce_l).mean()
             abs_diff_ce += torch.abs(ne_from_ce_l - ce_l).mean()
 
     print(f'Absolute difference between CE and NC latent spaces: {abs_diff_latent}')
     print(f'Absolute difference between CE and NC latent spaces from CE model: {abs_diff_ce}')
-    print(f'Absolute difference between CE and NC output spaces: {abs_diff_output}')
-    print(f'Absolute difference between CE and NC output spaces from CE model: {abs_diff_ce_output}')
+    print(f'Cross Entropy between CE and NC output spaces: {abs_diff_output}')
+    print(f'Cross Entropy between CE and NC output spaces from CE model: {abs_diff_ce_output}')
 
     # print size of the average weight and bias in each model
     print(f'Average weight size in CE model: {torch.abs(torch.cat([p.view(-1) for p in ce_model.parameters()])).mean()}')
