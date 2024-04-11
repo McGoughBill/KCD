@@ -9,7 +9,7 @@ import torch
 import sys
 
 
-data_name = 'kits23'
+data_name = 'kits23_nooverlap'
 spacing = 2
 fold = int(sys.argv[1])
 
@@ -50,7 +50,7 @@ del model_params['training']['loss_params']
 lr=0.0001
 model_params['data']['folders'] = ['images', 'labels']
 model_params['data']['keys'] = ['image', 'label']
-model_params['training']['num_epochs'] = 500
+model_params['training']['num_epochs'] = 300
 model_params['training']['opt_name'] = 'ADAM'
 model_params['training']['opt_params'] = {'lr': lr,
                                             'betas': (0.95, 0.9),
@@ -60,10 +60,10 @@ model_params['data']['trn_dl_params']['epoch_len']=1000
 model_params['data']['trn_dl_params']['padded_patch_size']=[2*patch_size[0]]*3
 model_params['data']['val_dl_params']['padded_patch_size']=[2*patch_size[0]]*3
 model_params['training']['lr_schedule'] = 'lin_ascent_log_decay'
-model_params['training']['lr_exponent'] = 3
+model_params['training']['lr_exponent'] = 2
 model_params['data']['trn_dl_params']['batch_size']=32
 model_params['data']['trn_dl_params']['min_biased_samples'] = model_params['data']['trn_dl_params']['batch_size']//2
-model_params['data']['val_dl_params']['epoch_len']=50
+model_params['data']['val_dl_params']['epoch_len']=100
 model_params['training']['is_voxsim'] = False
 # model_params['postprocessing'] = {'mask_with_reg': True}
 
