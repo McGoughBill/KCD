@@ -54,14 +54,18 @@ with open(os.path.join(save_path, 'labels.csv'), 'w') as f:
 # loop through the patients
 for patient in os.listdir(path_to_AbdomenAtlas):
     # load the image
+    if patient == '.DS_Store': continue
+    mask_save = os.path.join(label_path, patient + '.nii.gz')
+    if os.path.exists(mask_save):
+        continue
+    print(patient)
+
     im = nib.load(os.path.join(path_to_AbdomenAtlas, patient, 'ct.nii.gz'))
     im_data = im.get_fdata()
     im_affine = im.affine
     im_header = im.header
-    mask_save = os.path.join(label_path, patient + '.nii.gz')
 
-    if os.path.exists(mask_save):
-        continue
+
 
     # save the image
     im_nifti = nib.Nifti1Image(im_data, im_affine, im_header)
