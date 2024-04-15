@@ -213,6 +213,7 @@ class raw_Dataset(object):
             ind = ind % len(self.scans)
 
         scan = self.scans[ind]
+        print('Reading scan: ', scan)
 
         if self.is_nifti:
             data_tpl = read_data_tpl_from_nii(self.raw_path, scan, additional_channels = self.additional_channels)

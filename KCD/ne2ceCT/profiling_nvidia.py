@@ -1,6 +1,6 @@
 import torch
 import os
-os.environ['OV_DATA_BASE'] ='/home/wcm23/rds/hpc-work/FineTuningKITS23'
+os.environ['OV_DATA_BASE'] = "/bask/projects/p/phwq4930-renal-canc/data/seg_data"
 from torch.utils.data import DataLoader
 # import intel_extension_for_pytorch as ipex
 
@@ -49,7 +49,7 @@ def main():
     main_worker(args=args)
 
 def main_worker(args):
-    dev = 'gpu'
+    dev = 'cuda'
     print('Batch size is:', args.batch_size, 'epochs', args.epochs)
 
     l1_weight = args.l1_weight
@@ -79,7 +79,7 @@ def main_worker(args):
                                                                                    batch_size
                                                                                    ))
 
-    log_path = os.path.join(ne2ceCT_path, 'logs.txt')
+    log_path = os.path.join(ne2ceCT_path, 'logs_nvidia.txt')
     if not os.path.exists(ne2ceCT_path):
         os.makedirs(ne2ceCT_path)
     if os.path.exists(log_path):
@@ -87,7 +87,7 @@ def main_worker(args):
 
     dataset = CrossPhaseDataset(os.path.join(dataset_ne_path, 'images'), os.path.join(dataset_ce_path, 'images'),
                                 device=dev,
-                                is_train=True, patches_per_case=40, patch_size=64)
+                                is_train=True, patches_per_case=100, patch_size=64)
     print(dataset.cases)
 
     dataset.apply_foldsplit(split_ratio=0.9)

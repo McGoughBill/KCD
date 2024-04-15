@@ -14,6 +14,7 @@ from KCD.Segmentation.ovseg import OV_PREPROCESSED
 from os.path import join, exists
 from os import environ
 import matplotlib.pyplot as plt
+
 try:
     from tqdm import tqdm
 except ModuleNotFoundError:
@@ -24,6 +25,7 @@ from skimage.measure import block_reduce
 from skimage.transform import rescale
 from time import sleep
 import sys
+import gc
 
 
 class SegmentationPreprocessing(object):
@@ -81,7 +83,7 @@ class SegmentationPreprocessing(object):
         self.dataset_properties = dataset_properties
         # when inheriting from this please append any other important
         # parameters that define the preprocessing
-        self.num_additional_channels=num_additional_channels
+        self.num_additional_channels = num_additional_channels
         print("num additional channels")
         self.preprocessing_parameters = ['apply_resizing',
                                          'apply_pooling',
@@ -115,7 +117,7 @@ class SegmentationPreprocessing(object):
                                 prev_stage['data_name'],
                                 prev_stage['preprocessed_name'],
                                 prev_stage['model_name']])
-    
+
                 self.keys_for_previous_stages.append(key)
 
         self.is_initalised = False
@@ -155,7 +157,7 @@ class SegmentationPreprocessing(object):
                   'preprocessing objects')
             return
 
-        include_keys = ['apply_resizing', 'apply_pooling', 'apply_windowing', 'target_spacing', 
+        include_keys = ['apply_resizing', 'apply_pooling', 'apply_windowing', 'target_spacing',
                         'pooling_stride', 'window', 'scaling', 'n_im_channels',
                         'do_nn_img_interp']
 
@@ -186,8 +188,8 @@ class SegmentationPreprocessing(object):
                 return
             else:
                 print_dict_diff(data_pkl, data, 'pkl paramters', 'given paramters')
-                print('Found some not matching prerpocessing parameters in '+outfolder+'.'
-                      'The currently used parameters will not overwrite the stored ones.')
+                print('Found some not matching prerpocessing parameters in ' + outfolder + '.'
+                                                                                           'The currently used parameters will not overwrite the stored ones.')
         else:
             save_pkl(data, outfile)
             save_txt(data, outfile[:-4])
@@ -197,9 +199,9 @@ class SegmentationPreprocessing(object):
             path_to_params = join(path_to_params, 'preprocessing_parameters.pkl')
 
         if not exists(path_to_params):
-            raise FileNotFoundError('No preprocessing parameters found at '+path_to_params)
+            raise FileNotFoundError('No preprocessing parameters found at ' + path_to_params)
 
-        print('Loading preprocessing parameters from '+path_to_params)
+        print('Loading preprocessing parameters from ' + path_to_params)
         data = load_pkl(path_to_params)
         for key in data:
             self.__setattr__(key, data[key])
@@ -211,9 +213,8 @@ class SegmentationPreprocessing(object):
         spacing = data_tpl['spacing'] if 'spacing' in data_tpl else None
 
         if 'label' not in data_tpl:
-            
             return np.zeros(data_tpl['image'].shape[-3:])
-            
+
             # raise ValueError('Can\'t clean label from data tpl, none was found!')
 
         lb = data_tpl['label']
@@ -228,8 +229,8 @@ class SegmentationPreprocessing(object):
 
         if self.lb_min_vol is not None or self.lb_max_vol is not None:
             if len(lb.shape) > 3:
-                lb = remove_connected_components_by_volume_from_batch(lb, 
-                                                                      self.lb_min_vol, 
+                lb = remove_connected_components_by_volume_from_batch(lb,
+                                                                      self.lb_min_vol,
                                                                       self.lb_max_vol,
                                                                       spacing)
             else:
@@ -239,7 +240,7 @@ class SegmentationPreprocessing(object):
                                                            spacing)
 
         return lb
-    
+
     def is_preprocessed_data_tpl(self, data_tpl):
         return 'orig_shape' in data_tpl
 
@@ -248,7 +249,7 @@ class SegmentationPreprocessing(object):
         spacing = data_tpl['spacing'] if 'spacing' in data_tpl else None
         if 'image' not in data_tpl:
             raise ValueError('No \'image\' found in data_tpl')
-            
+
         xb = self.get_xb_from_data_tpl(data_tpl, preprocess_only_im)
         # now do the preprocessing
         if not torch.cuda.is_available():
@@ -262,7 +263,7 @@ class SegmentationPreprocessing(object):
                 if return_np:
                     xb_prep = xb_prep.cpu().numpy()
             except RuntimeError:
-                #... unless it fails for a RuntimeError then we will try again on the CPU
+                # ... unless it fails for a RuntimeError then we will try again on the CPU
                 print('Ooops! It seems like your GPU has gone out of memory while trying to '
                       'resize a large volume ({}), trying again on the CPU.'
                       ''.format(list(xb_cuda.shape)))
@@ -275,9 +276,8 @@ class SegmentationPreprocessing(object):
 
         return xb_prep
 
-
     def get_xb_from_data_tpl(self, data_tpl, get_only_im=False):
-        
+
         # getting the image
         xb = data_tpl['image'].astype(float)
 
@@ -289,27 +289,27 @@ class SegmentationPreprocessing(object):
             # this function for different predictions
             prev_preds = []
             for key in self.keys_for_previous_stages:
-                assert key in data_tpl, 'prediction '+key+' from previous stage missing'
+                assert key in data_tpl, 'prediction ' + key + ' from previous stage missing'
                 pred = data_tpl[key]
                 if torch.is_tensor(pred):
                     pred = pred.cpu().numpy()
                 # ensure the array is 4d
                 pred = maybe_add_channel_dim(pred)
                 prev_preds.append(pred)
-    
+
             bin_pred = (np.sum(prev_preds, 0) > 0).astype(float)
 
             xb = np.concatenate([xb, bin_pred])
 
-        if 'label' in data_tpl and not get_only_im:     
+        if 'label' in data_tpl and not get_only_im:
             # get the label from the data_tpl and clean if applicable
             lb = self.maybe_clean_label_from_data_tpl(data_tpl)
 
             assert len(lb.shape) == 3, 'label must be 3d'
             lb = lb[np.newaxis].astype(float)
-            print('get_xb_from_datatpl',lb.shape,lb.max())
+            print('get_xb_from_datatpl', lb.shape, lb.max())
             xb = np.concatenate([xb, lb])
-        
+
         # finally add batch axis
         xb = xb[np.newaxis]
 
@@ -340,7 +340,7 @@ class SegmentationPreprocessing(object):
                                  dcm_names_dict=dcm_names_dict,
                                  prev_stages=self.prev_stages if self.is_cascade() else None,
                                  create_missing_labels_as_zero=True,
-                                 additional_channels = self.num_additional_channels)
+                                 additional_channels=self.num_additional_channels)
             raw_ds_list.append(raw_ds)
 
         if not self.is_initalised:
@@ -363,7 +363,6 @@ class SegmentationPreprocessing(object):
         if self.is_cascade():
             maybe_create_path(join(outfolder, 'prev_preds'))
         maybe_create_path(plot_folder)
-
 
         # Let's quickly store the parameters so we can check later
         # what we've done here.
@@ -432,9 +431,9 @@ class SegmentationPreprocessing(object):
                 contains = np.where(np.sum(lb[-1], (1, 2)))[0]
                 z_list = [np.argmax(np.sum(lb[-1], (1, 2)))]
                 s_list = ['_largest', '_random']
-                
+
                 colors = ['red', 'blue', 'green', 'yellow']
-                
+
                 if len(contains) > 0:
                     z_list.extend(np.random.choice(contains, size=1))
                 else:
@@ -442,7 +441,7 @@ class SegmentationPreprocessing(object):
                 for z, s in zip(z_list, s_list):
                     fig = plt.figure()
                     for ic in range(im_ch):
-                        plt.subplot(1, im_ch, ic+1)
+                        plt.subplot(1, im_ch, ic + 1)
                         plt.imshow(im[ic, z], cmap='gray')
                         for lc in range(lb_ch):
                             if lb[lc, z].max() > 0:
@@ -460,15 +459,13 @@ class SegmentationPreprocessing(object):
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
         print('Preprocessing done!')
-        
-        print('Here are the preprocessing paramters:')
-        
+
+        print('Here are the preprocessing pzaramters:')
+
         path_to_params = join(outfolder, 'preprocessing_parameters.txt')
-        
+
         with open(path_to_params, 'r') as file:
             print(file.read())
-
-
 
     def plan_preprocessing_raw_data(self, raw_data,
                                     percentiles=[0.5, 99.5],
@@ -498,10 +495,10 @@ class SegmentationPreprocessing(object):
                                  dcm_revers=dcm_revers,
                                  dcm_names_dict=dcm_names_dict,
                                  create_missing_labels_as_zero=True,
-                                 additional_channels = self.num_additional_channels)
+                                 additional_channels=self.num_additional_channels)
             datasets.append(raw_ds)
         # foreground vals for windowing
-        fg_cvals = []
+        fg_cvals = np.array([], dtype=np.float16)
         # spacings for resampling
         spacings = []
         shapes = []
@@ -517,7 +514,7 @@ class SegmentationPreprocessing(object):
             # interupted ;)
             sleep(1)
             for i in tqdm(range(len(raw_ds))):
-                # read files   
+                # read files
                 data_tpl = raw_ds[i]
                 im, spacing = data_tpl['image'], data_tpl['spacing']
                 lb = self.maybe_clean_label_from_data_tpl(data_tpl)
@@ -528,14 +525,14 @@ class SegmentationPreprocessing(object):
                     print(data_tpl['scan'])
                     print(im.shape)
                     print(lb.shape)
-                    if self.num_additional_channels>0:
-                        fg_cval = im[0][lb > 0].astype(float)
+                    if self.num_additional_channels > 0:
+                        fg_cval = im[0][lb > 0].astype(np.float16)
                     else:
-                        fg_cval = im[lb > 0].astype(float)
-                    fg_cvals.extend(fg_cval.tolist())
+                        fg_cval = im[lb > 0].astype(np.float16)
+                    fg_cvals = np.concatenate([fg_cvals, fg_cval])
                     n_fg_classes = np.max([n_fg_classes, lb.max()])
 
-        if len(fg_cvals) > 10**8:
+        if len(fg_cvals) > 10 ** 8:
             # in some datasets the length of fg_cvals can become too long
             # in this case we split up the lists into chunks of data that can be put into an
             # np array and we compute the mean over the statistics of each batch
@@ -544,24 +541,27 @@ class SegmentationPreprocessing(object):
             array_len = len(fg_cvals) // n_arrays
             for i in range(n_arrays - 1):
                 fg_percentile_list.append(np.percentile(fg_cvals[i * array_len:
-                                                                 (i+1) * array_len],
+                                                                 (i + 1) * array_len],
                                                         percentiles))
             fg_percentile_list.append(np.percentile(fg_cvals[(n_arrays - 1) * array_len:],
                                                     percentiles))
             fg_percentiles = np.mean(fg_percentile_list, 0)
             std_fg_list, mean_fg_list = [], []
             for i in range(n_arrays - 1):
-                std_fg_list.append(np.std(np.clip(fg_cvals[i * array_len: (i+1) * array_len],
+                std_fg_list.append(np.std(np.clip(fg_cvals[i * array_len: (i + 1) * array_len],
                                                   *fg_percentiles)))
-                mean_fg_list.append(np.mean(np.clip(fg_cvals[i * array_len: (i+1) * array_len],
+                mean_fg_list.append(np.mean(np.clip(fg_cvals[i * array_len: (i + 1) * array_len],
                                                     *fg_percentiles)))
             std_fg_list.append(np.std(fg_cvals[(n_arrays - 1) * array_len:]))
             mean_fg_list.append(np.mean(fg_cvals[(n_arrays - 1) * array_len:]))
             std_fg, mean_fg = np.mean(std_fg_list), np.mean(mean_fg_list)
         else:
             fg_percentiles = np.percentile(fg_cvals, percentiles)
-            fg_cvals = np.array(fg_cvals)#.clip(*fg_percentiles)
+            fg_cvals = np.array(fg_cvals)  # .clip(*fg_percentiles)
             std_fg, mean_fg = np.std(fg_cvals), np.mean(fg_cvals)
+
+        # delete large ƒlists
+        del fg_cvals, fg_percentile_list, std_fg_list, mean_fg_list
 
         self.dataset_properties['median_shape'] = np.median(shapes, 0)
         self.dataset_properties['median_spacing'] = np.median(spacings, 0)
@@ -598,12 +598,13 @@ class SegmentationPreprocessing(object):
                 im_win = im.clip(*self.window)
                 mean_global += np.mean(im)
                 mean_window += np.mean(im_win)
-                mean2_global += np.mean(im**2)
-                mean2_window += np.mean(im_win**2)
-        mean_global, mean2_global = mean_global/n_cases, mean2_global/n_cases
-        mean_window, mean2_window = mean_window/n_cases, mean2_window/n_cases
-        std_global = np.sqrt(mean2_global - mean_global**2)
-        std_window = np.sqrt(mean2_window - mean_window**2)
+                mean2_global += np.mean(im ** 2)
+                mean2_window += np.mean(im_win ** 2)
+
+        mean_global, mean2_global = mean_global / n_cases, mean2_global / n_cases
+        mean_window, mean2_window = mean_window / n_cases, mean2_window / n_cases
+        std_global = np.sqrt(mean2_global - mean_global ** 2)
+        std_window = np.sqrt(mean2_window - mean_window ** 2)
         self.dataset_properties['scaling_global'] = \
             np.array([std_global, mean_global]).astype(np.float32)
         self.dataset_properties['scaling_window'] = \
@@ -711,7 +712,6 @@ class torch_preprocessing(torch.nn.Module):
 
         # windowing:
         if self.apply_windowing:
-
             imb = imb.clamp(*self.window)
 
         # scaling
@@ -781,7 +781,7 @@ class np_preprocessing():
         bs, nch = im.shape[0:2]
         idim = 2 if self.is_2d else 3
         scale = np.array(spacing) / self.target_spacing
-        shape = im.shape[-1*idim:]
+        shape = im.shape[-1 * idim:]
         im_vec = im.reshape(-1, *shape)
         im_vec = np.stack([rescale(im_vec[i], scale, order=order) for i in range(im_vec.shape[0])])
         return im_vec.reshape(bs, nch, *im_vec.shape[1:])
@@ -814,7 +814,6 @@ class np_preprocessing():
 
         # windowing:
         if self.apply_windowing:
-
             imb = imb.clip(*self.window)
 
         # scaling

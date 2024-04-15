@@ -14,7 +14,7 @@ fold = int(sys.argv[1])
 # preprocessed_name = '4mm_binary'
 preprocessed_name = '2mm_binary_canceronly'
 # preprocessed_name='4mm_binary_test'
-model_name = '6,3x3x3,32_finetune_fromkits23_cect_long'
+model_name = '6,3x3x3,32_finetune_fromaddandkits23_cect_long'
 # model_name = 'del'
 
 dev = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -63,13 +63,13 @@ model_params['data']['trn_dl_params']['epoch_len']=500
 model_params['data']['trn_dl_params']['padded_patch_size']=[2*patch_size[0]]*3
 model_params['data']['val_dl_params']['padded_patch_size']=[2*patch_size[0]]*3
 model_params['training']['lr_schedule'] = 'lin_ascent_log_decay'
-model_params['training']['lr_exponent'] = 2
+model_params['training']['lr_exponent'] = 3
 model_params['data']['trn_dl_params']['batch_size']=32
 model_params['data']['val_dl_params']['epoch_len']=100
 
 
 for vf in vfs:
-    path_to_model = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/trained_models/kits23_nooverlap/2mm_binary_canceronly/6,3x3x3,32_justcancer/fold_0/network_weights'
+    path_to_model = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/trained_models/kits23_add_nooverlap_small/2mm_binary_canceronly/6,3x3x3,32_justcancer_trainontest/fold_0/network_weights'
     # path_to_model = '/media/mcgoug01/Crucial X6/ovseg_test/ne2ceCT/coltea_4_legacy_outs/network_weights'
     # path_to_model = '/media/mcgoug01/Crucial X6/ovseg_test/ne2ceCT/small_coreg_alllabel_2_logitsonly/network_weights'
 

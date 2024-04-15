@@ -76,7 +76,7 @@ for vf in vfs:
                                 preprocessed_name=preprocessed_name, 
                                 model_name=model_name,
                                 model_parameters=model_params)
-    model.network.load_state_dict(torch.load(path_to_model,map_location=dev))
+    model.network.load_state_dict(torch.load(path_to_model))
 
     torch.cuda.empty_cache()
     gc.collect()
