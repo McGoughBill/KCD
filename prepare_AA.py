@@ -56,30 +56,25 @@ for patient in os.listdir(path_to_AbdomenAtlas):
     # load the image
     if patient == '.DS_Store': continue
     mask_save = os.path.join(label_path, patient + '.nii.gz')
-    if os.path.exists(mask_save):
-        continue
     print(patient)
 
-    im = nib.load(os.path.join(path_to_AbdomenAtlas, patient, 'ct.nii.gz'))
-    im_data = im.get_fdata()
-    im_affine = im.affine
-    im_header = im.header
-
-
-
-    # save the image
-    im_nifti = nib.Nifti1Image(im_data, im_affine, im_header)
-    nib.save(im_nifti, os.path.join(im_path, patient + '.nii.gz'))
 
     # create a mask
-    mask = np.zeros(im_data.shape)
-    for organ in os.listdir(os.path.join(path_to_AbdomenAtlas, patient, 'segmentations')):
-        organ_name = organ.split('.')[0]
+
+
+    organ_list = [os.path.join(path_to_AbdomenAtlas, patient, 'segmentations',organ) for organ in os.listdir(os.path.join(path_to_AbdomenAtlas, patient, 'segmentations')) if organ != '.DS_Store']
+    starter = nib.load(organ_list[0])
+    im_affine = starter.affine
+    im_header = starter.header
+    starter_data = starter.get_fdata().astype(np.int16)
+
+    for organ in organ_list[1:]:
+        organ_name = organ.split('/')[-1].split('.')[0]
         organ_index = organ_dict[organ_name]
-        organ_mask = nib.load(os.path.join(path_to_AbdomenAtlas, patient, 'segmentations', organ))
+        organ_mask = nib.load(organ)
         organ_mask_data = organ_mask.get_fdata()
-        mask[organ_mask_data == 1] = organ_index
+        starter_data[organ_mask_data >0] = organ_index
 
     # save the mask
-    mask_nifti = nib.Nifti1Image(mask, im_affine, im_header)
+    mask_nifti = nib.Nifti1Image(starter_data, im_affine, im_header)
     nib.save(mask_nifti, os.path.join(label_path, patient + '.nii.gz'))
