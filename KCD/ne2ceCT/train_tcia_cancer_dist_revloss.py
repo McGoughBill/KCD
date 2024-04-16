@@ -127,10 +127,10 @@ def main_worker(gpu,args):
 
     model_T = get_3d_featureoutput_unet(1, out_dim, 6, filters=32, filters_max=1024).cuda(args.gpu)
     model_T.load_state_dict(torch.load(
-        '/bask/projects/p/phwq4930-renal-canc/data/seg_data/trained_models/kits23_nooverlap/2mm_binary_canceronly/6,3x3x3,32_justcancer/fold_0/network_weights'))
+        '/bask/projects/p/phwq4930-renal-canc/data/seg_data/trained_models/kits23_add_nooverlap_small/2mm_binary_canceronly/6,3x3x3,32_justcancer_trainontest/fold_0/network_weights'))
     model_S = get_3d_featureoutput_unet(1, out_dim, 6, filters=32, filters_max=1024).cuda(args.gpu)
     model_S.load_state_dict(torch.load(
-        '/bask/projects/p/phwq4930-renal-canc/data/seg_data/trained_models/kits23_nooverlap/2mm_binary_canceronly/6,3x3x3,32_justcancer/fold_0/network_weights'))
+        '/bask/projects/p/phwq4930-renal-canc/data/seg_data/trained_models/kits23_add_nooverlap_small/2mm_binary_canceronly/6,3x3x3,32_justcancer_trainontest/fold_0/network_weights'))
 
     model_T.eval()
     model_S.train()

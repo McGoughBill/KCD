@@ -96,7 +96,7 @@ class LatentSimilarityLoss(nn.Module):
                     cov_loss = off_diagonal(cov_x).pow(2).mean() + off_diagonal(cov_y).pow(2).mean()
                     # print(cov_loss)
                     loss += torch.clamp(cov_loss,0,1)*self.cov_loss_weight
-        return loss / d
+        return loss / (d**0.333)
 
 
 

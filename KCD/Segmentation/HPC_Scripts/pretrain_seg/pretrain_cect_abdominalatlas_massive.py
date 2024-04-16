@@ -63,7 +63,7 @@ model_params['data']['trn_dl_params']['padded_patch_size']=[2*patch_size[0]]*3
 model_params['data']['val_dl_params']['padded_patch_size']=[2*patch_size[0]]*3
 model_params['training']['lr_schedule'] = 'lin_ascent_log_decay'
 model_params['training']['lr_exponent'] = 3
-model_params['data']['trn_dl_params']['batch_size']=16
+model_params['data']['trn_dl_params']['batch_size']=12
 model_params['data']['val_dl_params']['epoch_len']=50
 # model_params['postprocessing'] = {'mask_with_reg': True}
 
