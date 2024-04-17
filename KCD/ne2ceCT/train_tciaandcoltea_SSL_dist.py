@@ -8,7 +8,7 @@ import argparse
 import torch.distributed as dist
 from datetime import timedelta
 
-from KCD.ne2ceCT.dataloader import CrossPhaseDataset
+from KCD.ne2ceCT.dataloader_SSL import CrossPhaseDataset
 from KCD.ne2ceCT.loss_function import LatentSimilarityLoss_resnet as LatentSimilarityLoss
 from KCD.ne2ceCT.lr_scheduler import LinearWarmupExponentialDecayScheduler
 import matplotlib.pyplot as plt
@@ -38,7 +38,7 @@ def parse_option():
     parser.add_argument('--workers', default=16, type=int, help='number of workers')
     parser.add_argument('--ngpus_per_node', default=4, type=int, help='number of gpus per node')
     parser.add_argument('--out_dim', default=2, type=int, help='output dimension')
-    parser.add_argument('--spacing', default=2, type=int, help='spacing')
+    parser.add_argument('--spacing', default=1, type=int, help='spacing')
     parser.add_argument('--dist-url', default='tcp://127.0.0.1:23456', type=str, help='distributed url')
 
     args = parser.parse_args()
@@ -90,8 +90,8 @@ def main_worker(gpu,args):
     workers = args.workers
     world_size = args.world_size
 
-    dataset_ne_path = os.path.join(os.environ['OV_DATA_BASE'], 'preprocessed/tciaandcoltea_ncct/2mm/')
-    dataset_ce_path = os.path.join(os.environ['OV_DATA_BASE'], 'preprocessed/tciaandcoltea_cect/2mm/')
+    dataset_ne_path = os.path.join(os.environ['OV_DATA_BASE'], 'preprocessed/tciaandcoltea_ncct/1mm/')
+    dataset_ce_path = os.path.join(os.environ['OV_DATA_BASE'], 'preprocessed/tciaandcoltea_cect/1mm/')
 
     assert os.path.exists(dataset_ne_path) and os.path.exists(dataset_ce_path)
     ne2ceCT_path = os.path.join(os.environ['OV_DATA_BASE'], 'ne2ceCT', 'resnet_tciaandcoltea_{}_cancer'.format(spacing),
@@ -153,7 +153,7 @@ def main_worker(gpu,args):
             with torch.no_grad():
                 T_features = model_T(ce)
             S_features = model_S(ne)
-            loss = loss_func(T, S)
+            loss = loss_func(T_features, S_features)
             dist.all_reduce(loss, op=dist.ReduceOp.SUM)
 
             # backward

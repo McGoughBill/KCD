@@ -3,4 +3,5 @@ __pycache__
 .idea*
 slurm*
 running*.sh
+model_weights.torch
 

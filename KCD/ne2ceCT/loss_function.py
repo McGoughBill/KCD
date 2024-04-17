@@ -123,23 +123,9 @@ class LatentSimilarityLoss_resnet(nn.Module):
         mag = torch.linalg.vector_norm(z, dim=-1, keepdim=True)
         return z / mag
 
-    def forward(self, z1, z2):
-        b,d,x,y,z = z1.shape
-
-        # reshaped_z1 = z1.view(b,d,-1).swapaxes(1,2)
-        # reshaped_z2 = z2.view(b,d,-1).swapaxes(1,2)
-        #
-        # s_ptd = self.softmax(reshaped_z1)
-        # t_ptd = self.softmax(reshaped_z2)
-        # self.symmetric_cce = (self.cce(s_ptd, t_ptd) + self.cce(t_ptd, s_ptd))/2
-        #
-        # return self.symmetric_cce/(x*y*z)
-
-        reshaped_z1 = z1.view(b, d, -1).swapaxes(1,2).reshape(-1,d)#  (b*x*y*z, d)
-        reshaped_z2 = z2.view(b, d, -1).swapaxes(1,2).reshape(-1,d) # (b*x*y*z, d)
-
+    def forward(self, reshaped_z1, reshaped_z2):
+        b,d = reshaped_z1.shape
         loss = 0
-
         if d == self.out_dim:
             if self.cce_weight>0:
                 amax_z1 = torch.argmax(reshaped_z1, dim=1)

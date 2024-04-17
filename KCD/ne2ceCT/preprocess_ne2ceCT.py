@@ -49,21 +49,71 @@ def Segmentation_Preparation(home, seg_spacing=np.array([4,4,4]),
                                       save_as_fp16=True)
     print("")
 
+def Segmentation_Preparation_SSL(home, seg_spacing=np.array([4,4,4]),
+                             data_name='test',preprocessed_name='test', is_cect=False):
+
+    #base lung attenuation preprocess values on https://pubmed.ncbi.nlm.nih.gov/35607427/
+
+    pp_save_path = os.path.join(home, "preprocessed", data_name,preprocessed_name, 'images')
+
+    rawdata_path = os.path.join(home, "raw_data", data_name, 'images')
+
+    print("##SEG PREPROCESS##\nPreprocessing CT Volumes to {}\n Stored in location {}.".format(seg_spacing,
+                                                                                               pp_save_path))
+    print("")
+    if is_cect:
+        preprocessing = SegmentationPreprocessing(apply_resizing=True,
+                                                  apply_pooling=False,
+                                                  apply_windowing=True,
+                                                  target_spacing=seg_spacing,
+                                                  pooling_stride=None,
+                                                  window=np.array([-1024,2048]),
+                                                  scaling=np.array([3072, -1024]),
+                                                  lb_classes=None,
+                                                  reduce_lb_to_single_class=False,
+                                                  lb_min_vol=None,
+                                                  prev_stages=[],
+                                                  save_only_fg_scans=False,
+                                                  n_im_channels=1)
+    else:
+        preprocessing = SegmentationPreprocessing(apply_resizing=True,
+                                                  apply_pooling=False,
+                                                  apply_windowing=True,
+                                                  target_spacing=seg_spacing,
+                                                  pooling_stride=None,
+                                                  window=np.array([-1000, 400]),
+                                                  scaling=np.array([200, 12.3]),
+                                                  lb_classes=None,
+                                                  reduce_lb_to_single_class=False,
+                                                  lb_min_vol=None,
+                                                  prev_stages=[],
+                                                  save_only_fg_scans=False,
+                                                  n_im_channels=1)
+
+    preprocessing.preprocess_raw_data(raw_data=data_name,
+                                      preprocessed_name=preprocessed_name,
+                                      data_name=None,
+                                      save_as_fp16=True)
+    print("")
+
 if __name__ == "__main__":
-    # Segmentation_Preparation(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([2,2,2]),
-    #                          data_name='abdominal_tcia_ncct',preprocessed_name='tcia_cmd_2_ncct', is_cect=False)
-    #
-    # Segmentation_Preparation(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([2,2,2]),
-    #                          data_name='abdominal_tcia_cect',preprocessed_name='tcia_cmd_2_cect', is_cect=True)
-    #
+    Segmentation_Preparation_SSL(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([1,1,1]),
+                             data_name='abdominal_tcia_ncct',preprocessed_name='SSL_1_ncct', is_cect=False)
+
+    # Segmentation_Preparation_SSL(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([1,1,1]),
+    #                          data_name='abdominal_tcia_cect',preprocessed_name='SSL_1_cect', is_cect=True)
+
     # Segmentation_Preparation(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([2,2,2]),
     #                          data_name='cropped_tcia_ncct',preprocessed_name='tcia_cmd_2_ncct', is_cect=False)
     #
     # Segmentation_Preparation(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([2,2,2]),
     #                          data_name='cropped_tcia_cect',preprocessed_name='tcia_cmd_2_cect', is_cect=True)
 
-    Segmentation_Preparation(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([2,2,2]),
-                             data_name='coltea_art',preprocessed_name='coltea_art_2', is_cect=True)
+    # Segmentation_Preparation_SSL(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([1,1,1]),
+    #                          data_name='coltea_art',preprocessed_name='SSL_1', is_cect=True)
+
+    Segmentation_Preparation_SSL(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([1,1,1]),
+                             data_name='coltea_nat',preprocessed_name='SSL_1', is_cect=False)
 
     # Segmentation_Preparation(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([2,2,2]),
     #                          data_name='add_cect',preprocessed_name='add_cect_2', is_cect=False)
