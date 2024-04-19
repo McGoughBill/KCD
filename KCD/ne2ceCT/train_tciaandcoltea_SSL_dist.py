@@ -94,7 +94,8 @@ def main_worker(gpu,args):
     dataset_ce_path = os.path.join(os.environ['OV_DATA_BASE'], 'preprocessed/tciaandcoltea_cect/1mm/')
 
     assert os.path.exists(dataset_ne_path) and os.path.exists(dataset_ce_path)
-    ne2ceCT_path = os.path.join(os.environ['OV_DATA_BASE'], 'ne2ceCT', 'resnet_tciaandcoltea_{}_cancer'.format(spacing),
+    home_path = os.path.join(os.environ['OV_DATA_BASE'], 'ne2ceCT', 'resnet_tciaandcoltea_{}_cancer'.format(spacing))
+    ne2ceCT_path = os.path.join(home_path,
                                 'l1{}_l2{}_var{}_cov{}_cce{}_cos{}_{}lr_{}lg_{}bs_{}ep_{}gpus'.format(l1_weight,
                                                                                    l2_weight,
                                                                                    var_loss_weight,
@@ -106,6 +107,7 @@ def main_worker(gpu,args):
                                                                                    batch_size,
                                                                                    epochs,
                                                                                    world_size))
+
     log_path = os.path.join(ne2ceCT_path, 'logs.txt')
     if args.rank == 0:
         if not os.path.exists(ne2ceCT_path):
@@ -114,12 +116,13 @@ def main_worker(gpu,args):
             os.remove(log_path)
 
     dataset = CrossPhaseDataset(os.path.join(dataset_ne_path, 'images'), os.path.join(dataset_ce_path, 'images'),
+                                home_path,
                                 device='cuda',
                                 is_train=True, patches_per_case=40, patch_size=64)
     if args.rank == 0:
         print(dataset.cases)
 
-    dataset.apply_foldsplit(split_ratio=0.9)
+    dataset.apply_foldsplit()
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers=workers)
 
     model_T = fmcib_model().cuda(args.gpu)

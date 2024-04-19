@@ -12,12 +12,20 @@ from math import ceil
 # and then apply random rotations, flips, and noise to the patches, cropping them back to 64x64x64
 # before returning them
 class CrossPhaseDataset(Dataset):
-    def __init__(self, ne_path, ce_path, device=None, patch_size=64,
+    def __init__(self, ne_path, ce_path,split_path, device=None, patch_size=64,
                  blur_kernel=torchvision.transforms.GaussianBlur(kernel_size=3, sigma=(0.1, 2.0)),
                  is_train=True,patches_per_case=10):
         assert (os.path.exists(ne_path)) and os.path.exists(ce_path)
-        self.ne_path = ne_path
-        self.ce_path = ce_path
+        self.ne_path = os.path.join(ne_path,'images')
+        self.ce_path = os.path.join(ce_path,'images')
+        self.split_path = split_path
+        if os.path.exists(self.split_path):
+            if os.path.exists(os.path.join(self.split_path,'split.npy')):
+                self.split = np.load(os.path.join(self.split_path,'split.npy'))
+            else:
+                self.split = None
+        else:
+            raise FileNotFoundError(f'{self.split_path} does not exist')
         self.device = device
 
         #save cases as a list of cases present in both ne_path and ce_path
@@ -35,13 +43,21 @@ class CrossPhaseDataset(Dataset):
 
 
     def apply_foldsplit(self, split_ratio=0.8, train_cases=None):
-        if type(train_cases) == type(None):
-            self.train_cases = np.random.choice(self.cases, int(split_ratio * len(self.cases)), replace=False)
+        if self.split is not None:
+            self.train_cases = self.split[0]
+            self.test_cases = self.split[1]
+            self.is_foldsplit = True
+            print('Using saved split')
         else:
-            self.train_cases = train_cases
+            if type(train_cases) == type(None):
+                self.train_cases = np.random.choice(self.cases, int(split_ratio * len(self.cases)), replace=False)
+            else:
+                self.train_cases = train_cases
 
-        self.test_cases = self.cases[~np.isin(self.cases, self.train_cases)]
-        self.is_foldsplit = True
+            self.test_cases = self.cases[~np.isin(self.cases, self.train_cases)]
+            self.is_foldsplit = True
+            # save the split
+            np.save(os.path.join(self.split_path, 'split.npy'), [self.train_cases, self.test_cases])
 
     def __len__(self):
         assert (self.is_foldsplit)
