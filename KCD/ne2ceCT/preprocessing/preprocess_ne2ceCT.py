@@ -106,53 +106,6 @@ def Segmentation_Preparation_SSL(home, seg_spacing=np.array([4,4,4]), background
         for file in [f for f in os.listdir(src) if os.path.isfile(os.path.join(src, f)) and f.endswith('.npy')]:
             shutil.copy(os.path.join(src, file), dst)
 
-        #prepare indices
-        prepare_indices(dst,background_thresh=background_thresh,patch_size=64)
-
-def prepare_indices(preprocessed_folder,background_thresh=0.5,patch_size=64):
-    # this function will prepare the indices for the training and validation sets, and save them to the appropriate
-    # directories on a per-case basis. Indices are saved as .npy files, with the same name as the case they correspond to
-    # in the 'images' directory. Patches are accepted as indices if they contain >background_thresh proportion of
-    # non-background voxels (==0).
-    assert os.path.exists(preprocessed_folder) and os.path.exists(os.path.join(preprocessed_folder, 'images'))
-
-    index_path = os.path.join(preprocessed_folder, 'indices')
-    if not os.path.exists(index_path):
-        os.makedirs(index_path)
-
-    images = [f for f in os.listdir(os.path.join(preprocessed_folder, 'images')) if f.endswith('.npy')]
-
-    for im in images:
-        image = torch.Tensor(np.load(os.path.join(preprocessed_folder, 'images', im)))
-        shape = image.shape
-        # pad patch using torch if image is less than patch size
-        padding = []
-        for dim in range(1, 4):
-            if shape[dim] < patch_size:
-                pad = patch_size - shape[dim]
-                padding = padding + [0, pad]
-            else:
-                padding = padding + [0, 0]
-
-        image = torch.nn.functional.pad(image, tuple(padding[::-1]), 'constant', -3.15)
-
-        #get full list of indices
-        zxy_list = []
-        for z in range(0, shape[1]-patch_size+1):
-            for x in range(0, shape[2]-patch_size+1):
-                for y in range(0, shape[3]-patch_size+1):
-                    zxy_list.append((z, x, y))
-
-        #get indices that are not background
-        indices = []
-        for z, x, y in zxy_list:
-            patch = image[0, z:z + patch_size, x:x + patch_size, y:y + patch_size]
-            if torch.sum(patch == 0) / patch_size ** 3 < background_thresh:
-                indices.append((z, x, y))
-
-        #save indices and padded image
-        np.save(os.path.join(index_path, im), np.array(indices))
-
 
 
 if __name__ == "__main__":

@@ -102,7 +102,7 @@ class CrossPhaseDataset(Dataset):
     def reset_patch_count(self):
         self.case_patch_count = {case: 0 for case in self.cases}
 
-    def _get_random_patch_indices(self, image1,image2, patch_size):
+    def _get_random_patch_indices(self, image1,image2, patch_size, background_threshold=0.5):
         '''
 
         Parameters
@@ -136,15 +136,14 @@ class CrossPhaseDataset(Dataset):
         shape = [min(image1.shape[dim], image2.shape[dim]) for dim in range(4)]
 
 
-        # get the random indices to take the patch from
-        xyz = []
-        for dim in range(1,4):
-            if shape[dim] == patch_size:
-                xyz.append(0)
-            else:
-                xyz.append(np.random.randint(0, shape[dim] - patch_size))
+        # get the random index to take the patch from
+        zxy = [np.random.randint(0, shape[dim] - patch_size) for dim in range(1,4)]
 
-        return image1,image2,tuple(xyz)
+        # if zxy returns a patch with over 50% of the patch being 0, try again
+        while torch.sum(image1[0, zxy[0]:zxy[0]+patch_size, zxy[1]:zxy[1]+patch_size, zxy[2]:zxy[2]+patch_size]) < (patch_size**3)*background_threshold:
+            zxy = [np.random.randint(0, shape[dim] - patch_size) for dim in range(1,4)]
+
+        return image1,image2,tuple(zxy)
 
     def __getitem__(self, idx: int):
         assert (self.is_foldsplit)
@@ -159,13 +158,10 @@ class CrossPhaseDataset(Dataset):
             transforms = None
             case = self.test_cases[idx % (len(self.test_cases)-1)]
 
-        print(case)
-
         ne = torch.Tensor(np.load(os.path.join(self.ne_path, case),allow_pickle=True))
         ce = torch.Tensor(np.load(os.path.join(self.ce_path, case),allow_pickle=True))
         # get random patch indices
         ne,ce,indices = self._get_random_patch_indices(ne,ce, self.patch_size)
-        print(indices,ce.shape,ne.shape)
         ne_patch = ne[0, indices[0]:indices[0]+self.patch_size, indices[1]:indices[1]+self.patch_size, indices[2]:indices[2]+self.patch_size]
         ce_patch = ce[0, indices[0]:indices[0]+self.patch_size, indices[1]:indices[1]+self.patch_size, indices[2]:indices[2]+self.patch_size]
 
