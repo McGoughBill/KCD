@@ -51,7 +51,8 @@ def Segmentation_Preparation(home, seg_spacing=np.array([4,4,4]),
     print("")
 
 def Segmentation_Preparation_SSL(home, seg_spacing=np.array([4,4,4]), background_thresh=0.5,
-                             data_name='test',preprocessed_name='test', is_cect=False):
+                             data_name='test',preprocessed_name='test', is_cect=False,
+                                 do_indices= False):
 
     #base lung attenuation preprocess values on https://pubmed.ncbi.nlm.nih.gov/35607427/
 
@@ -99,15 +100,16 @@ def Segmentation_Preparation_SSL(home, seg_spacing=np.array([4,4,4]), background
 
     #copy all data from SSL_1 folder to PATH below
     if not is_cect:
-        dst = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/preprocessed/tciaandcoltea_ncct/1mm/images'
+        dst = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/preprocessed/tciaandcoltea_ncct/1mm/'
         src = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/preprocessed/{}/{}/images'.format(data_name, preprocessed_name)
 
         import shutil
         for file in [f for f in os.listdir(src) if os.path.isfile(os.path.join(src, f)) and f.endswith('.npy')]:
-            shutil.copy(os.path.join(src, file), dst)
+            shutil.copy(os.path.join(src, file), os.path.join(dst, 'images', file))
 
-        #prepare indices
-        prepare_indices(dst,background_thresh=background_thresh,patch_size=64)
+        if do_indices:
+            #prepare indices
+            prepare_indices(dst,background_thresh=background_thresh,patch_size=64)
 
 def prepare_indices(preprocessed_folder,background_thresh=0.5,patch_size=64):
     # this function will prepare the indices for the training and validation sets, and save them to the appropriate
@@ -157,7 +159,8 @@ def prepare_indices(preprocessed_folder,background_thresh=0.5,patch_size=64):
 
 if __name__ == "__main__":
     Segmentation_Preparation_SSL(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([1,1,1]),
-                             data_name='abdominal_tcia_ncct',preprocessed_name='SSL_1_ncct', is_cect=False)
+                             data_name='abdominal_tcia_ncct',preprocessed_name='SSL_1_ncct', is_cect=False,
+                                 do_indices=True)
 
     Segmentation_Preparation_SSL(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([1,1,1]),
                              data_name='abdominal_tcia_cect',preprocessed_name='SSL_1_cect', is_cect=True)
@@ -172,7 +175,8 @@ if __name__ == "__main__":
                              data_name='coltea_art',preprocessed_name='SSL_1', is_cect=True)
 
     Segmentation_Preparation_SSL(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([1,1,1]),
-                             data_name='coltea_nat',preprocessed_name='SSL_1', is_cect=False)
+                             data_name='coltea_nat',preprocessed_name='SSL_1', is_cect=False,
+                                 do_indices=True)
 
     # Segmentation_Preparation(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([2,2,2]),
     #                          data_name='add_cect',preprocessed_name='add_cect_2', is_cect=False)
