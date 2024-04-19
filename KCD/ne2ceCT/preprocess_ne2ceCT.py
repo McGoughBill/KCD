@@ -81,8 +81,8 @@ def Segmentation_Preparation_SSL(home, seg_spacing=np.array([4,4,4]),
                                                   apply_windowing=True,
                                                   target_spacing=seg_spacing,
                                                   pooling_stride=None,
-                                                  window=np.array([-1000, 400]),
-                                                  scaling=np.array([200, 12.3]),
+                                                  window=np.array([-500, 500]),
+                                                  scaling=np.array([400, -500]),
                                                   lb_classes=None,
                                                   reduce_lb_to_single_class=False,
                                                   lb_min_vol=None,
@@ -95,6 +95,15 @@ def Segmentation_Preparation_SSL(home, seg_spacing=np.array([4,4,4]),
                                       data_name=None,
                                       save_as_fp16=True)
     print("")
+
+    #copy all data from SSL_1 folder to PATH below
+    ncct_PATH_dst = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/preprocessed/tciaandcoltea_ncct/1mm/images'
+    src = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/preprocessed/{}/{}/images'.format(data_name, preprocessed_name)
+
+    import shutil
+    for file in [f for f in os.listdir(src) if os.path.isfile(os.path.join(src, f)) and f.endswith('.npy')]:
+        shutil.copy(os.path.join(src, file), ncct_PATH_dst)
+
 
 if __name__ == "__main__":
     Segmentation_Preparation_SSL(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([1,1,1]),
