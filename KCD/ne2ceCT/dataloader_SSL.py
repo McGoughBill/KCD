@@ -19,6 +19,8 @@ class CrossPhaseDataset(Dataset):
         assert (os.path.exists(ne_path)) and os.path.exists(ce_path)
         self.ne_path = os.path.join(ne_path,'images')
         self.ce_path = os.path.join(ce_path,'images')
+        self.indices_path = os.path.join(ne_path,'indices')
+        assert os.path.exists(self.ne_path) and os.path.exists(self.ce_path) and os.path.exists(self.indices_path)
         self.split_path = split_path
         if os.path.exists(self.split_path):
             if os.path.exists(os.path.join(self.split_path,'split.npy')):
@@ -104,7 +106,7 @@ class CrossPhaseDataset(Dataset):
     def reset_patch_count(self):
         self.case_patch_count = {case: 0 for case in self.cases}
 
-    def _get_random_patch_indices(self, image1,image2, patch_size):
+    def _get_random_patch_indices(self, image1,image2, patch_size,indices):
         '''
 
         Parameters
@@ -135,18 +137,11 @@ class CrossPhaseDataset(Dataset):
 
         image1 = torch.nn.functional.pad(image1, tuple(padding[::-1]),'constant',-3.15)
         image2 = torch.nn.functional.pad(image2, tuple(padding[::-1]),'constant',-3.15)
-        shape = [min(image1.shape[dim], image2.shape[dim]) for dim in range(4)]
 
+        # get the random index - a random selection from 'indices
+        zxy = indices[np.random.randint(0, len(indices))]
 
-        # get the random indices to take the patch from
-        xyz = []
-        for dim in range(1,4):
-            if shape[dim] == patch_size:
-                xyz.append(0)
-            else:
-                xyz.append(np.random.randint(0, shape[dim] - patch_size))
-
-        return image1,image2,tuple(xyz)
+        return image1,image2,tuple(zxy)
 
     def __getitem__(self, idx: int):
         assert (self.is_foldsplit)
@@ -163,12 +158,13 @@ class CrossPhaseDataset(Dataset):
 
         ne = torch.Tensor(np.load(os.path.join(self.ne_path, case),allow_pickle=True))
         ce = torch.Tensor(np.load(os.path.join(self.ce_path, case),allow_pickle=True))
+        indices = np.load(os.path.join(self.indices_path, case),allow_pickle=True)
         # if ne.shape != ce.shape:
         #     sys.stdout.write(f'ne shape: {ne.shape}, ce shape: {ce.shape}\n')
         #     sys.stdout.write(f'case: {case}\n')
         #     sys.stdout.flush()
         # get random patch indices
-        ne,ce,indices = self._get_random_patch_indices(ne,ce, self.patch_size)
+        ne,ce,indices = self._get_random_patch_indices(ne,ce, self.patch_size, indices)
         ne_patch = ne[0, indices[0]:indices[0]+self.patch_size, indices[1]:indices[1]+self.patch_size, indices[2]:indices[2]+self.patch_size]
         ce_patch = ce[0, indices[0]:indices[0]+self.patch_size, indices[1]:indices[1]+self.patch_size, indices[2]:indices[2]+self.patch_size]
 
