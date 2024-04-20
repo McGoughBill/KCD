@@ -145,6 +145,7 @@ def main_worker(gpu,args):
     loss_func = LatentSimilarityLoss(l1_weight=l1_weight, l2_weight=l2_weight,
                                               cce_weight=cce_weight, cos_weight=cos_weight,
                                               var_loss_weight=var_loss_weight, cov_loss_weight=cov_loss_weight,
+                                                clip_loss_weight=clip_loss_weight,
                                               out_dim=out_dim).cuda(args.gpu)
     losses = []
     weight = 0.95
@@ -162,9 +163,6 @@ def main_worker(gpu,args):
                 T_features = model_T(ce)
             S_features = model_S(ne)
             loss = loss_func(T_features, S_features)
-            sys.stdout.write(f"loss: {loss}\n")
-            sys.stdout.write(f"loss: {loss}\n")
-            sys.stdout.write(f"loss: {loss}\n")
             sys.stdout.flush()
             dist.all_reduce(loss, op=dist.ReduceOp.AVG)
 

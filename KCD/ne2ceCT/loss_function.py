@@ -143,8 +143,6 @@ class LatentSimilarityLoss_resnet(nn.Module):
                 labels = torch.arange(b).to(reshaped_z1.device)
                 symm_cce = (F.cross_entropy(normalised_similarity, labels,reduction='mean')
                             + F.cross_entropy(normalised_similarity.T, labels,reduction='mean'))
-                sys.stdout.write(f"symm_cce: {symm_cce}\n")
-                sys.stdout.flush()
                 loss += symm_cce*self.clip_loss_weight
             if self.l2_weight>0:
                 l2 = self.l2(reshaped_z1, reshaped_z2)
