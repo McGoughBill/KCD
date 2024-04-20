@@ -29,8 +29,10 @@ if __name__ == '__main__':
 
     ce_data_path = '/Users/mcgoug01/Downloads/assessing_latent_resnet/ce'
     ne_data_path = '/Users/mcgoug01/Downloads/assessing_latent_resnet/nc'
+    split_path = '/Users/mcgoug01/Downloads/assessing_latent_resnet'
 
-    dataset = CrossPhaseDataset(ne_data_path, ce_data_path, device='cpu', is_train=False,patches_per_case=200)
+    dataset = CrossPhaseDataset(ne_data_path, ce_data_path, split_path,
+                                device='cpu', is_train=False,patches_per_case=200)
     dataset.apply_foldsplit(split_ratio=0)
 
     # get an inference sample
