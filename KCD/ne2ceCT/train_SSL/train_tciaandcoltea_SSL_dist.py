@@ -105,6 +105,7 @@ def main_worker(gpu,args):
                                                                                    cov_loss_weight,
                                                                                    cce_weight,
                                                                                    cos_weight,
+                                                                                   clip_loss_weight,
                                                                                    lr_max,
                                                                                    loss_gamma,
                                                                                    batch_size,
