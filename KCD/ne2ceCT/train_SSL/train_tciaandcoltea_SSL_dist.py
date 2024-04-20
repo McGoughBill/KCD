@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 import torch.optim.lr_scheduler as lr_scheduler
 import sys
 from fmcib.models import fmcib_model
+import gc
 
 
 def parse_option():
@@ -115,7 +116,7 @@ def main_worker(gpu,args):
         if os.path.exists(log_path):
             os.remove(log_path)
 
-    dataset = CrossPhaseDataset(os.path.join(dataset_ne_path, 'images'), os.path.join(dataset_ce_path, 'images'),
+    dataset = CrossPhaseDataset(dataset_ne_path, dataset_ce_path,
                                 home_path,
                                 device='cuda',
                                 is_train=True, patches_per_case=40, patch_size=64)
@@ -182,39 +183,48 @@ def main_worker(gpu,args):
             with open(log_path, 'a') as f:
                 f.write(train_string)
 
+        gc.collect()
+        #clear cuda cache
+        torch.cuda.empty_cache()
+
         dataloader.dataset.is_train = False
-        with torch.no_grad():
-            model_S.eval()
-            for i, (ne, ce) in enumerate(dataloader):
-                ne = ne.cuda(args.gpu)
-                ce = ce.cuda(args.gpu)
-                T = model_T(ce)
-                S = model_S(ne)
-                loss = loss_func(T, S)
-                if running_val_loss is None:
-                    running_val_loss = loss.item()
-                else:
-                    running_val_loss = weight * running_val_loss + (1 - weight) * loss.item()
         if args.rank == 0:
+            with torch.no_grad():
+                model_S.eval()
+                for i, (ne, ce) in enumerate(dataloader):
+                    ne = ne.cuda(args.gpu)
+                    ce = ce.cuda(args.gpu)
+                    T = model_T(ce)
+                    S = model_S(ne)
+                    loss = loss_func(T, S)
+                    if running_val_loss is None:
+                        running_val_loss = loss.item()
+                    else:
+                        running_val_loss = weight * running_val_loss + (1 - weight) * loss.item()
             val_string = f'Val Loss: {running_val_loss:.4E}\n'
             with open(log_path, 'a') as f:
                 f.write(val_string)
-        dataloader.dataset.reset_patch_count()
-        if args.rank == 0:
             if running_val_loss < min_val_loss:
                 min_val_loss = running_val_loss
                 torch.save(model_S.state_dict(), os.path.join(ne2ceCT_path, 'network_weights'))
                 print('Model saved')
                 with open(log_path, 'a') as f:
                     f.write('Model saved\n')
-        if args.rank == 0:
+
             with open(log_path, 'a') as f:
                 f.write('\n')
             fig = plt.figure()
             ax = fig.add_subplot(1, 1, 1)
             ax.plot(losses)
             plt.savefig(os.path.join(ne2ceCT_path, 'losses.png'))
+
+
+        dataloader.dataset.reset_patch_count()
+        gc.collect()
+        # clear cuda cache
+        torch.cuda.empty_cache()
         dist.barrier()
+
 
 
 if __name__ == '__main__':

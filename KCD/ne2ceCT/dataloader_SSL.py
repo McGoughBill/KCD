@@ -22,8 +22,8 @@ class CrossPhaseDataset(Dataset):
         assert os.path.exists(self.ne_path) and os.path.exists(self.ce_path)
         self.split_path = split_path
         if os.path.exists(self.split_path):
-            if os.path.exists(os.path.join(self.split_path,'split.npy')):
-                self.split = np.load(os.path.join(self.split_path,'split.npy'))
+            if os.path.exists(os.path.join(self.split_path,'split_train.npy')) and os.path.exists(os.path.join(self.split_path,'split_test.npy')):
+                self.split = [np.load(os.path.join(self.split_path,'split_train.npy'),allow_pickle=True), np.load(os.path.join(self.split_path,'split_test.npy'),allow_pickle=True)]
             else:
                 self.split = None
         else:
@@ -32,7 +32,7 @@ class CrossPhaseDataset(Dataset):
         self.device = device
 
         #save cases as a list of cases present in both ne_path and ce_path
-        self.cases = [case for case in os.listdir(ne_path) if case in os.listdir(ce_path) and case.endswith('.npy')]
+        self.cases = [case for case in os.listdir(self.ne_path) if case in os.listdir(self.ce_path) and case.endswith('.npy')]
         self.cases = np.random.permutation(np.array(self.cases))
 
         assert (len(self.cases) > 0)
@@ -60,7 +60,8 @@ class CrossPhaseDataset(Dataset):
             self.test_cases = self.cases[~np.isin(self.cases, self.train_cases)]
             self.is_foldsplit = True
             # save the split
-            np.save(os.path.join(self.split_path, 'split.npy'), [self.train_cases, self.test_cases])
+            np.save(os.path.join(self.split_path, 'split_train.npy'), self.train_cases)
+            np.save(os.path.join(self.split_path, 'split_test.npy'), self.test_cases)
 
     def __len__(self):
         assert (self.is_foldsplit)
