@@ -166,7 +166,7 @@ def main_worker(gpu,args):
             sys.stdout.write(f"loss: {loss}\n")
             sys.stdout.write(f"loss: {loss}\n")
             sys.stdout.flush()
-            dist.all_reduce(loss, op=dist.ReduceOp.SUM)
+            dist.all_reduce(loss, op=dist.ReduceOp.AVG)
 
             # backward
             loss.backward()
