@@ -1,4 +1,6 @@
 import os
+import sys
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -139,7 +141,8 @@ class LatentSimilarityLoss_resnet(nn.Module):
                 # calculate multimodal embeddings
                 normalised_similarity = F.normalize(reshaped_z1, p=2, dim=1) @ F.normalize(reshaped_z2, p=2, dim=1).T * self.temperature
                 labels = torch.arange(b).to(reshaped_z1.device)
-                symm_cce = F.cross_entropy(normalised_similarity, labels) + F.cross_entropy(normalised_similarity.T, labels)
+                symm_cce = (F.cross_entropy(normalised_similarity, labels,reduction='mean')
+                            + F.cross_entropy(normalised_similarity.T, labels,reduction='mean'))
                 loss += symm_cce*self.clip_loss_weight
             if self.l2_weight>0:
                 l2 = self.l2(reshaped_z1, reshaped_z2)
