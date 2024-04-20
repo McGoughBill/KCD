@@ -108,7 +108,7 @@ class LatentSimilarityLoss_resnet(nn.Module):
         self.cos = nn.CosineSimilarity(dim=-1)
         self.cce = nn.CrossEntropyLoss()
         self.softmax = nn.Softmax(dim=1)
-        self.temperature = np.exp(0.07)
+        self.temperature = 0.07
         self.mse_weight = 0.01
         self.cos_weight = 1
         self.huber = nn.SmoothL1Loss()
@@ -139,7 +139,7 @@ class LatentSimilarityLoss_resnet(nn.Module):
         else:
             if self.clip_loss_weight>0:
                 # calculate multimodal embeddings
-                normalised_similarity = F.normalize(reshaped_z1, p=2, dim=1) @ F.normalize(reshaped_z2, p=2, dim=1).T * self.temperature
+                normalised_similarity = (F.normalize(reshaped_z1, p=2, dim=1) @ F.normalize(reshaped_z2, p=2, dim=1).T) / self.temperature
                 labels = torch.arange(b).to(reshaped_z1.device)
                 symm_cce = (F.cross_entropy(normalised_similarity, labels,reduction='mean')
                             + F.cross_entropy(normalised_similarity.T, labels,reduction='mean'))
