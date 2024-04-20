@@ -99,7 +99,7 @@ def main_worker(gpu,args):
     assert os.path.exists(dataset_ne_path) and os.path.exists(dataset_ce_path)
     home_path = os.path.join(os.environ['OV_DATA_BASE'], 'ne2ceCT', 'resnet_tciaandcoltea_{}_cancer'.format(spacing))
     ne2ceCT_path = os.path.join(home_path,
-                                'l1{}_l2{}_var{}_cov{}_cce{}_cos{}_clip{}_{}lr_{}lg_{}bs_{}ep_{}gpus'.format(l1_weight,
+                                'l1-{}_l2-{}_var{}_cov{}_cce{}_cos{}_clip{}_{}lr_{}lg_{}bs_{}ep_{}gpus'.format(l1_weight,
                                                                                    l2_weight,
                                                                                    var_loss_weight,
                                                                                    cov_loss_weight,
