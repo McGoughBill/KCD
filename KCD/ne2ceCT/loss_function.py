@@ -15,7 +15,7 @@ def off_diagonal(x):
 
 class LatentSimilarityLoss(nn.Module):
     def __init__(self, l2_weight = 0, l1_weight = 0, cce_weight = 0, cos_weight = 0,
-                 var_loss_weight = 0, cov_loss_weight=0,out_dim= 2):
+                 var_loss_weight = 0, cov_loss_weight=0,clip_loss_weight=0,out_dim= 2):
         super(LatentSimilarityLoss, self).__init__()
         self.mse = nn.MSELoss()
         self.cos = nn.CosineSimilarity(dim=-1)
@@ -33,6 +33,7 @@ class LatentSimilarityLoss(nn.Module):
         self.cos_weight = cos_weight
         self.var_loss_weight = var_loss_weight # encourages variance in features across samples
         self.cov_loss_weight = cov_loss_weight # discourages covariance between features in each samples
+        self.clip_loss_weight = clip_loss_weight
         self.out_dim = out_dim
 
     def normalize(self, z):
@@ -99,7 +100,7 @@ class LatentSimilarityLoss(nn.Module):
 
 class LatentSimilarityLoss_resnet(nn.Module):
     def __init__(self, l2_weight = 0, l1_weight = 0, cce_weight = 0, cos_weight = 0,
-                 var_loss_weight = 0, cov_loss_weight=0,out_dim= 2):
+                 var_loss_weight = 0, cov_loss_weight=0,out_dim= 2,clip_loss_weight=0):
         super(LatentSimilarityLoss_resnet, self).__init__()
         self.mse = nn.MSELoss()
         self.cos = nn.CosineSimilarity(dim=-1)
@@ -117,6 +118,7 @@ class LatentSimilarityLoss_resnet(nn.Module):
         self.cos_weight = cos_weight
         self.var_loss_weight = var_loss_weight # encourages variance in features across samples
         self.cov_loss_weight = cov_loss_weight # discourages covariance between features in each samples
+        self.clip_loss_weight = clip_loss_weight
         self.out_dim = out_dim
 
     def normalize(self, z):
@@ -133,6 +135,12 @@ class LatentSimilarityLoss_resnet(nn.Module):
                 symm_cce = (self.cce(reshaped_z1, amax_z2) + self.cce(reshaped_z2, amax_z1)) / 2
                 loss += symm_cce*self.cce_weight
         else:
+            if self.clip_loss_weight>0:
+                # calculate multimodal embeddings
+                normalised_similarity = F.normalize(reshaped_z1, p=2, dim=1) @ F.normalize(reshaped_z2, p=2, dim=1).T * self.temperature
+                labels = torch.arange(b).to(reshaped_z1.device)
+                symm_cce = F.cross_entropy(normalised_similarity, labels) + F.cross_entropy(normalised_similarity.T, labels)
+                loss += symm_cce*self.clip_loss_weight
             if self.l2_weight>0:
                 l2 = self.l2(reshaped_z1, reshaped_z2)
                 loss += l2*self.l2_weight

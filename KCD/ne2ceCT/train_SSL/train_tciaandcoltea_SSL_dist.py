@@ -28,6 +28,7 @@ def parse_option():
     parser.add_argument('--cos_weight', type=float, default=0, help='cosine similarity weight')
     parser.add_argument('--var_loss_weight', type=float, default=0.1, help='variance loss weight')
     parser.add_argument('--cov_loss_weight', type=float, default=0.1, help='covariance loss weight')
+    parser.add_argument('--clip_loss_weight', type=float, default=0, help='clip loss weight')
     parser.add_argument('--batch_size', type=int, default=4, help='batch size')
     parser.add_argument('--lr_max', type=float, default=0.00005, help='max learning rate')
     parser.add_argument('--loss_gamma', type=float, default=0.99999, help='gamma for learning rate scheduler')
@@ -90,6 +91,7 @@ def main_worker(gpu,args):
     spacing = args.spacing
     workers = args.workers
     world_size = args.world_size
+    clip_loss_weight = args.clip_loss_weight
 
     dataset_ne_path = os.path.join(os.environ['OV_DATA_BASE'], 'preprocessed/tciaandcoltea_ncct/1mm/')
     dataset_ce_path = os.path.join(os.environ['OV_DATA_BASE'], 'preprocessed/tciaandcoltea_cect/1mm/')
@@ -97,7 +99,7 @@ def main_worker(gpu,args):
     assert os.path.exists(dataset_ne_path) and os.path.exists(dataset_ce_path)
     home_path = os.path.join(os.environ['OV_DATA_BASE'], 'ne2ceCT', 'resnet_tciaandcoltea_{}_cancer'.format(spacing))
     ne2ceCT_path = os.path.join(home_path,
-                                'l1{}_l2{}_var{}_cov{}_cce{}_cos{}_{}lr_{}lg_{}bs_{}ep_{}gpus'.format(l1_weight,
+                                'l1{}_l2{}_var{}_cov{}_cce{}_cos{}_clip{}_{}lr_{}lg_{}bs_{}ep_{}gpus'.format(l1_weight,
                                                                                    l2_weight,
                                                                                    var_loss_weight,
                                                                                    cov_loss_weight,
