@@ -162,6 +162,10 @@ def main_worker(gpu,args):
                 T_features = model_T(ce)
             S_features = model_S(ne)
             loss = loss_func(T_features, S_features)
+            sys.stdout.write(f"loss: {loss}\n")
+            sys.stdout.write(f"loss: {loss}\n")
+            sys.stdout.write(f"loss: {loss}\n")
+            sys.stdout.flush()
             dist.all_reduce(loss, op=dist.ReduceOp.SUM)
 
             # backward
