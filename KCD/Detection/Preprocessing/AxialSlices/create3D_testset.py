@@ -3,7 +3,7 @@ import numpy as np
 
 data_name = 'test_set'
 path = "/Users/mcgoug01/Library/CloudStorage/OneDrive-CRUKCambridgeInstitute/SecondYear/Segmentation/seg_data/raw_data/{}/images".format(data_name)
-save_dir = '/Users/mcgoug01/Downloads/Data'
+save_dir = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/3DSlice_data'
 segpath='/Users/mcgoug01/Library/CloudStorage/OneDrive-CRUKCambridgeInstitute/SecondYear/Segmentation/seg_data/predictions_nii/{}/[4 4 4]mm'.format(data_name)
 
 overlap_mm = 40 ## this dictates the minimum distance apart between each slice! not the overlap.
