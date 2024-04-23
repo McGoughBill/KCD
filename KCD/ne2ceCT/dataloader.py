@@ -148,10 +148,6 @@ class CrossPhaseDataset(Dataset):
 
         # if zxy returns a patch with over background thresh% of the patch being background, try again
         while torch.sum(image1[0, zxy[0]:zxy[0]+patch_size, zxy[1]:zxy[1]+patch_size, zxy[2]:zxy[2]+patch_size]>(self.background_value+0.01)) < (patch_size**3)*self.background_threshold:
-            sys.stdout.write(f'background threshold not exceeded, value: {torch.sum(image1[0, zxy[0]:zxy[0]+patch_size, zxy[1]:zxy[1]+patch_size, zxy[2]:zxy[2]+patch_size]>(self.background_value+0.01))}\n')
-            sys.stdout.write(f'value counts: {torch.unique(image1[0, zxy[0]:zxy[0]+patch_size, zxy[1]:zxy[1]+patch_size, zxy[2]:zxy[2]+patch_size],return_counts=True)}\n')
-            sys.stdout.write(f'min max: {image1[0, zxy[0]:zxy[0]+patch_size, zxy[1]:zxy[1]+patch_size, zxy[2]:zxy[2]+patch_size].min()} {image1[0, zxy[0]:zxy[0]+patch_size, zxy[1]:zxy[1]+patch_size, zxy[2]:zxy[2]+patch_size].max()}\n')
-            sys.stdout.flush()
             zxy = [np.random.randint(0, shape[dim] - patch_size) if shape[dim] > patch_size else 0 for dim in range(1,4) ]
 
         return image1,image2,tuple(zxy)
