@@ -31,3 +31,24 @@ More datasets:
 
 CPTAC - TCIA
 Acrin-6698
+
+
+Downstream finetune tasks:
+
+Seg and Detection for:
+
+Hemmorhage using RSNA CT dataset (https://github.com/SeuTao/RSNA2019_Intracranial-Hemorrhage-Detection?tab=readme-ov-file)
+This emulates the downstream task from SparK paper and 100mill medical images paper
+
+Lung Cancer / Covid-19 detection using LIDC-IDRI dataset and Covid-19 CT dataset (https://ieee-dataport.org/documents/lung-image-database-consortium-image-collection-lidc-idri)
+(https://bmcresnotes.biomedcentral.com/articles/10.1186/s13104-021-05592-x) haghihi semantic genesis
+
+Kidney cancer - my short paper dataset.
+
+Semantic Genesis does finetuning from pretrain. MoCo uses Prototypical Networks for few shot classification?
+SparK uses a simple linear layer on top of the pretrained model, trains only the final added linear layer for 10 epochs.
+
+Perform a similar reduction in training set size as SparK! See how this performs as training dataset size
+is reduced.
+
+For seg downstream, we can copy vox2vec. For detection, we can copy SparK.
