@@ -109,6 +109,7 @@ def main_worker(args):
 
     model_S.train()
     model_S, optimizer = ipex.optimize(model_S, optimizer=optimizer)
+    model_T = ipex.optimize(model_T)
 
     scheduler = LinearWarmupExponentialDecayScheduler(optimizer, warmup_epochs=500, lr_max=lr_max,
                                                       decay_rate=loss_gamma)

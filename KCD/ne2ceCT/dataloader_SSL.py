@@ -106,7 +106,7 @@ class CrossPhaseDataset(Dataset):
     def reset_patch_count(self):
         self.case_patch_count = {case: 0 for case in self.cases}
 
-    def _get_random_patch_indices(self, image1,image2, patch_size, background_threshold=0.5):
+    def _get_random_patch_indices(self, image1,image2, patch_size, background_threshold=0.25):
         '''
 
         Parameters

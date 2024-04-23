@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 from random import random
 from math import ceil
+import sys
 
 
 # want to select random 128x128x128 patches from the 3D images, padding if need be,
@@ -14,22 +15,24 @@ from math import ceil
 class CrossPhaseDataset(Dataset):
     def __init__(self, ne_path, ce_path,split_path, device=None, patch_size=64,
                  blur_kernel=torchvision.transforms.GaussianBlur(kernel_size=3, sigma=(0.1, 2.0)),
-                 is_train=True,patches_per_case=10):
+                 is_train=True,patches_per_case=10,background_value=-3,background_threshold=0.25):
         assert (os.path.exists(ne_path)) and os.path.exists(ce_path)
         self.ne_path = os.path.join(ne_path,'images')
         self.ce_path = os.path.join(ce_path,'images')
         self.split_path = split_path
         if os.path.exists(self.split_path):
-            if os.path.exists(os.path.join(self.split_path,'split.npy')):
-                self.split = np.load(os.path.join(self.split_path,'split.npy'))
+            if os.path.exists(os.path.join(self.split_path,'split_train.npy')) and os.path.exists(os.path.join(self.split_path,'split_test.npy')):
+                self.split = [np.load(os.path.join(self.split_path,'split_train.npy'),allow_pickle=True), np.load(os.path.join(self.split_path,'split_test.npy'),allow_pickle=True)]
             else:
                 self.split = None
         else:
             raise FileNotFoundError(f'{self.split_path} does not exist')
         self.device = device
+        self.background_value = background_value
+        self.background_threshold = background_threshold
 
         #save cases as a list of cases present in both ne_path and ce_path
-        self.cases = [case for case in os.listdir(ne_path) if case in os.listdir(ce_path) and case.endswith('.npy')]
+        self.cases = [case for case in os.listdir(self.ne_path) if case in os.listdir(self.ce_path) and case.endswith('.npy')]
         self.cases = np.random.permutation(np.array(self.cases))
 
         assert (len(self.cases) > 0)
@@ -57,7 +60,9 @@ class CrossPhaseDataset(Dataset):
             self.test_cases = self.cases[~np.isin(self.cases, self.train_cases)]
             self.is_foldsplit = True
             # save the split
-            np.save(os.path.join(self.split_path, 'split.npy'), [self.train_cases, self.test_cases])
+            np.save(os.path.join(self.split_path, 'split_train.npy'), self.train_cases)
+            np.save(os.path.join(self.split_path, 'split_test.npy'), self.test_cases)
+
 
     def __len__(self):
         assert (self.is_foldsplit)
@@ -102,13 +107,15 @@ class CrossPhaseDataset(Dataset):
     def reset_patch_count(self):
         self.case_patch_count = {case: 0 for case in self.cases}
 
-    def _get_random_patch_indices(self, image1,image2, patch_size, background_threshold=0.5):
+    def _get_random_patch_indices(self, image1,image2, patch_size):
         '''
 
         Parameters
         ----------
         image1, image2 : torch.Tensor
             3D image to take a random patch from
+            image1 is the non-contrast enhanced image
+            image2 is the contrast enhanced image
         patch_size
             size of the patch to take from the image
         Returns
@@ -136,12 +143,12 @@ class CrossPhaseDataset(Dataset):
         shape = [min(image1.shape[dim], image2.shape[dim]) for dim in range(4)]
 
 
-        # get the random index to take the patch from
-        zxy = [np.random.randint(0, shape[dim] - patch_size) for dim in range(1,4)]
+        # get the random index to take the patch from. if dimensions are smaller than the patch size, make the index 0
+        zxy = [np.random.randint(0, shape[dim] - patch_size) if shape[dim] > patch_size else 0 for dim in range(1,4) ]
 
-        # if zxy returns a patch with over 50% of the patch being 0, try again
-        while torch.sum(image1[0, zxy[0]:zxy[0]+patch_size, zxy[1]:zxy[1]+patch_size, zxy[2]:zxy[2]+patch_size]) < (patch_size**3)*background_threshold:
-            zxy = [np.random.randint(0, shape[dim] - patch_size) for dim in range(1,4)]
+        # if zxy returns a patch with over background thresh% of the patch being background, try again
+        while torch.sum(image1[0, zxy[0]:zxy[0]+patch_size, zxy[1]:zxy[1]+patch_size, zxy[2]:zxy[2]+patch_size]>(self.background_value-0.01)) < (patch_size**3)*self.background_threshold:
+            zxy = [np.random.randint(0, shape[dim] - patch_size) if shape[dim] > patch_size else 0 for dim in range(1,4) ]
 
         return image1,image2,tuple(zxy)
 
@@ -160,6 +167,11 @@ class CrossPhaseDataset(Dataset):
 
         ne = torch.Tensor(np.load(os.path.join(self.ne_path, case),allow_pickle=True))
         ce = torch.Tensor(np.load(os.path.join(self.ce_path, case),allow_pickle=True))
+
+        # if ne.shape != ce.shape:
+        #     sys.stdout.write(f'ne shape: {ne.shape}, ce shape: {ce.shape}\n')
+        #     sys.stdout.write(f'case: {case}\n')
+        #     sys.stdout.flush()
         # get random patch indices
         ne,ce,indices = self._get_random_patch_indices(ne,ce, self.patch_size)
         ne_patch = ne[0, indices[0]:indices[0]+self.patch_size, indices[1]:indices[1]+self.patch_size, indices[2]:indices[2]+self.patch_size]
