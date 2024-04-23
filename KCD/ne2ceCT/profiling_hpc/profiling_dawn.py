@@ -70,7 +70,8 @@ def main_worker(args):
     dataset_ce_path = os.path.join(os.environ['OV_DATA_BASE'], 'preprocessed/coltea_art/coltea_art_2/')
 
     assert os.path.exists(dataset_ne_path) and os.path.exists(dataset_ce_path)
-    ne2ceCT_path = os.path.join(os.environ['OV_DATA_BASE'], 'ne2ceCT', 'profiling_dawn_coltea',
+    home_path = os.path.join(os.environ['OV_DATA_BASE'], 'ne2ceCT', 'profiling_dawn_coltea')
+    ne2ceCT_path = os.path.join(home_path,
                                 'dawn_profile_l1{}_l2{}_var{}_cov{}_cce{}_{}bs'.format(l1_weight,
                                                                                    l2_weight,
                                                                                    var_loss_weight,
@@ -85,7 +86,7 @@ def main_worker(args):
     if os.path.exists(log_path):
         os.remove(log_path)
 
-    dataset = CrossPhaseDataset(os.path.join(dataset_ne_path, 'images'), os.path.join(dataset_ce_path, 'images'),
+    dataset = CrossPhaseDataset(dataset_ne_path, dataset_ce_path,home_path,
                                 device=dev,
                                 is_train=True, patches_per_case=100, patch_size=64)
     print(dataset.cases)
