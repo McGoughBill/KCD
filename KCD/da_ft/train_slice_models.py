@@ -53,7 +53,7 @@ def finetune_da_model(path_to_pretrained_model,home = '/Users/mcgoug01/Downloads
             if not os.path.exists(fold_path):os.mkdir(fold_path)
             if not os.path.exists(slice_path):os.mkdir(slice_path)
 
-            model = LinearClassifier()
+            model = LinearClassifier(3)
             model.feature_extractor.load_state_dict(torch.load(path_to_pretrained_model))
 
             # turn all model.feature_extractor parameters to non-trainable
@@ -131,7 +131,7 @@ def finetune_SSL_model(home = '/Users/mcgoug01/Downloads/Data/',
             if not os.path.exists(fold_path):os.mkdir(fold_path)
             if not os.path.exists(slice_path):os.mkdir(slice_path)
 
-            model = LinearClassifier()
+            model = LinearClassifier(3)
 
             # turn all model.feature_extractor parameters to non-trainable
             for param in model.feature_extractor.parameters():
@@ -141,7 +141,7 @@ def finetune_SSL_model(home = '/Users/mcgoug01/Downloads/Data/',
 
             dl,test_dl = tu.generate_dataloaders(slicedataset,test_slicedataset,cases[train_index],params['batch_size'])
             model = tu.train_model(dl,dev,params['epochs'],loss_fnc,opt,model)
-            model_name = 'finetune_DA_{}_{}_{}_{}_{}_{}'.format(pretrain_ds,model_type,params['model_size'],params['epochs'],params['epochs'],params['lr'])
+            model_name = 'finetune_SSL_{}_{}_{}_{}_{}_{}'.format(pretrain_ds,model_type,params['model_size'],params['epochs'],params['epochs'],params['lr'])
 
             if not os.path.exists(os.path.join(slice_path,'model')):
                 os.mkdir(os.path.join(slice_path,'model'))
@@ -167,5 +167,5 @@ def finetune_SSL_model(home = '/Users/mcgoug01/Downloads/Data/',
 
 if __name__ == '__main__':
     dataset = 'coreg_ncct'
-    home = '/bask/projects/p/phwq4930-renal-canc/KCD_data/Data'
-    train_cv_slice_model(home=home,dataname=dataset,is_3D=True,splits=[0])
+    home = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/3DSlice_data'
+    finetune_SSL_model(home=home,dataname=dataset,is_3D=True,splits=[0])
