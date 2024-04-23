@@ -23,7 +23,7 @@ if __name__ == '__main__':
     ce_model = fmcib_model()
 
     converted_dam = fmcib_model()
-    converted_dam.load_state_dict(torch.load('/Users/mcgoug01/Downloads/assessing_latent_resnet/l1-0.2_l2-1.0_var0.0_cov0.0_cce0.0_cos0.0_clip0.0_2e-05lr_0.99995lg_80bs_2000ep_4gpus/network_weights', map_location='cpu'))
+    converted_dam.load_state_dict(torch.load('/Users/mcgoug01/Downloads/assessing_latent_resnet/l1-0.2_l2-1.0_var0.01_cov0.2_cce0.0_cos1.0_clip0.0_2e-05lr_0.99998lg_80bs_5000ep_4gpus/network_weights', map_location='cpu'))
 
     ce_model.eval(), converted_dam.eval()
 
@@ -32,7 +32,8 @@ if __name__ == '__main__':
     split_path = '/Users/mcgoug01/Downloads/assessing_latent_resnet'
 
     dataset = CrossPhaseDataset(ne_data_path, ce_data_path, split_path,
-                                device='cpu', is_train=False,patches_per_case=200)
+                                device='cpu', is_train=False,patches_per_case=200,
+                                background_threshold=0.25,background_value=0)
     dataset.apply_foldsplit(split_ratio=0)
 
     # get an inference sample
@@ -76,7 +77,7 @@ if __name__ == '__main__':
         # top row is the ce image and the nc image
         # middle row is the ce latent space and the nc latent space
         # bottom row is the nc latent space from the ce model and the difference between the ce and nc latent spaces
-        if count %199 == 0 and count > 0:
+        if count %499 == 0 and count > 0:
             plt.switch_backend('TkAgg')
             fig, axs = plt.subplots(3, 2, figsize=(15, 15))
             # set location of each figure to the same point on the monitor
