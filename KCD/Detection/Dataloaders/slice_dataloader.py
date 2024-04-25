@@ -141,7 +141,10 @@ class SW_Data_labelled(Dataset):
             
         directory = self.dir_dict[label]
         image = np.load(os.path.join(directory,class_df.iloc[idx]['filepath']),allow_pickle=True)
-        image = torch.clip(torch.Tensor(image).to(self.device),-200,200)/100
+        # image = torch.clip(torch.Tensor(image).to(self.device),-200,200)/100
+        # image = (torch.clip(torch.Tensor(image).to(self.device),-500,500)+500)/400
+        image = (torch.clip(torch.Tensor(image).to(self.device),-1024,2048)+1024)/3072
+
         image = torch.unsqueeze(image,0)
         
         #shuffles order of transforms every time
@@ -210,7 +213,7 @@ class SW_Data_unlabelled(Dataset):
             
         directory = self.dir_dict[label]
         image = np.load(os.path.join(directory,class_df.iloc[idx]['filepath']),allow_pickle=True)
-        image = torch.clip(torch.Tensor(image).to(self.device),-200,200)/100
+        image = (torch.clip(torch.Tensor(image).to(self.device),-1024,2048)+1024)/3072
         return torch.unsqueeze(image,0)
         
 

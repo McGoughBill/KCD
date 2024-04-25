@@ -1,6 +1,8 @@
 import KCD.Detection.Dataloaders.object_dataloader as dl_shape
 import KCD.Detection.Dataloaders.slice_dataloader as dl_slice
+import KCD.Detection.Dataloaders.slice_dataloader_DA as dl_slice_da
 import KCD.Detection.Dataloaders.sliceseg_dataloader as dl_sliceseg
+from KCD.ne2ceCT.lr_scheduler import LinearWarmupExponentialDecayScheduler
 from KCD.Detection.ModelGenerator import model_generator
 from torch.utils.data import DataLoader
 import numpy as np
@@ -145,6 +147,36 @@ def init_slice3D_params_finetune():
               'pred_window': 1}
     return params
 
+def init_domainadaptation(type='normal'):
+    params = {"voxel_size": 1,
+              "model_size": "small",
+              "cancthresh_r_mm": 10,
+              "kidthresh_r_mm": 20,
+              "batch_size": 40,
+              "dilated": 40,
+              "lr": 1e-4,
+              "epochs": 10,
+              "depth_z": 20,
+              "boundary_z": 5,
+              'pred_window': 1}
+
+    if type =='normal':
+        params['min_att'] = -200
+        params['max_att'] = 200
+        params['mean_att'] = 0
+        params['att_stddev'] = 100
+    elif type == 'custom':
+        params['min_att'] = -500
+        params['max_att'] = 500
+        params['mean_att'] = 500
+        params['att_stddev'] = 400
+    elif type == 'original':
+        params['min_att'] = -1024
+        params['max_att'] = 2048
+        params['mean_att'] = 1024
+        params['att_stddev'] = 3072
+    return params
+
 def init_slice2D_params_finetune():
     params = {"voxel_size": 1,
               "model_size": "large",
@@ -223,6 +255,16 @@ def get_slice_data(home, dataname, voxel_size, cancthresh,kidthresh,depth_z,
     test_slicedataset = dl_slice.SW_Data_labelled(home, dataname, voxel_size_mm=voxel_size, cancthresh=0,kidthresh=0,depth_z=depth_z,boundary_z=boundary_z,dilated=dilated,device=device)
     return slicedataset, test_slicedataset
 
+def get_slice_data_DA(home, dataname, voxel_size, cancthresh,kidthresh,depth_z,
+                   boundary_z,dilated,device='cpu',min_att=-200,max_att=200,mean_att=0,att_stddev=2):
+    slicedataset = dl_slice_da.SW_Data_labelled(home, dataname, voxel_size_mm=voxel_size, cancthresh=cancthresh,kidthresh=kidthresh,depth_z=depth_z,boundary_z=boundary_z,dilated=dilated,device=device,
+                                                min_att=min_att,max_att=max_att,mean_att=mean_att,
+                                                att_stddev=att_stddev)
+    test_slicedataset = dl_slice_da.SW_Data_labelled(home, dataname, voxel_size_mm=voxel_size, cancthresh=0,kidthresh=0,depth_z=depth_z,boundary_z=boundary_z,dilated=dilated,device=device,
+                                                     min_att=min_att, max_att=max_att, mean_att=mean_att,
+                                                     att_stddev=att_stddev)
+    return slicedataset, test_slicedataset
+
 def get_sliceseg_data(home, dataname, voxel_size, cancthresh,kidthresh,depth_z,
                    boundary_z,dilated,device='cpu'):
     slicedataset = dl_sliceseg.SW_Data_seglabelled(home, dataname, voxel_size_mm=voxel_size, cancthresh=cancthresh,kidthresh=kidthresh,depth_z=depth_z,boundary_z=boundary_z,dilated=dilated,device=device)
@@ -258,7 +300,7 @@ def update_doc(doc_path, model_name, losses,batch_count, loss):
 
 
 def train_model(dl, dev, epochs, loss_fnc, opt, model,
-                model_name,doc_path,save_freq=100):
+                model_name,doc_path,learning_rate,save_freq=100):
 
     # document training in training.txt
     # an ema of training loss in training.png
@@ -271,6 +313,8 @@ def train_model(dl, dev, epochs, loss_fnc, opt, model,
     batch_count=0
     weighted_losses = []
     weight = 1 - (1/save_freq)
+    scheduler = LinearWarmupExponentialDecayScheduler(opt, warmup_epochs=500, lr_max=learning_rate,
+                                                      decay_rate=0.9999)
     for i in range(epochs):
         print("\nEpoch {}".format(i))
         for features,label in dl:
@@ -278,6 +322,7 @@ def train_model(dl, dev, epochs, loss_fnc, opt, model,
             if label.numel() != 1:label = label.squeeze()
             loss = loss_fnc(pred, label.to(dev))
             loss.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), 1)
             opt.step()
             opt.zero_grad()
 
@@ -291,6 +336,7 @@ def train_model(dl, dev, epochs, loss_fnc, opt, model,
                 weighted_losses.append(loss_w)
                 update_doc(model_doc_path,model_name,weighted_losses,batch_count,loss)
             batch_count += 1
+            scheduler.step()
     return model
 
 

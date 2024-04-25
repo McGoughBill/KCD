@@ -13,5 +13,6 @@ class LinearClassifier(nn.Module):
         with torch.no_grad():
             x = self.feature_extractor(x)
         x = self.fc(x)
-        return x
+        out = F.softmax(x, dim=1)
+        return out
 

@@ -10,23 +10,28 @@ import numpy as np
 import warnings
 import pandas as pd
 
+#set seed
+torch.manual_seed(0)
+np.random.seed(0)
+
 def finetune_da_model(path_to_pretrained_model,home = '/Users/mcgoug01/Downloads/Data/',
-                         dataname='coreg_ncct',pretrain_ds='kits23_nooverlap',
-                         splits:list=[0],folds=5,params:dict=None,is_3D=True):
+                         dataname='coreg_ncct', type='normal',
+                         splits:list=[0],folds=5,params:dict=None):
     # Suppress warnings
     warnings.filterwarnings("ignore") #makes dgl stop complaining!
 
     # Initialization
     dev = tu.initialize_device()
 
-    if params==None:params = tu.init_slice3D_params_finetune()
-    else:tu.check_params(params,tu.init_slice3D_params_finetune())
+    if params==None:params = tu.init_domainadaptation(type=type)
+    else:tu.check_params(params,tu.init_domainadaptation(type=type))
     model_type = 'PatchModel'
 
     save_dir = tu.init_training_home(home, dataname)
     print(save_dir)
 
-    slicedataset, test_slicedataset = tu.get_slice_data(home, dataname, params['voxel_size'], params['cancthresh_r_mm'],params['kidthresh_r_mm'],params['depth_z'],params['boundary_z'],params['dilated'],device=dev)
+    slicedataset, test_slicedataset = tu.get_slice_data_DA(home, dataname, params['voxel_size'], params['cancthresh_r_mm'],params['kidthresh_r_mm'],params['depth_z'],params['boundary_z'],params['dilated'],device=dev,
+                                                        min_att=params['min_att'],max_att=params['max_att'],mean_att=params['mean_att'],att_stddev=params['att_stddev'])
     cases, is_ncct = tu.get_cases(slicedataset)
 
     # More Initialization
@@ -43,8 +48,8 @@ def finetune_da_model(path_to_pretrained_model,home = '/Users/mcgoug01/Downloads
 
         if os.path.exists(split_fp): fold_split = np.load(split_fp,allow_pickle=True)
         else:
-            fold_split = np.array([(fold,tr_index,ts_index) for fold,(tr_index, ts_index) in enumerate(five_fold_strat.split(cases,is_ncct))])
-            np.save(os.path.join(split_path,split_fp),fold_split)
+            fold_split = np.array([(fold,tr_index,ts_index) for fold,(tr_index, ts_index) in enumerate(five_fold_strat.split(cases,is_ncct))],dtype=object)
+            np.save(os.path.join(split_path,split_fp),fold_split,allow_pickle=True)
 
         for fold,train_index, test_index in fold_split:
             fold_path = os.path.join(split_path,'fold_{}'.format(fold))
@@ -55,6 +60,7 @@ def finetune_da_model(path_to_pretrained_model,home = '/Users/mcgoug01/Downloads
 
             model = LinearClassifier(3)
             model.feature_extractor.load_state_dict(torch.load(path_to_pretrained_model))
+            model = model.to(dev)
 
             # turn all model.feature_extractor parameters to non-trainable
             for param in model.feature_extractor.parameters():
@@ -63,12 +69,15 @@ def finetune_da_model(path_to_pretrained_model,home = '/Users/mcgoug01/Downloads
             opt = torch.optim.Adam(model.fc.parameters(),lr=params['lr'])
 
             dl,test_dl = tu.generate_dataloaders(slicedataset,test_slicedataset,cases[train_index],params['batch_size'])
-            model = tu.train_model(dl,dev,params['epochs'],loss_fnc,opt,model)
-            model_name = 'finetune_DA_{}_{}_{}_{}_{}_{}'.format(pretrain_ds,model_type,params['model_size'],params['epochs'],params['epochs'],params['lr'])
 
             if not os.path.exists(os.path.join(slice_path,'model')):
                 os.mkdir(os.path.join(slice_path,'model'))
                 os.mkdir(os.path.join(slice_path,'csv'))
+            model_name = 'finetune_DA_{}_{}_{}_{}_{}_{}'.format(type,model_type,params['model_size'],params['epochs'],params['epochs'],params['lr'])
+
+            model = tu.train_model(dl,dev,params['epochs'],loss_fnc,opt,model,model_name,slice_path,params['lr'])
+
+
 
             torch.save(model,os.path.join(slice_path,'model',model_name))
 
@@ -89,22 +98,23 @@ def finetune_da_model(path_to_pretrained_model,home = '/Users/mcgoug01/Downloads
         plt.close()
 
 def finetune_SSL_model(home = '/Users/mcgoug01/Downloads/Data/',
-                         dataname='coreg_ncct',pretrain_ds='kits23_nooverlap',
-                         splits:list=[0],folds=5,params:dict=None,is_3D=True):
+                         dataname='coreg_ncct',type='normal',
+                         splits:list=[0],folds=5,params:dict=None):
     # Suppress warnings
     warnings.filterwarnings("ignore") #makes dgl stop complaining!
 
     # Initialization
     dev = tu.initialize_device()
 
-    if params==None:params = tu.init_slice3D_params_finetune()
-    else:tu.check_params(params,tu.init_slice3D_params_finetune())
+    if params==None:params = tu.init_domainadaptation(type=type)
+    else:tu.check_params(params,tu.init_domainadaptation(type=type))
     model_type = 'PatchModel'
 
     save_dir = tu.init_training_home(home, dataname)
     print(save_dir)
 
-    slicedataset, test_slicedataset = tu.get_slice_data(home, dataname, params['voxel_size'], params['cancthresh_r_mm'],params['kidthresh_r_mm'],params['depth_z'],params['boundary_z'],params['dilated'],device=dev)
+    slicedataset, test_slicedataset = tu.get_slice_data_DA(home, dataname, params['voxel_size'], params['cancthresh_r_mm'],params['kidthresh_r_mm'],params['depth_z'],params['boundary_z'],params['dilated'],device=dev,
+                                                        min_att=params['min_att'],max_att=params['max_att'],mean_att=params['mean_att'],att_stddev=params['att_stddev'])
     cases, is_ncct = tu.get_cases(slicedataset)
 
     # More Initialization
@@ -121,8 +131,8 @@ def finetune_SSL_model(home = '/Users/mcgoug01/Downloads/Data/',
 
         if os.path.exists(split_fp): fold_split = np.load(split_fp,allow_pickle=True)
         else:
-            fold_split = np.array([(fold,tr_index,ts_index) for fold,(tr_index, ts_index) in enumerate(five_fold_strat.split(cases,is_ncct))])
-            np.save(os.path.join(split_path,split_fp),fold_split)
+            fold_split = np.array([(fold,tr_index,ts_index) for fold,(tr_index, ts_index) in enumerate(five_fold_strat.split(cases,is_ncct))],dtype=object)
+            np.save(os.path.join(split_path,split_fp),fold_split,allow_pickle=True)
 
         for fold,train_index, test_index in fold_split:
             fold_path = os.path.join(split_path,'fold_{}'.format(fold))
@@ -131,22 +141,21 @@ def finetune_SSL_model(home = '/Users/mcgoug01/Downloads/Data/',
             if not os.path.exists(fold_path):os.mkdir(fold_path)
             if not os.path.exists(slice_path):os.mkdir(slice_path)
 
-            model = LinearClassifier(3)
+            model = LinearClassifier(3).to(dev)
 
             # turn all model.feature_extractor parameters to non-trainable
             for param in model.feature_extractor.parameters():
                 param.requires_grad = False
 
-            opt = torch.optim.Adam(model.fc.parameters(),lr=params['lr'])
-
-            dl,test_dl = tu.generate_dataloaders(slicedataset,test_slicedataset,cases[train_index],params['batch_size'])
-            model = tu.train_model(dl,dev,params['epochs'],loss_fnc,opt,model)
-            model_name = 'finetune_SSL_{}_{}_{}_{}_{}_{}'.format(pretrain_ds,model_type,params['model_size'],params['epochs'],params['epochs'],params['lr'])
-
             if not os.path.exists(os.path.join(slice_path,'model')):
                 os.mkdir(os.path.join(slice_path,'model'))
                 os.mkdir(os.path.join(slice_path,'csv'))
 
+            opt = torch.optim.Adam(model.fc.parameters(),lr=params['lr'])
+
+            dl,test_dl = tu.generate_dataloaders(slicedataset,test_slicedataset,cases[train_index],params['batch_size'])
+            model_name = 'finetune_SSL_{}_{}_{}_{}_{}_{}'.format(type,model_type,params['model_size'],params['epochs'],params['epochs'],params['lr'])
+            model = tu.train_model(dl,dev,params['epochs'],loss_fnc,opt,model,model_name,slice_path,params['lr'])
             torch.save(model,os.path.join(slice_path,'model',model_name))
 
             model.eval()
@@ -166,6 +175,18 @@ def finetune_SSL_model(home = '/Users/mcgoug01/Downloads/Data/',
         plt.close()
 
 if __name__ == '__main__':
+    import sys
+
+    is_da = sys.argv[1].lower() == 'true'
+    type = str(sys.argv[2])
+
     dataset = 'coreg_ncct'
+    path_to_pretrained_model = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/ne2ceCT/resnet_tciaandcoltea_1_cancer/l1-0.2_l2-1.0_var0.01_cov0.2_cce0.0_cos1.0_clip0.0_2e-05lr_0.99998lg_80bs_5000ep_4gpus/network_weights'
     home = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/3DSlice_data'
-    finetune_SSL_model(home=home,dataname=dataset,is_3D=True,splits=[0])
+    if is_da:
+        finetune_da_model(path_to_pretrained_model,home=home,dataname=dataset,splits=[0,1,2],
+                          type=type)
+    else:
+        finetune_SSL_model(home=home,dataname=dataset,splits=[0,1,2],
+                          type=type)
+
