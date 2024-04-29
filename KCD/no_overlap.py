@@ -10,12 +10,12 @@
 #         - <filename>.npy
 
 import os
-os.environ['OV_DATA_BASE'] = "/Users/mcgoug01/Library/CloudStorage/OneDrive-CRUKCambridgeInstitute/SecondYear/Segmentation/seg_data"
+os.environ['OV_DATA_BASE'] = "/bask/projects/p/phwq4930-renal-canc/data/seg_data/"
 import shutil
 
 # define the folders to copy from and to
-from_folder = os.path.join(os.environ['OV_DATA_BASE'], 'preprocessed', 'all_add','2mm_binary_canceronly')
-to_folder = os.path.join(os.environ['OV_DATA_BASE'], 'preprocessed', 'add_nooverlap','2mm_binary_canceronly')
+from_folder = os.path.join(os.environ['OV_DATA_BASE'], 'preprocessed', 'all_add','1mm_binary_canceronly')
+to_folder = os.path.join(os.environ['OV_DATA_BASE'], 'preprocessed', 'add_nooverlap','1mm_binary_canceronly')
 
 if not os.path.exists(to_folder):
     os.makedirs(to_folder)

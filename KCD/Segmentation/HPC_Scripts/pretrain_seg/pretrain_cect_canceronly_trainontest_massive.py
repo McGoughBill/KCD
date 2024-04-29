@@ -9,11 +9,11 @@ import torch
 import sys
 
 
-data_name = 'kits23_nooverlap'
-spacing = 2
+data_name = 'kits23_add_nooverlap'
+spacing = 1
 fold = int(sys.argv[1])
 
-preprocessed_name = '2mm_binary_canceronly'
+preprocessed_name = '1mm_binary_canceronly'
 model_name = '7,3x3x3,32_justcancer_trainontest_massive_500'
 
 vfs = [fold]

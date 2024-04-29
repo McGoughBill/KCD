@@ -1,10 +1,10 @@
 import os
-os.environ['OV_DATA_BASE'] = "/Users/mcgoug01/Library/CloudStorage/OneDrive-CRUKCambridgeInstitute/SecondYear/Segmentation/seg_data"
+os.environ['OV_DATA_BASE'] = "/bask/projects/p/phwq4930-renal-canc/data/seg_data/"
 from KCD.Segmentation.ovseg.preprocessing.SegmentationPreprocessing import SegmentationPreprocessing
 
 data_name = 'all_add'
-spacing = 2
-preprocessed_name = '2mm_binary_canceronly'
+spacing = 1
+preprocessed_name = '1mm_binary_canceronly'
 
 lb_classes = [2]
 target_spacing=[spacing]*3

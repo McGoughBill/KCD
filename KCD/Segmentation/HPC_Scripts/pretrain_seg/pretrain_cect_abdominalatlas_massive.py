@@ -38,7 +38,7 @@ model_params = get_model_params_3d_res_encoder_U_Net(patch_size,
 
 
 model_params['architecture'] = 'UNet'
-model_params['network']['kernel_sizes'] =6*[(3,3,3)]
+model_params['network']['kernel_sizes'] =7*[(3,3,3)]
 model_params['network']['norm'] = 'inst'
 model_params['network']['in_channels']=1
 model_params['network']['filters']=32
