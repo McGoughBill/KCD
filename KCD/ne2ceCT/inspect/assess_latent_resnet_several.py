@@ -21,26 +21,22 @@ if __name__ == '__main__':
     # load model
     ce_model = fmcib_model()
 
-    clip_dam, cos_dam, clipmse_dam, clipcosmse_dam, mse_dam = fmcib_model(), fmcib_model(), fmcib_model(), fmcib_model(), fmcib_model()
-    clip_dam.load_state_dict(torch.load('/Users/mcgoug01/Downloads/assessing_latent_resnet/l1-0.2_l2-0.0_var0.0_cov0.0_cce0.0_cos0.0_clip0.125_2e-05lr_0.99995lg_80bs_2000ep_4gpus/network_weights', map_location='cpu'))
-    cos_dam.load_state_dict(torch.load('/Users/mcgoug01/Downloads/assessing_latent_resnet/l1-0.2_l2-0.0_var0.0_cov0.0_cce0.0_cos2.5_clip0.0_2e-05lr_0.99995lg_80bs_2000ep_4gpus/network_weights', map_location='cpu'))
-    clipmse_dam.load_state_dict(torch.load('/Users/mcgoug01/Downloads/assessing_latent_resnet/l1-0.2_l2-0.5_var0.0_cov0.0_cce0.0_cos0.0_clip0.05_2e-05lr_0.99995lg_80bs_2000ep_4gpus/network_weights', map_location='cpu'))
-    clipcosmse_dam.load_state_dict(torch.load('/Users/mcgoug01/Downloads/assessing_latent_resnet/l1-0.2_l2-0.5_var0.0_cov0.0_cce0.0_cos1.0_clip0.05_2e-05lr_0.99995lg_80bs_2000ep_4gpus/network_weights', map_location='cpu'))
-    mse_dam.load_state_dict(torch.load('/Users/mcgoug01/Downloads/assessing_latent_resnet/l1-0.2_l2-1.0_var0.0_cov0.0_cce0.0_cos0.0_clip0.0_2e-05lr_0.99995lg_80bs_2000ep_4gpus/network_weights', map_location='cpu'))
-
+    bs80,bs160 = fmcib_model(), fmcib_model()
     ce_model.eval()
-    clip_dam.eval(), cos_dam.eval(), clipmse_dam.eval(), clipcosmse_dam.eval(), mse_dam.eval()
+    bs80.load_state_dict(torch.load('/Users/mcgoug01/Downloads/assessing_latent_resnet/l1-0.2_l2-1.0_var0.01_cov0.2_cce0.0_cos1.0_clip0.0_2e-05lr_0.99998lg_80bs_5000ep_4gpus/network_weights', map_location='cpu'))
+    bs160.load_state_dict(torch.load('/Users/mcgoug01/Downloads/assessing_latent_resnet/l1-0.2_l2-0.5_var0.01_cov0.2_cce0.0_cos1.0_clip0.0_2e-05lr_0.99998lg_160bs_5000ep_4gpus/network_weights', map_location='cpu'))
 
     ce_data_path = '/Users/mcgoug01/Downloads/assessing_latent_resnet/ce'
     ne_data_path = '/Users/mcgoug01/Downloads/assessing_latent_resnet/nc'
     split_path = '/Users/mcgoug01/Downloads/assessing_latent_resnet'
 
     dataset = CrossPhaseDataset(ne_data_path, ce_data_path, split_path,
-                                device='cpu', is_train=False,patches_per_case=200)
+                                device='cpu', is_train=False,patches_per_case=200,
+                                background_threshold=0.5)
     dataset.apply_foldsplit(split_ratio=0)
 
     # get an inference sample
-    sum_clip, sum_cos, sum_clipmse, sum_clipcosmse, sum_mse, sum_ce = 0, 0, 0, 0, 0, 0
+    sum_80, sum_160, sum_ce = 0, 0, 0
     for count,(ne, ce) in enumerate(dataset):
 
         ne = ne.unsqueeze(0)
@@ -55,34 +51,24 @@ if __name__ == '__main__':
         print(f'ce_equiv_ne min: {ce_equiv_ne.min()} max: {ce_equiv_ne.max()}')
         # get the latent space
         with torch.no_grad():
-            latent_clip = clip_dam(ne)[0].reshape(64,64)
-            latent_cos = cos_dam(ne)[0].reshape(64,64)
-            latent_clipmse = clipmse_dam(ne)[0].reshape(64,64)
-            latent_clipcosmse = clipcosmse_dam(ne)[0].reshape(64,64)
-            latent_mse = mse_dam(ne)[0].reshape(64,64)
-
+            latent_80 = bs80(ne)[0].reshape(64,64)
+            latent_160 = bs160(ne)[0].reshape(64,64)
             latent_ce = ce_model(ce)[0].reshape(64,64)
             latent_nc_from_ce = ce_model((ce_equiv_ne))[0].reshape(64,64)
 
-        abs_diff_clip = torch.abs(latent_clip - latent_ce).mean()
-        abs_diff_cos = torch.abs(latent_cos - latent_ce).mean()
-        abs_diff_clipmse = torch.abs(latent_clipmse - latent_ce).mean()
-        abs_diff_clipcosmse = torch.abs(latent_clipcosmse - latent_ce).mean()
-        abs_diff_mse = torch.abs(latent_mse - latent_ce).mean()
+        abs_diff_80 = torch.abs(latent_80 - latent_ce).mean()
+        abs_diff_160 = torch.abs(latent_160 - latent_ce).mean()
         abs_diff_ce = torch.abs(latent_nc_from_ce - latent_ce).mean()
 
-        sum_clip += abs_diff_clip
-        sum_cos += abs_diff_cos
-        sum_clipmse += abs_diff_clipmse
-        sum_clipcosmse += abs_diff_clipcosmse
-        sum_mse += abs_diff_mse
+        sum_80 += abs_diff_80
+        sum_160 += abs_diff_160
         sum_ce += abs_diff_ce
 
         # plot a 3 row 2 column set of plots
         # top row is the ce image and the nc image
         # middle row is the ce latent space and the nc latent space
         # bottom row is the nc latent space from the ce model and the difference between the ce and nc latent spaces
-        if count %199 == 0 and count > 0:
+        if (count+1) %300 == 0 and count > 0:
             plt.switch_backend('TkAgg')
             fig, axs = plt.subplots(3, 2, figsize=(15, 15))
             # set location of each figure to the same point on the monitor
@@ -94,7 +80,7 @@ if __name__ == '__main__':
             axs[0, 1].imshow(ce[0, 0, 32, :, :].T.cpu().detach().numpy(), cmap='gray', vmin=0, vmax=1)
             axs[0, 1].set_title('CE')
             axs[0, 1].axis('off')
-            axs[1, 0].imshow(latent_clipcosmse,vmin=0, vmax=2.5)
+            axs[1, 0].imshow(latent_80,vmin=-1, vmax=2.5)
             axs[1, 0].set_title('(a) Domain-Adapted ClipCosMSE Latent Space')
             axs[1, 0].axis('off')
             axs[1, 1].imshow(latent_ce,vmin=-1, vmax=2.5)
@@ -103,17 +89,14 @@ if __name__ == '__main__':
             axs[2, 0].imshow(latent_nc_from_ce,vmin=-1, vmax=2.5)
             axs[2, 0].set_title('(c) Original Model Latent Space using NC input')
             axs[2, 0].axis('off')
-            axs[2, 1].imshow(torch.abs(latent_ce - latent_clipcosmse),vmin=0, vmax=2.5)
+            axs[2, 1].imshow(torch.abs(latent_ce - latent_160),vmin=0, vmax=2)
             axs[2, 1].set_title('(d) Difference between Latent Spaces in (a) and (b)')
             axs[2, 1].axis('off')
 
             # insert the absolute differences as a figure-wide title up to 3 sigfig
-            fig.suptitle(f'Average absolute difference of clipcosmse: {sum_clipcosmse/(count+1):.3f}\n'
+            fig.suptitle(f'Average absolute difference of bs80: {sum_80/(count+1):.3f}\n'
+                            f'Average absolute difference of bs160: {sum_160/(count+1):.3f}\n'
                             f'Average absolute difference of ce: {sum_ce/(count+1):.3f}\n'
-                            f'Average absolute difference of clip: {sum_clip/(count+1):.3f}\n'
-                            f'Average absolute difference of cos: {sum_cos/(count+1):.3f}\n'
-                            f'Average absolute difference of clipmse: {sum_clipmse/(count+1):.3f}\n'
-                            f'Average absolute difference of mse: {sum_mse/(count+1):.3f}\n'
                             f'Number of samples: {count+1}', fontsize=12)
             plt.tight_layout()
 

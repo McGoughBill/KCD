@@ -33,7 +33,7 @@ if __name__ == '__main__':
 
     dataset = CrossPhaseDataset(ne_data_path, ce_data_path, split_path,
                                 device='cpu', is_train=False,patches_per_case=200,
-                                background_threshold=0.25,background_value=0)
+                                background_threshold=0.6,background_value=0)
     dataset.apply_foldsplit(split_ratio=0)
 
     # get an inference sample
@@ -49,7 +49,7 @@ if __name__ == '__main__':
         print(f'CE min: {ce.min()} max: {ce.max()}')
 
         ce_equiv_ne = (ne/(2.5*3.072)) + (524/3072)
-        # ce_equiv_ne[ne==0] = 0
+        ce_equiv_ne[ne==0] = 0
         print(f'ce_equiv_ne min: {ce_equiv_ne.min()} max: {ce_equiv_ne.max()}')
         # get the latent space
         with torch.no_grad():
@@ -61,10 +61,9 @@ if __name__ == '__main__':
         abs_diff_ce = torch.abs(latent_nc_from_ce - latent_ce).mean()
 
         loss_func = LatentSimilarityLoss(l1_weight=0.2, l2_weight=1,
-                                         cce_weight=0, cos_weight=0,
-                                         var_loss_weight=0, cov_loss_weight=0,
-                                         clip_loss_weight=0,
-                                         out_dim=2).cpu()
+                                         cce_weight=0, cos_weight=1,
+                                         var_loss_weight=0, cov_loss_weight=0.2,
+                                         clip_loss_weight=0).cpu()
 
         sum_loss_ce += loss_func(latent_ce.unsqueeze(0).reshape(1,-1), latent_nc_from_ce.unsqueeze(0).reshape(1,-1)).item()
         sum_loss_converted += loss_func(latent_ce.unsqueeze(0).reshape(1,-1), latent_converted.unsqueeze(0).reshape(1,-1)).item()
@@ -77,7 +76,7 @@ if __name__ == '__main__':
         # top row is the ce image and the nc image
         # middle row is the ce latent space and the nc latent space
         # bottom row is the nc latent space from the ce model and the difference between the ce and nc latent spaces
-        if count %499 == 0 and count > 0:
+        if (count+1) %5000 == 0 and count > 0:
             plt.switch_backend('TkAgg')
             fig, axs = plt.subplots(3, 2, figsize=(15, 15))
             # set location of each figure to the same point on the monitor
