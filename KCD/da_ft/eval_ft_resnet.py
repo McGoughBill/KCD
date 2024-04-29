@@ -22,6 +22,7 @@ for subdir in splits:
 
 # group and average where modeltype and preprocessing are the same
 df = pd.DataFrame(combined_res)
+print(df.head())
 df = df.groupby(['modeltype','preprocessing']).mean().reset_index()
 df.to_csv(os.path.join(home,'combined_results.csv'),index=False)
 
