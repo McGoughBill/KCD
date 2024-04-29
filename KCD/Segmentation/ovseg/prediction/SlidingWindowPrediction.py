@@ -8,9 +8,11 @@ class SlidingWindowPrediction(object):
 
     def __init__(self, network, patch_size, batch_size=1, overlap=0.5, fp32=False,
                  patch_weight_type='gaussian', sigma_gaussian_weight=1/8, linear_min=0.1,
-                 mode='flip'):
-
-        self.dev = 'cuda' if torch.cuda.is_available() else 'cpu'
+                 mode='flip',xpu=False):
+        if xpu:
+            self.dev = 'xpu'
+        else:
+            self.dev = 'cuda' if torch.cuda.is_available() else 'cpu'
         self.network = network.to(self.dev)
         self.batch_size = batch_size
         self.overlap = overlap
