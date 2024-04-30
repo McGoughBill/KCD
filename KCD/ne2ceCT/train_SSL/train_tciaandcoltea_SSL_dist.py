@@ -122,7 +122,7 @@ def main_worker(gpu,args):
     dataset = CrossPhaseDataset(dataset_ne_path, dataset_ce_path,
                                 home_path,
                                 device='cuda',
-                                is_train=True, patches_per_case=40, patch_size=64)
+                                is_train=True, patches_per_case=40, patch_size=50)
     if args.rank == 0:
         print(dataset.cases)
 

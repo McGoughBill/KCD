@@ -81,8 +81,8 @@ def Segmentation_Preparation_AbdAtlas(home, seg_spacing=np.array([4,4,4]),
                                                   apply_windowing=True,
                                                   target_spacing=seg_spacing,
                                                   pooling_stride=None,
-                                                  scaling=[60, 60],
-                                                  window=[-120, 240],
+                                                  scaling=[100, 0],
+                                                  window=[-200,200],
                                                   lb_classes=None,
                                                   reduce_lb_to_single_class=False,
                                                   lb_min_vol=None,
@@ -97,10 +97,10 @@ def Segmentation_Preparation_AbdAtlas(home, seg_spacing=np.array([4,4,4]),
     print("")
 
     if is_cect:
-        dst = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/preprocessed/tciaandcoltea_cect/{}mm_AA/images'.format(seg_spacing[0])
+        dst = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/preprocessed/tciaandcoltea_cect/{}mm_AA_ISBI/images'.format(seg_spacing[0])
         src = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/preprocessed/{}/{}/images'.format(data_name, preprocessed_name)
     else:
-        dst = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/preprocessed/tciaandcoltea_ncct/{}mm_AA/images'.format(seg_spacing[0])
+        dst = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/preprocessed/tciaandcoltea_ncct/{}mm_AA_ISBI/images'.format(seg_spacing[0])
         src = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/preprocessed/{}/{}/images'.format(data_name,
                                                                                                     preprocessed_name)
     if not os.path.exists(dst):
@@ -142,8 +142,8 @@ def Segmentation_Preparation_SSL(home, seg_spacing=np.array([4,4,4]), background
                                                   apply_windowing=True,
                                                   target_spacing=seg_spacing,
                                                   pooling_stride=None,
-                                                  window=np.array([-500, 500]),
-                                                  scaling=np.array([400, -500]),
+                                                  scaling=[100, 0],
+                                                  window=[-200,200],
                                                   lb_classes=None,
                                                   reduce_lb_to_single_class=False,
                                                   lb_min_vol=None,
@@ -159,7 +159,7 @@ def Segmentation_Preparation_SSL(home, seg_spacing=np.array([4,4,4]), background
 
     #copy all data from SSL_1 folder to PATH below
     if not is_cect:
-        dst = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/preprocessed/tciaandcoltea_ncct/1mm/images'
+        dst = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/preprocessed/tciaandcoltea_ncct/{}mm_ISBI/images'.format(seg_spacing[0])
         src = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/preprocessed/{}/{}/images'.format(data_name, preprocessed_name)
 
         import shutil
@@ -176,29 +176,29 @@ if __name__ == "__main__":
     #                          data_name='abdominal_tcia_cect',preprocessed_name='SSL_1_cect', is_cect=True)
 
     Segmentation_Preparation_AbdAtlas(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([4,4,4]),
-                             data_name='abdominal_tcia_ncct',preprocessed_name='tcia_AA_4_ncct', is_cect=False)
+                             data_name='abdominal_tcia_ncct',preprocessed_name='tcia_AA_4_ncct_ISBI', is_cect=False)
 
     Segmentation_Preparation_AbdAtlas(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([4,4,4]),
-                             data_name='abdominal_tcia_cect',preprocessed_name='tcia_AA_4_cect', is_cect=True)
+                             data_name='abdominal_tcia_cect',preprocessed_name='tcia_AA_4_cect_ISBI', is_cect=True)
 
     Segmentation_Preparation_AbdAtlas(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([4,4,4]),
-                             data_name='coltea_art',preprocessed_name='coltea_AA_4', is_cect=True)
+                             data_name='coltea_art',preprocessed_name='coltea_AA_4_ISBI', is_cect=True)
 
     Segmentation_Preparation_AbdAtlas(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([4,4,4]),
-                             data_name='coltea_nat',preprocessed_name='coltea_AA_4', is_cect=False)
+                             data_name='coltea_nat',preprocessed_name='coltea_AA_4_ISBI', is_cect=False)
 
 
     Segmentation_Preparation_AbdAtlas(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([2,2,2]),
-                             data_name='abdominal_tcia_ncct',preprocessed_name='tcia_AA_2_ncct', is_cect=False)
+                             data_name='abdominal_tcia_ncct',preprocessed_name='tcia_AA_2_ncct_ISBI', is_cect=False)
 
     Segmentation_Preparation_AbdAtlas(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([2,2,2]),
-                             data_name='abdominal_tcia_cect',preprocessed_name='tcia_AA_2_cect', is_cect=True)
+                             data_name='abdominal_tcia_cect',preprocessed_name='tcia_AA_2_cect_ISBI', is_cect=True)
 
     Segmentation_Preparation_AbdAtlas(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([2,2,2]),
-                             data_name='coltea_art',preprocessed_name='coltea_AA_2', is_cect=True)
+                             data_name='coltea_art',preprocessed_name='coltea_AA_2_ISBI', is_cect=True)
 
     Segmentation_Preparation_AbdAtlas(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([2,2,2]),
-                             data_name='coltea_nat',preprocessed_name='coltea_AA_2', is_cect=False)
+                             data_name='coltea_nat',preprocessed_name='coltea_AA_2_ISBI', is_cect=False)
 
     # Segmentation_Preparation_SSL(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([1,1,1]),
     #                          data_name='coltea_art',preprocessed_name='SSL_1', is_cect=True)
