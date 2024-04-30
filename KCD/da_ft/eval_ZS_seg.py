@@ -43,7 +43,7 @@ def eval_ZS_seg(pred, gt, num_classes):
     return Dice, Sensitivity, Specificity
 
 NCCT_path = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/predictions_npy/coreg_ncct/4,4,4mm_AA_False'
-CECT_path = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/predictions_npy/coreg_cect/4,4,4mm_AA_True'
+CECT_path = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/predictions_npy/coreg_ncct/4,4,4mm_AA_True'
 labels_path = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/preprocessed/coreg_ncct/4mm_binary/labels'
 save_path = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/predictions_npy/coreg_ncct'
 
