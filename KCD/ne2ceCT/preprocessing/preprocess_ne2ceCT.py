@@ -169,42 +169,54 @@ def Segmentation_Preparation_SSL(home, seg_spacing=np.array([4,4,4]), background
 
 
 if __name__ == "__main__":
-    # Segmentation_Preparation_SSL(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([1,1,1]),
-    #                          data_name='abdominal_tcia_ncct',preprocessed_name='SSL_1_ncct', is_cect=False)
+    Segmentation_Preparation_SSL(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([1,1,1]),
+                             data_name='abdominal_tcia_ncct',preprocessed_name='SSL_1_ISBI', is_cect=False)
+
+    Segmentation_Preparation_SSL(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([1,1,1]),
+                             data_name='abdominal_tcia_cect',preprocessed_name='SSL_1_ISBI', is_cect=True)
+
+    Segmentation_Preparation_SSL(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([2,2,2]),
+                             data_name='abdominal_tcia_ncct',preprocessed_name='SSL_2_ISBI', is_cect=False)
+
+    Segmentation_Preparation_SSL(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([2,2,2]),
+                             data_name='abdominal_tcia_cect',preprocessed_name='SSL_2_ISBI', is_cect=True)
+
+    # Segmentation_Preparation_AbdAtlas(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([4,4,4]),
+    #                          data_name='abdominal_tcia_ncct',preprocessed_name='tcia_AA_4_ncct_ISBI', is_cect=False)
     #
-    # Segmentation_Preparation_SSL(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([1,1,1]),
-    #                          data_name='abdominal_tcia_cect',preprocessed_name='SSL_1_cect', is_cect=True)
-
-    Segmentation_Preparation_AbdAtlas(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([4,4,4]),
-                             data_name='abdominal_tcia_ncct',preprocessed_name='tcia_AA_4_ncct_ISBI', is_cect=False)
-
-    Segmentation_Preparation_AbdAtlas(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([4,4,4]),
-                             data_name='abdominal_tcia_cect',preprocessed_name='tcia_AA_4_cect_ISBI', is_cect=True)
-
-    Segmentation_Preparation_AbdAtlas(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([4,4,4]),
-                             data_name='coltea_art',preprocessed_name='coltea_AA_4_ISBI', is_cect=True)
-
-    Segmentation_Preparation_AbdAtlas(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([4,4,4]),
-                             data_name='coltea_nat',preprocessed_name='coltea_AA_4_ISBI', is_cect=False)
-
-
-    Segmentation_Preparation_AbdAtlas(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([2,2,2]),
-                             data_name='abdominal_tcia_ncct',preprocessed_name='tcia_AA_2_ncct_ISBI', is_cect=False)
-
-    Segmentation_Preparation_AbdAtlas(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([2,2,2]),
-                             data_name='abdominal_tcia_cect',preprocessed_name='tcia_AA_2_cect_ISBI', is_cect=True)
-
-    Segmentation_Preparation_AbdAtlas(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([2,2,2]),
-                             data_name='coltea_art',preprocessed_name='coltea_AA_2_ISBI', is_cect=True)
-
-    Segmentation_Preparation_AbdAtlas(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([2,2,2]),
-                             data_name='coltea_nat',preprocessed_name='coltea_AA_2_ISBI', is_cect=False)
-
-    # Segmentation_Preparation_SSL(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([1,1,1]),
-    #                          data_name='coltea_art',preprocessed_name='SSL_1', is_cect=True)
+    # Segmentation_Preparation_AbdAtlas(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([4,4,4]),
+    #                          data_name='abdominal_tcia_cect',preprocessed_name='tcia_AA_4_cect_ISBI', is_cect=True)
     #
-    # Segmentation_Preparation_SSL(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([1,1,1]),
-    #                          data_name='coltea_nat',preprocessed_name='SSL_1', is_cect=False)
+    # Segmentation_Preparation_AbdAtlas(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([4,4,4]),
+    #                          data_name='coltea_art',preprocessed_name='coltea_AA_4_ISBI', is_cect=True)
+    #
+    # Segmentation_Preparation_AbdAtlas(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([4,4,4]),
+    #                          data_name='coltea_nat',preprocessed_name='coltea_AA_4_ISBI', is_cect=False)
+    #
+    #
+    # Segmentation_Preparation_AbdAtlas(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([2,2,2]),
+    #                          data_name='abdominal_tcia_ncct',preprocessed_name='tcia_AA_2_ncct_ISBI', is_cect=False)
+    #
+    # Segmentation_Preparation_AbdAtlas(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([2,2,2]),
+    #                          data_name='abdominal_tcia_cect',preprocessed_name='tcia_AA_2_cect_ISBI', is_cect=True)
+    #
+    # Segmentation_Preparation_AbdAtlas(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([2,2,2]),
+    #                          data_name='coltea_art',preprocessed_name='coltea_AA_2_ISBI', is_cect=True)
+    #
+    # Segmentation_Preparation_AbdAtlas(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([2,2,2]),
+    #                          data_name='coltea_nat',preprocessed_name='coltea_AA_2_ISBI', is_cect=False)
+
+    Segmentation_Preparation_SSL(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([1,1,1]),
+                             data_name='coltea_art',preprocessed_name='SSL_1_ISBI', is_cect=True)
+
+    Segmentation_Preparation_SSL(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([1,1,1]),
+                             data_name='coltea_nat',preprocessed_name='SSL_1_ISBI', is_cect=False)
+
+    Segmentation_Preparation_SSL(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([2,2,2]),
+                             data_name='coltea_art',preprocessed_name='SSL_2_ISBI', is_cect=True)
+
+    Segmentation_Preparation_SSL(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([2,2,2]),
+                             data_name='coltea_nat',preprocessed_name='SSL_2_ISBI', is_cect=False)
 
     # Segmentation_Preparation(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([2,2,2]),
     #                          data_name='add_cect',preprocessed_name='add_cect_2', is_cect=True)
