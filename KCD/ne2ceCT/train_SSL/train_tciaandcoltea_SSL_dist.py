@@ -137,10 +137,9 @@ def main_worker(gpu,args):
 
     optimizer = torch.optim.Adam(model_S.parameters(), lr=lr_max / 20, betas=(0.95, 0.9), eps=1e-08,
                                  weight_decay=0.000001)
+
     scheduler = LinearWarmupExponentialDecayScheduler(optimizer, warmup_epochs=500, lr_max=lr_max,
                                                       decay_rate=loss_gamma)
-
-    # scheduler = lr_scheduler.ExponentialLR(optimizer, gamma=loss_gamma)
 
     loss_func = LatentSimilarityLoss(l1_weight=l1_weight, l2_weight=l2_weight,
                                               cce_weight=cce_weight, cos_weight=cos_weight,
