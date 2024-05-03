@@ -3,7 +3,6 @@
 [Link to paper](https://arxiv.org/abs/2312.05258)
 
 
-## Future ideas ##
 
 For segmentation-based detection:
 
