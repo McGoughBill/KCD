@@ -69,7 +69,7 @@ if __name__ == '__main__':
         # top row is the ce image and the nc image
         # middle row is the ce latent space and the nc latent space
         # bottom row is the nc latent space from the ce model and the difference between the ce and nc latent spaces
-        if (count+1) %50 == 0 and count > 0:
+        if (count+1) %1000 == 0 and count > 0:
             plt.switch_backend('TkAgg')
             fig, axs = plt.subplots(3, 2, figsize=(15, 15))
             # set location of each figure to the same point on the monitor
@@ -81,8 +81,8 @@ if __name__ == '__main__':
             axs[0, 1].imshow(ce[0, 0, 32, :, :].T.cpu().detach().numpy(), cmap='gray', vmin=0, vmax=1)
             axs[0, 1].set_title('CE')
             axs[0, 1].axis('off')
-            axs[1, 0].imshow(latent_mse,vmin=-1, vmax=2.5)
-            axs[1, 0].set_title('(a) Domain-Adapted MSE Latent Space')
+            axs[1, 0].imshow(latent_cos,vmin=-1, vmax=2.5)
+            axs[1, 0].set_title('(a) Domain-Adapted Cos Latent Space')
             axs[1, 0].axis('off')
             axs[1, 1].imshow(latent_ce,vmin=-1, vmax=2.5)
             axs[1, 1].set_title('(b) Original Model Latent Space')
@@ -90,7 +90,7 @@ if __name__ == '__main__':
             axs[2, 0].imshow(latent_nc_from_ce,vmin=-1, vmax=2.5)
             axs[2, 0].set_title('(c) Original Model Latent Space using NC input')
             axs[2, 0].axis('off')
-            axs[2, 1].imshow(torch.abs(latent_ce - latent_mse),vmin=0, vmax=2)
+            axs[2, 1].imshow(torch.abs(latent_ce - latent_cos),vmin=0, vmax=2)
             axs[2, 1].set_title('(d) Difference between Latent Spaces in (a) and (b)')
             axs[2, 1].axis('off')
 
