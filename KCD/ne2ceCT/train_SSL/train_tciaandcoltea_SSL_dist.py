@@ -42,6 +42,7 @@ def parse_option():
     parser.add_argument('--out_dim', default=2, type=int, help='output dimension')
     parser.add_argument('--spacing', default=1, type=int, help='spacing')
     parser.add_argument('--dist-url', default='tcp://127.0.0.1:23456', type=str, help='distributed url')
+    parser.add_argument('--background_threshold', default=0.5, type=float, help='background threshold')
 
     args = parser.parse_args()
     print('args parsed')
@@ -92,6 +93,7 @@ def main_worker(gpu,args):
     workers = args.workers
     world_size = args.world_size
     clip_loss_weight = args.clip_loss_weight
+    background_threshold = args.background_threshold
 
     dataset_ne_path = os.path.join(os.environ['OV_DATA_BASE'], 'preprocessed/tciaandcoltea_ncct/1mm_ISBI/')
     dataset_ce_path = os.path.join(os.environ['OV_DATA_BASE'], 'preprocessed/tciaandcoltea_cect/1mm_NMI/')
@@ -99,7 +101,7 @@ def main_worker(gpu,args):
     assert os.path.exists(dataset_ne_path) and os.path.exists(dataset_ce_path)
     home_path = os.path.join(os.environ['OV_DATA_BASE'], 'ne2ceCT', 'resnet_tciaandcoltea_{}_cancer'.format(spacing))
     ne2ceCT_path = os.path.join(home_path,
-                                'l1-{}_l2-{}_var{}_cov{}_cce{}_cos{}_clip{}_{}lr_{}lg_{}bs_{}ep_{}gpus'.format(l1_weight,
+                                'l1-{}_l2-{}_var{}_cov{}_cce{}_cos{}_clip{}_{}lr_{}lg_{}bs_{}ep_{}gpus_{}bgt'.format(l1_weight,
                                                                                    l2_weight,
                                                                                    var_loss_weight,
                                                                                    cov_loss_weight,
@@ -110,7 +112,8 @@ def main_worker(gpu,args):
                                                                                    loss_gamma,
                                                                                    batch_size,
                                                                                    epochs,
-                                                                                   world_size))
+                                                                                   world_size,
+                                                                                   background_threshold))
 
     log_path = os.path.join(ne2ceCT_path, 'logs.txt')
     if args.rank == 0:
@@ -123,7 +126,7 @@ def main_worker(gpu,args):
                                 home_path,
                                 device='cuda',
                                 is_train=True, patches_per_case=40, patch_size=50,
-                                background_threshold=0.25,background_value = 0.1)
+                                background_threshold=background_threshold,background_value = 0.1)
     if args.rank == 0:
         print(dataset.cases)
 
