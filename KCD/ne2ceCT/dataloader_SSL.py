@@ -108,7 +108,7 @@ class CrossPhaseDataset(Dataset):
     def reset_patch_count(self):
         self.case_patch_count = {case: 0 for case in self.cases}
 
-    def _get_random_patch_indices(self, image1,image2, patch_size, background_threshold=0.25):
+    def _get_random_patch_indices(self, nc,ce, patch_size, background_threshold=0.25):
         '''
 
         Parameters
@@ -125,9 +125,9 @@ class CrossPhaseDataset(Dataset):
         # delete all training data where image1 and image2 are not the same size within 3 pixels,
         # or there is inconsistent slice interval (n=10)
         for dim in range(1,4):
-            assert (image1.shape[dim] - image2.shape[dim])<4
+            assert (nc.shape[dim] - ce.shape[dim])<4
         # get the shape of the image
-        shape = [min(image1.shape[dim], image2.shape[dim]) for dim in range(4)]
+        shape = [min(nc.shape[dim], ce.shape[dim]) for dim in range(4)]
         # pad the image to the size of the patch if the image is smaller than the patch - use torch padding
         padding = []
         for dim in range(1,4):
@@ -137,18 +137,18 @@ class CrossPhaseDataset(Dataset):
             else:
                 padding = padding +[0, 0]
 
-        image1 = torch.nn.functional.pad(image1, tuple(padding[::-1]),'constant',0)
-        image2 = torch.nn.functional.pad(image2, tuple(padding[::-1]),'constant',0)
+        nc = torch.nn.functional.pad(nc, tuple(padding[::-1]),'constant',0)
+        ce = torch.nn.functional.pad(ce, tuple(padding[::-1]),'constant',0)
 
         # get the random index to take the patch from. if dimensions are smaller than the patch size, make the index 0
         zxy = [np.random.randint(0, shape[dim] - patch_size) if shape[dim] > patch_size else 0 for dim in range(1,4) ]
 
         # if zxy returns a patch with over background thresh% of the patch being background, try again
-        while torch.sum(image1[0, zxy[0]:zxy[0]+patch_size, zxy[1]:zxy[1]+patch_size, zxy[2]:zxy[2]+patch_size]>(self.background_value+0.01)) < (patch_size**3)*self.background_threshold:
+        while torch.sum(ce[0, zxy[0]:zxy[0]+patch_size, zxy[1]:zxy[1]+patch_size, zxy[2]:zxy[2]+patch_size]>(self.background_value+0.01)) < (patch_size**3)*self.background_threshold:
             zxy = [np.random.randint(0, shape[dim] - patch_size) if shape[dim] > patch_size else 0 for dim in range(1,4) ]
 
 
-        return image1,image2,tuple(zxy)
+        return nc,ce,tuple(zxy)
 
     def __getitem__(self, idx: int):
         assert (self.is_foldsplit)

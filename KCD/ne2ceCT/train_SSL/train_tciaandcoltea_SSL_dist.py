@@ -93,8 +93,8 @@ def main_worker(gpu,args):
     world_size = args.world_size
     clip_loss_weight = args.clip_loss_weight
 
-    dataset_ne_path = os.path.join(os.environ['OV_DATA_BASE'], 'preprocessed/tciaandcoltea_ncct/1mm/')
-    dataset_ce_path = os.path.join(os.environ['OV_DATA_BASE'], 'preprocessed/tciaandcoltea_cect/1mm/')
+    dataset_ne_path = os.path.join(os.environ['OV_DATA_BASE'], 'preprocessed/tciaandcoltea_ncct/1mm_ISBI/')
+    dataset_ce_path = os.path.join(os.environ['OV_DATA_BASE'], 'preprocessed/tciaandcoltea_cect/1mm_NMI/')
 
     assert os.path.exists(dataset_ne_path) and os.path.exists(dataset_ce_path)
     home_path = os.path.join(os.environ['OV_DATA_BASE'], 'ne2ceCT', 'resnet_tciaandcoltea_{}_cancer'.format(spacing))
@@ -122,7 +122,8 @@ def main_worker(gpu,args):
     dataset = CrossPhaseDataset(dataset_ne_path, dataset_ce_path,
                                 home_path,
                                 device='cuda',
-                                is_train=True, patches_per_case=40, patch_size=50)
+                                is_train=True, patches_per_case=40, patch_size=50,
+                                background_threshold=0.25,background_value = 0.1)
     if args.rank == 0:
         print(dataset.cases)
 
