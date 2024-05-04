@@ -10,11 +10,11 @@ import sys
 
 
 data_name = 'kits23_add_nooverlap'
-spacing = 2
+spacing = 1.0
 fold = int(sys.argv[1])
 
-preprocessed_name = '2mm_binary_canceronly'
-model_name = '7,3x3x3,32_justcancer_trainontest_massive_1000'
+preprocessed_name = '1mm_canceronly_customPP'
+model_name = '7,3x3x3,32_justcancer_trainontest_massive_1000_quicker'
 
 vfs = [fold]
 
@@ -58,7 +58,8 @@ model_params['training']['opt_params'] = {'lr': lr,
 model_params['training']['lr_params'] = {'n_warmup_epochs': 15, 'lr_max': 0.004}
 model_params['data']['trn_dl_params']['epoch_len']=1000
 model_params['data']['trn_dl_params']['padded_patch_size']=[2*patch_size[0]]*3
-model_params['data']['val_dl_params']['padded_patch_size']=[2*patch_size[0]]*3
+model_params['data']['val_dl_params']['num_workers']=16
+model_params['data']['trn_dl_params']['epoch_len']=1000
 model_params['training']['lr_schedule'] = 'lin_ascent_log_decay'
 model_params['training']['lr_exponent'] = 3
 model_params['data']['trn_dl_params']['batch_size']=16

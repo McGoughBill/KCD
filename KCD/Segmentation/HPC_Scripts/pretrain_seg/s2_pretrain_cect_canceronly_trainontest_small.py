@@ -13,7 +13,7 @@ data_name = 'kits23_add_nooverlap_small'
 spacing = 2
 fold = int(sys.argv[1])
 
-preprocessed_name = '2mm_binary_canceronly'
+preprocessed_name = '2mm_canceronly_customPP'
 model_name = '6,3x3x3,32_justcancer_trainontest'
 
 vfs = [fold]

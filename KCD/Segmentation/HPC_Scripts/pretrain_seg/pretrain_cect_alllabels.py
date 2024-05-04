@@ -11,11 +11,11 @@ import sys
 
 
 data_name = 'kits23_nooverlap'
-spacing = 2
+spacing = 4
 fold = int(sys.argv[1])
 
-preprocessed_name = '{}mm_alllabel'.format(spacing)
-model_name = 'alllabel_long'
+preprocessed_name = '{}mm_binary_customPP'.format(spacing)
+model_name = '6'
 
 vfs = [fold]
 
@@ -27,7 +27,7 @@ patch_size = [64,64,64]
 #                                           = ((((kernel_dimension+1)//2)^depth)/2)*target_spacing/1000
 z_to_xy_ratio = 1
 larger_res_encoder = True
-n_fg_classes = 3
+n_fg_classes = 1
     
 
 
@@ -52,12 +52,12 @@ del model_params['training']['loss_params']
 lr=0.0001
 model_params['data']['folders'] = ['images', 'labels']
 model_params['data']['keys'] = ['image', 'label']
-model_params['training']['num_epochs'] = 500
+model_params['training']['num_epochs'] = 300
 model_params['training']['opt_name'] = 'ADAM'
 model_params['training']['opt_params'] = {'lr': lr,
                                             'betas': (0.95, 0.9),
                                             'eps': 1e-08}
-model_params['training']['lr_params'] = {'n_warmup_epochs': 15, 'lr_max': 0.002}
+model_params['training']['lr_params'] = {'n_warmup_epochs': 15, 'lr_max': 0.004}
 model_params['data']['trn_dl_params']['epoch_len']=1000
 model_params['data']['trn_dl_params']['padded_patch_size']=[2*patch_size[0]]*3
 model_params['data']['val_dl_params']['padded_patch_size']=[2*patch_size[0]]*3

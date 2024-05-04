@@ -5,7 +5,7 @@ import sys
 data_name = 'coreg_ncct'
 spacing = int(sys.argv[1])
 
-preprocessed_name = '{}mm_binary'.format(spacing)
+preprocessed_name = '{}mm_binary_customPP'.format(spacing)
 
 lb_classes = [1,2,3]
 
@@ -16,8 +16,8 @@ prep = SegmentationPreprocessing(apply_resizing=True,
                                     apply_windowing=True,
                                     lb_classes=lb_classes,
                                     target_spacing=target_spacing,
-                                    scaling = [60, 60],
-                                    window = [-120,240],
+                                    scaling = [100, 0],
+                                    window = [-200,200],
                                     reduce_lb_to_single_class = True,
                                     pooling_stride=None)
 

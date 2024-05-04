@@ -8,18 +8,20 @@ import argparse
 import torch.distributed as dist
 from datetime import timedelta
 
-from KCD.ne2ceCT.dataloader import CrossPhaseDataset
-from KCD.ne2ceCT.loss_function import PyramidalLatentSimilarityLoss
-from KCD.Segmentation.Inference import infer_network
+from KCD.ne2ceCT.dataloader_seg import CrossPhaseDataset
+from KCD.ne2ceCT.loss_function import LatentSimilarityLoss_resnet as LatentSimilarityLoss
 from KCD.ne2ceCT.lr_scheduler import LinearWarmupExponentialDecayScheduler
 import matplotlib.pyplot as plt
 import torch.optim.lr_scheduler as lr_scheduler
 import sys
+from fmcib.models import fmcib_model
+import gc
 
 def get_3d_featureoutput_unet(in_channels, out_channels, n_stages,filters=32, filters_max=1024):
     kernel_sizes = n_stages * [(3, 3, 3)]
 
     return infer_network.UNet_featureoutput(in_channels, out_channels, kernel_sizes, False, filters_max=filters_max, filters=filters, )
+
 
 def parse_option():
     parser = argparse.ArgumentParser('ne2ceCT pretraining script', add_help=False)
@@ -31,6 +33,7 @@ def parse_option():
     parser.add_argument('--cos_weight', type=float, default=0, help='cosine similarity weight')
     parser.add_argument('--var_loss_weight', type=float, default=0.1, help='variance loss weight')
     parser.add_argument('--cov_loss_weight', type=float, default=0.1, help='covariance loss weight')
+    parser.add_argument('--clip_loss_weight', type=float, default=0, help='clip loss weight')
     parser.add_argument('--batch_size', type=int, default=4, help='batch size')
     parser.add_argument('--lr_max', type=float, default=0.00005, help='max learning rate')
     parser.add_argument('--loss_gamma', type=float, default=0.99999, help='gamma for learning rate scheduler')
@@ -42,8 +45,9 @@ def parse_option():
     parser.add_argument('--workers', default=16, type=int, help='number of workers')
     parser.add_argument('--ngpus_per_node', default=4, type=int, help='number of gpus per node')
     parser.add_argument('--out_dim', default=2, type=int, help='output dimension')
-    parser.add_argument('--spacing', default=2, type=int, help='spacing')
+    parser.add_argument('--spacing', default=1, type=int, help='spacing')
     parser.add_argument('--dist-url', default='tcp://127.0.0.1:23456', type=str, help='distributed url')
+    parser.add_argument('--segmentation_threshold', default=400, type=float, help='background threshold')
 
     args = parser.parse_args()
     print('args parsed')
@@ -93,22 +97,30 @@ def main_worker(gpu,args):
     spacing = args.spacing
     workers = args.workers
     world_size = args.world_size
+    clip_loss_weight = args.clip_loss_weight
+    segmentation_threshold = args.segmentation_threshold
 
-    dataset_ne_path = os.path.join(os.environ['OV_DATA_BASE'], 'preprocessed/cropped_tcia_ncct/tcia_cmd_2_ncct/')
-    dataset_ce_path = os.path.join(os.environ['OV_DATA_BASE'], 'preprocessed/cropped_tcia_cect/tcia_cmd_2_cect/')
+    dataset_ne_path = os.path.join(os.environ['OV_DATA_BASE'], 'preprocessed/tcia_ncct/2mm_canceronly_customPP/')
+    dataset_ce_path = os.path.join(os.environ['OV_DATA_BASE'], 'preprocessed/tcia_cect/2mm_canceronly_customPP/')
+    seg_ce_path = os.path.join(os.environ['OV_DATA_BASE'], 'predictions_npy/tcia_cect/[4 4 4]mm_to2mm_flipped')
 
     assert os.path.exists(dataset_ne_path) and os.path.exists(dataset_ce_path)
-    ne2ceCT_path = os.path.join(os.environ['OV_DATA_BASE'], 'ne2ceCT', 'cropped_tcia_{}_cancer'.format(spacing),
-                                'l1{}_l2{}_var{}_cov{}_cce{}_{}lr_{}lg_{}bs_{}ep_{}gpus'.format(l1_weight,
+    home_path = os.path.join(os.environ['OV_DATA_BASE'], 'ne2ceCT', 'kidney_{}_cancer'.format(spacing))
+    ne2ceCT_path = os.path.join(home_path,
+                                'l1-{}_l2-{}_var{}_cov{}_cce{}_cos{}_clip{}_{}lr_{}lg_{}bs_{}ep_{}gpus_{}segt'.format(l1_weight,
                                                                                    l2_weight,
                                                                                    var_loss_weight,
                                                                                    cov_loss_weight,
                                                                                    cce_weight,
+                                                                                   cos_weight,
+                                                                                   clip_loss_weight,
                                                                                    lr_max,
                                                                                    loss_gamma,
                                                                                    batch_size,
                                                                                    epochs,
-                                                                                   world_size))
+                                                                                   world_size,
+                                                                                   background_threshold))
+
     log_path = os.path.join(ne2ceCT_path, 'logs.txt')
     if args.rank == 0:
         if not os.path.exists(ne2ceCT_path):
@@ -116,35 +128,36 @@ def main_worker(gpu,args):
         if os.path.exists(log_path):
             os.remove(log_path)
 
-    dataset = CrossPhaseDataset(os.path.join(dataset_ne_path, 'images'), os.path.join(dataset_ce_path, 'images'),
+    dataset = CrossPhaseDataset(dataset_ne_path, dataset_ce_path,
+                                home_path, seg_ce_path,
                                 device='cuda',
-                                is_train=True, patches_per_case=40, patch_size=64)
+                                is_train=True, patches_per_case=40, patch_size=64,
+                                segmentation_threshold=segmentation_threshold)
     if args.rank == 0:
         print(dataset.cases)
 
-    dataset.apply_foldsplit(split_ratio=0.9)
+    dataset.apply_foldsplit()
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers=workers)
 
+    mod_path = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/trained_models/kits23_add_nooverlap/2mm_binary_canceronly/7,3x3x3,32_justcancer_trainontest_massive_1000/fold_4/network_weights'
     model_T = get_3d_featureoutput_unet(1, out_dim, 6, filters=32, filters_max=1024).cuda(args.gpu)
-    model_T.load_state_dict(torch.load(
-        '/bask/projects/p/phwq4930-renal-canc/data/seg_data/trained_models/kits23_add_nooverlap_small/2mm_binary_canceronly/6,3x3x3,32_justcancer_trainontest/fold_0/network_weights'))
+    model_T.load_state_dict(torch.load(mod_path))
     model_S = get_3d_featureoutput_unet(1, out_dim, 6, filters=32, filters_max=1024).cuda(args.gpu)
-    model_S.load_state_dict(torch.load(
-        '/bask/projects/p/phwq4930-renal-canc/data/seg_data/trained_models/kits23_add_nooverlap_small/2mm_binary_canceronly/6,3x3x3,32_justcancer_trainontest/fold_0/network_weights'))
+    model_S.load_state_dict(torch.load(mod_path))
 
     model_T.eval()
     model_S.train()
 
     optimizer = torch.optim.Adam(model_S.parameters(), lr=lr_max / 20, betas=(0.95, 0.9), eps=1e-08,
                                  weight_decay=0.000001)
+
     scheduler = LinearWarmupExponentialDecayScheduler(optimizer, warmup_epochs=500, lr_max=lr_max,
                                                       decay_rate=loss_gamma)
 
-    # scheduler = lr_scheduler.ExponentialLR(optimizer, gamma=loss_gamma)
-
-    loss_func = PyramidalLatentSimilarityLoss(l1_weight=l1_weight, l2_weight=l2_weight,
+    loss_func = LatentSimilarityLoss(l1_weight=l1_weight, l2_weight=l2_weight,
                                               cce_weight=cce_weight, cos_weight=cos_weight,
                                               var_loss_weight=var_loss_weight, cov_loss_weight=cov_loss_weight,
+                                                clip_loss_weight=clip_loss_weight,
                                               out_dim=out_dim).cuda(args.gpu)
     losses = []
     weight = 0.95
@@ -159,10 +172,11 @@ def main_worker(gpu,args):
             ne = ne.cuda(args.gpu)
             ce = ce.cuda(args.gpu)
             with torch.no_grad():
-                T = model_T(ce)
-            S = model_S(ne)
-            loss = loss_func(T, S)
-            dist.all_reduce(loss, op=dist.ReduceOp.SUM)
+                T_features = model_T(ce)
+            S_features = model_S(ne)
+            loss = loss_func(T_features, S_features)
+            sys.stdout.flush()
+            dist.all_reduce(loss, op=dist.ReduceOp.AVG)
 
             # backward
             loss.backward()
@@ -186,39 +200,48 @@ def main_worker(gpu,args):
             with open(log_path, 'a') as f:
                 f.write(train_string)
 
+        gc.collect()
+        #clear cuda cache
+        torch.cuda.empty_cache()
+
         dataloader.dataset.is_train = False
-        with torch.no_grad():
-            model_S.eval()
-            for i, (ne, ce) in enumerate(dataloader):
-                ne = ne.cuda(args.gpu)
-                ce = ce.cuda(args.gpu)
-                T = model_T(ce)
-                S = model_S(ne)
-                loss = loss_func(T, S)
-                if running_val_loss is None:
-                    running_val_loss = loss.item()
-                else:
-                    running_val_loss = weight * running_val_loss + (1 - weight) * loss.item()
         if args.rank == 0:
+            with torch.no_grad():
+                model_S.eval()
+                for i, (ne, ce) in enumerate(dataloader):
+                    ne = ne.cuda(args.gpu)
+                    ce = ce.cuda(args.gpu)
+                    T = model_T(ce)
+                    S = model_S(ne)
+                    loss = loss_func(T, S)
+                    if running_val_loss is None:
+                        running_val_loss = loss.item()
+                    else:
+                        running_val_loss = weight * running_val_loss + (1 - weight) * loss.item()
             val_string = f'Val Loss: {running_val_loss:.4E}\n'
             with open(log_path, 'a') as f:
                 f.write(val_string)
-        dataloader.dataset.reset_patch_count()
-        if args.rank == 0:
             if running_val_loss < min_val_loss:
                 min_val_loss = running_val_loss
                 torch.save(model_S.state_dict(), os.path.join(ne2ceCT_path, 'network_weights'))
                 print('Model saved')
                 with open(log_path, 'a') as f:
                     f.write('Model saved\n')
-        if args.rank == 0:
+
             with open(log_path, 'a') as f:
                 f.write('\n')
             fig = plt.figure()
             ax = fig.add_subplot(1, 1, 1)
             ax.plot(losses)
             plt.savefig(os.path.join(ne2ceCT_path, 'losses.png'))
+
+
+        dataloader.dataset.reset_patch_count()
+        gc.collect()
+        # clear cuda cache
+        torch.cuda.empty_cache()
         dist.barrier()
+
 
 
 if __name__ == '__main__':

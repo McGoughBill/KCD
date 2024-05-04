@@ -5,19 +5,24 @@ from KCD.Segmentation.ovseg.preprocessing.SegmentationPreprocessing import Segme
 data_name = 'kits23_nooverlap'
 spacing = 4
 
-preprocessed_name = '{}mm_binary'.format(spacing)
+preprocessed_name = '{}mm_binary_customPP'.format(spacing)
 
 lb_classes = [1,2,3]
+
 target_spacing=[spacing]*3
 
-prep = SegmentationPreprocessing(apply_resizing=True, 
-                                    apply_pooling=False, 
+prep = SegmentationPreprocessing(apply_resizing=True,
+                                    apply_pooling=False,
                                     apply_windowing=True,
                                     lb_classes=lb_classes,
                                     target_spacing=target_spacing,
-                                    reduce_lb_to_single_class = True)
+                                    scaling = [100, 0],
+                                    window = [-200,300],
+                                    reduce_lb_to_single_class = True,
+                                    pooling_stride=None)
 
-prep.plan_preprocessing_raw_data(raw_data=data_name)
+prep.initialise_preprocessing()
+
 
 prep.preprocess_raw_data(raw_data=data_name,
                           preprocessed_name=preprocessed_name)
