@@ -9,13 +9,15 @@ import torch.distributed as dist
 from datetime import timedelta
 
 from KCD.ne2ceCT.dataloader_seg import CrossPhaseDataset
-from KCD.ne2ceCT.loss_function import LatentSimilarityLoss_resnet as LatentSimilarityLoss
+from KCD.ne2ceCT.loss_function_seg import PyramidalLatentSimilarityLoss as Loss
 from KCD.ne2ceCT.lr_scheduler import LinearWarmupExponentialDecayScheduler
 import matplotlib.pyplot as plt
 import torch.optim.lr_scheduler as lr_scheduler
 import sys
 from fmcib.models import fmcib_model
 import gc
+from KCD.Segmentation.Inference import infer_network
+
 
 def get_3d_featureoutput_unet(in_channels, out_channels, n_stages,filters=32, filters_max=1024):
     kernel_sizes = n_stages * [(3, 3, 3)]
@@ -47,7 +49,7 @@ def parse_option():
     parser.add_argument('--out_dim', default=2, type=int, help='output dimension')
     parser.add_argument('--spacing', default=1, type=int, help='spacing')
     parser.add_argument('--dist-url', default='tcp://127.0.0.1:23456', type=str, help='distributed url')
-    parser.add_argument('--segmentation_threshold', default=400, type=float, help='background threshold')
+    parser.add_argument('--segmentation_threshold', default=20, type=float, help='segmentation threshold')
 
     args = parser.parse_args()
     print('args parsed')
@@ -100,9 +102,9 @@ def main_worker(gpu,args):
     clip_loss_weight = args.clip_loss_weight
     segmentation_threshold = args.segmentation_threshold
 
-    dataset_ne_path = os.path.join(os.environ['OV_DATA_BASE'], 'preprocessed/tcia_ncct/2mm_canceronly_customPP/')
-    dataset_ce_path = os.path.join(os.environ['OV_DATA_BASE'], 'preprocessed/tcia_cect/2mm_canceronly_customPP/')
-    seg_ce_path = os.path.join(os.environ['OV_DATA_BASE'], 'predictions_npy/tcia_cect/[4 4 4]mm_to2mm_flipped')
+    dataset_ne_path = os.path.join(os.environ['OV_DATA_BASE'], 'preprocessed/tcia_ncct_reg/cmd_ready_2/')
+    dataset_ce_path = os.path.join(os.environ['OV_DATA_BASE'], 'preprocessed/tcia_cect/cmd_ready_2/')
+    seg_ce_path = os.path.join(os.environ['OV_DATA_BASE'], 'predictions_npy/tcia_cect/[2 2 2]mm_correctedDA')
 
     assert os.path.exists(dataset_ne_path) and os.path.exists(dataset_ce_path)
     home_path = os.path.join(os.environ['OV_DATA_BASE'], 'ne2ceCT', 'kidney_{}_cancer'.format(spacing))
@@ -119,7 +121,7 @@ def main_worker(gpu,args):
                                                                                    batch_size,
                                                                                    epochs,
                                                                                    world_size,
-                                                                                   background_threshold))
+                                                                                   segmentation_threshold))
 
     log_path = os.path.join(ne2ceCT_path, 'logs.txt')
     if args.rank == 0:
@@ -131,7 +133,7 @@ def main_worker(gpu,args):
     dataset = CrossPhaseDataset(dataset_ne_path, dataset_ce_path,
                                 home_path, seg_ce_path,
                                 device='cuda',
-                                is_train=True, patches_per_case=40, patch_size=64,
+                                is_train=True, patches_per_case=40, patch_size=128,
                                 segmentation_threshold=segmentation_threshold)
     if args.rank == 0:
         print(dataset.cases)
@@ -139,10 +141,10 @@ def main_worker(gpu,args):
     dataset.apply_foldsplit()
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers=workers)
 
-    mod_path = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/trained_models/kits23_add_nooverlap/2mm_binary_canceronly/7,3x3x3,32_justcancer_trainontest_massive_1000/fold_4/network_weights'
-    model_T = get_3d_featureoutput_unet(1, out_dim, 6, filters=32, filters_max=1024).cuda(args.gpu)
+    mod_path = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/trained_models/kits_add_nooverlap_v2/2mm_canceronly_customPP/7_tot/fold_0/network_weights'
+    model_T = get_3d_featureoutput_unet(1, out_dim, 7, filters=32, filters_max=1024).cuda(args.gpu)
     model_T.load_state_dict(torch.load(mod_path))
-    model_S = get_3d_featureoutput_unet(1, out_dim, 6, filters=32, filters_max=1024).cuda(args.gpu)
+    model_S = get_3d_featureoutput_unet(1, out_dim, 7, filters=32, filters_max=1024).cuda(args.gpu)
     model_S.load_state_dict(torch.load(mod_path))
 
     model_T.eval()
@@ -154,27 +156,30 @@ def main_worker(gpu,args):
     scheduler = LinearWarmupExponentialDecayScheduler(optimizer, warmup_epochs=500, lr_max=lr_max,
                                                       decay_rate=loss_gamma)
 
-    loss_func = LatentSimilarityLoss(l1_weight=l1_weight, l2_weight=l2_weight,
+    loss_func = Loss(l1_weight=l1_weight, l2_weight=l2_weight,
                                               cce_weight=cce_weight, cos_weight=cos_weight,
                                               var_loss_weight=var_loss_weight, cov_loss_weight=cov_loss_weight,
-                                                clip_loss_weight=clip_loss_weight,
+                                            clip_loss_weight=clip_loss_weight,
                                               out_dim=out_dim).cuda(args.gpu)
     losses = []
     weight = 0.95
     running_loss = None
     running_val_loss = None
     min_val_loss = 1e6
+    print('\nStarting training\n')
     for epoch in range(epochs):
         dataloader.dataset.is_train = True
         model_S.train()
-        for i, (ne, ce) in enumerate(dataloader):
+        for i, (ne, ce, seg) in enumerate(dataloader):
             # forward
             ne = ne.cuda(args.gpu)
             ce = ce.cuda(args.gpu)
+            seg = seg.cuda(args.gpu)
             with torch.no_grad():
                 T_features = model_T(ce)
             S_features = model_S(ne)
-            loss = loss_func(T_features, S_features)
+
+            loss = loss_func(T_features, S_features, seg)
             sys.stdout.flush()
             dist.all_reduce(loss, op=dist.ReduceOp.AVG)
 
@@ -208,12 +213,13 @@ def main_worker(gpu,args):
         if args.rank == 0:
             with torch.no_grad():
                 model_S.eval()
-                for i, (ne, ce) in enumerate(dataloader):
+                for i, (ne, ce,seg) in enumerate(dataloader):
                     ne = ne.cuda(args.gpu)
                     ce = ce.cuda(args.gpu)
+                    seg = seg.cuda(args.gpu)
                     T = model_T(ce)
                     S = model_S(ne)
-                    loss = loss_func(T, S)
+                    loss = loss_func(T, S, seg)
                     if running_val_loss is None:
                         running_val_loss = loss.item()
                     else:
