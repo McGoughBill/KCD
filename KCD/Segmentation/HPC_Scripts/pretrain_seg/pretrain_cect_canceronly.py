@@ -1,7 +1,7 @@
 import os
 os.environ['OV_DATA_BASE'] = "/bask/projects/p/phwq4930-renal-canc/data/seg_data"
 
-from KCD.Segmentation.ovseg.model.SegmentationModel import SegmentationModel
+from KCD.Segmentation.ovseg.model.SegmentationModel import SegmentationModel_trainontest as SegmentationModel
 from KCD.Segmentation.ovseg.model.model_parameters_segmentation import get_model_params_3d_res_encoder_U_Net
 from KCD.Segmentation.ovseg.preprocessing.SegmentationPreprocessing import SegmentationPreprocessing
 
@@ -10,12 +10,12 @@ import torch
 import sys
 
 
-data_name = 'kits23_nooverlap'
+data_name = 'kits_add_nooverlap_v2'
 spacing = 2
-fold = int(sys.argv[1])
+fold = 0
 
-preprocessed_name = '2mm_binary_canceronly'
-model_name = '6,3x3x3,32_justcancer'
+preprocessed_name = '2mm_cancer_customPP'
+model_name = '6_tot'
 
 vfs = [fold]
 

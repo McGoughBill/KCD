@@ -196,6 +196,7 @@ def main_worker(gpu,args):
                 f.write(train_string)
 
         dataloader.dataset.is_train = False
+        val_loss_list = []
         with torch.no_grad():
             model_S.eval()
             for i, (ne, ce) in enumerate(dataloader):
@@ -204,10 +205,8 @@ def main_worker(gpu,args):
                 T = model_T(ce)
                 S = model_S(ne)
                 loss = loss_func(T, S)
-                if running_val_loss is None:
-                    running_val_loss = loss.item()
-                else:
-                    running_val_loss = weight * running_val_loss + (1 - weight) * loss.item()
+                val_loss_list.append(loss.item())
+            running_val_loss = sum(val_loss_list) / len(val_loss_list)
         if args.rank == 0:
             val_string = f'Val Loss: {running_val_loss:.4E}\n'
             with open(log_path, 'a') as f:

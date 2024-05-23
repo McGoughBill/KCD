@@ -69,7 +69,7 @@ model_params['data']['val_dl_params']['epoch_len']=100
 
 
 for vf in vfs:
-    path_to_model = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/ne2ceCT/kidney_2_cancer/l1-0.0_l2-0.0_var0.0_cov0.0_cce1.0_cos1.0_clip0_2e-05lr_0.99999lg_4bs_200ep_4gpus_5.0segt/network_weights'
+    path_to_model = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/ne2ceCT/kidney_2_cancer/l1-0.0_l2-0.0_var0.0_cov0.0_cce1.0_cos0.0_clip0_2e-05lr_0.99999lg_8bs_500ep_4gpus/network_weights'
     # path_to_model = '/media/mcgoug01/Crucial X6/ovseg_test/ne2ceCT/coltea_4_legacy_outs/network_weights'
     # path_to_model = '/media/mcgoug01/Crucial X6/ovseg_test/ne2ceCT/small_coreg_alllabel_2_logitsonly/network_weights'
 

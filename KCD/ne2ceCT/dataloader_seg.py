@@ -18,13 +18,12 @@ from scipy.ndimage import label
 class CrossPhaseDataset(Dataset):
     def __init__(self, ne_path, ce_path,split_path,seg_path, device=None, patch_size=64,
                  blur_kernel=torchvision.transforms.GaussianBlur(kernel_size=3, sigma=(0.1, 2.0)),
-                 is_train=True,patches_per_case=10,segmentation_threshold=400):
+                 is_train=True,patches_per_case=10):
         assert (os.path.exists(ne_path)) and os.path.exists(ce_path)
         self.ne_path = os.path.join(ne_path,'images')
         self.ce_path = os.path.join(ce_path,'images')
         self.split_path = split_path
         self.seg_path = seg_path
-        self.segmentation_threshold = segmentation_threshold
         if os.path.exists(self.split_path):
             if os.path.exists(os.path.join(self.split_path,'split_train.npy')) and os.path.exists(os.path.join(self.split_path,'split_test.npy')):
                 self.split = [np.load(os.path.join(self.split_path,'split_train.npy'),allow_pickle=True), np.load(os.path.join(self.split_path,'split_test.npy'),allow_pickle=True)]

@@ -21,7 +21,7 @@ class LatentSimilarityLoss(nn.Module):
         super(LatentSimilarityLoss, self).__init__()
         self.mse = nn.MSELoss(reduction='none')
         self.cos = nn.CosineSimilarity(dim=-1)
-        self.cce = nn.CrossEntropyLoss(reduction='none')
+        self.cce = nn.CrossEntropyLoss()
         self.softmax = nn.Softmax(dim=1)
         self.temperature = np.exp(0.07)
         self.mse_weight = 0.01
@@ -60,7 +60,7 @@ class LatentSimilarityLoss(nn.Module):
                 amax_z1 = torch.argmax(reshaped_z1, dim=1)
                 amax_z2 = torch.argmax(reshaped_z2, dim=1)
                 symm_cce = (self.cce(reshaped_z1, amax_z2) + self.cce(reshaped_z2, amax_z1)) / 2
-                loss += torch.masked_select(symm_cce,seg_mask).mean()*self.cce_weight
+                loss += symm_cce*self.cce_weight
         else:
             if self.l2_weight>0:
                 l2 = self.l2(reshaped_z1, reshaped_z2)

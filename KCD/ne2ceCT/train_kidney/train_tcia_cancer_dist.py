@@ -49,7 +49,6 @@ def parse_option():
     parser.add_argument('--out_dim', default=2, type=int, help='output dimension')
     parser.add_argument('--spacing', default=1, type=int, help='spacing')
     parser.add_argument('--dist-url', default='tcp://127.0.0.1:23456', type=str, help='distributed url')
-    parser.add_argument('--segmentation_threshold', default=20, type=float, help='segmentation threshold')
 
     args = parser.parse_args()
     print('args parsed')
@@ -100,7 +99,6 @@ def main_worker(gpu,args):
     workers = args.workers
     world_size = args.world_size
     clip_loss_weight = args.clip_loss_weight
-    segmentation_threshold = args.segmentation_threshold
 
     dataset_ne_path = os.path.join(os.environ['OV_DATA_BASE'], 'preprocessed/tcia_ncct_reg/cmd_ready_2/')
     dataset_ce_path = os.path.join(os.environ['OV_DATA_BASE'], 'preprocessed/tcia_cect/cmd_ready_2/')
@@ -109,7 +107,7 @@ def main_worker(gpu,args):
     assert os.path.exists(dataset_ne_path) and os.path.exists(dataset_ce_path)
     home_path = os.path.join(os.environ['OV_DATA_BASE'], 'ne2ceCT', 'kidney_{}_cancer'.format(spacing))
     ne2ceCT_path = os.path.join(home_path,
-                                'l1-{}_l2-{}_var{}_cov{}_cce{}_cos{}_clip{}_{}lr_{}lg_{}bs_{}ep_{}gpus_{}segt'.format(l1_weight,
+                                'l1-{}_l2-{}_var{}_cov{}_cce{}_cos{}_clip{}_{}lr_{}lg_{}bs_{}ep_{}gpus'.format(l1_weight,
                                                                                    l2_weight,
                                                                                    var_loss_weight,
                                                                                    cov_loss_weight,
@@ -120,8 +118,7 @@ def main_worker(gpu,args):
                                                                                    loss_gamma,
                                                                                    batch_size,
                                                                                    epochs,
-                                                                                   world_size,
-                                                                                   segmentation_threshold))
+                                                                                   world_size))
 
     log_path = os.path.join(ne2ceCT_path, 'logs.txt')
     if args.rank == 0:
@@ -133,8 +130,7 @@ def main_worker(gpu,args):
     dataset = CrossPhaseDataset(dataset_ne_path, dataset_ce_path,
                                 home_path, seg_ce_path,
                                 device='cuda',
-                                is_train=True, patches_per_case=40, patch_size=128,
-                                segmentation_threshold=segmentation_threshold)
+                                is_train=True, patches_per_case=40, patch_size=128)
     if args.rank == 0:
         print(dataset.cases)
 
@@ -213,6 +209,7 @@ def main_worker(gpu,args):
         if args.rank == 0:
             with torch.no_grad():
                 model_S.eval()
+                val_loss_list = []
                 for i, (ne, ce,seg) in enumerate(dataloader):
                     ne = ne.cuda(args.gpu)
                     ce = ce.cuda(args.gpu)
@@ -220,10 +217,8 @@ def main_worker(gpu,args):
                     T = model_T(ce)
                     S = model_S(ne)
                     loss = loss_func(T, S, seg)
-                    if running_val_loss is None:
-                        running_val_loss = loss.item()
-                    else:
-                        running_val_loss = weight * running_val_loss + (1 - weight) * loss.item()
+                    val_loss_list.append(loss.item())
+                running_val_loss = sum(val_loss_list) / len(val_loss_list)
             val_string = f'Val Loss: {running_val_loss:.4E}\n'
             with open(log_path, 'a') as f:
                 f.write(val_string)
