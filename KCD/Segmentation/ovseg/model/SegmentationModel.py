@@ -1,3 +1,4 @@
+import sys
 import warnings
 warnings.simplefilter("ignore")
 import torch
@@ -171,7 +172,7 @@ class SegmentationModel(ModelBase):
         params = self.model_parameters['network'].copy()
         if self.model_parameters['architecture'].lower() in ['unet', 'u-net']:
             self.network = UNet(**params).to(self.dev)
-        if self.model_parameters['architecture'].lower() in ['unet_classhead','unetclasshead','unet-classhead']:
+        elif self.model_parameters['architecture'].lower() in ['unet_classhead','unetclasshead','unet-classhead']:
             self.network = UNet_ClassHead(**params).to(self.dev)
         elif self.model_parameters['architecture'].lower() in ['nfunet', 'nf-unet']:
             self.network = nfUNet(**params).to(self.dev)
@@ -247,9 +248,6 @@ class SegmentationModel(ModelBase):
                                                    network_name=self.network_name,
                                                    augmentation=self.augmentation.torch_augmentation,
                                                    spacing=prep_params['target_spacing'],
-                                                   class_weight = params['class_weight'],
-                                                   class_seg_label = params['class_seg_label'],
-                                                   vol_thresh_mm = params['vol_thresh_mm'],
                                                    **params)
         else:
             try:
@@ -953,6 +951,8 @@ class SegmentationModel_trainontest(ModelBase):
         params = self.model_parameters['network'].copy()
         if self.model_parameters['architecture'].lower() in ['unet', 'u-net']:
             self.network = UNet(**params).to(self.dev)
+        elif self.model_parameters['architecture'].lower() in ['unet_classhead','unetclasshead','unet-classhead']:
+            self.network = UNet_ClassHead(**params).to(self.dev)
         elif self.model_parameters['architecture'].lower() in ['nfunet', 'nf-unet']:
             self.network = nfUNet(**params).to(self.dev)
         elif self.model_parameters['architecture'].lower() in ['unettransformer', 'UNetTransformer',
@@ -1019,24 +1019,39 @@ class SegmentationModel_trainontest(ModelBase):
                                  '\'training\'. These must contain the '
                                  'dict of training paramters.')
         params = self.model_parameters['training'].copy()
-        try:
-            self.training = SegmentationTrainingV2(network=self.network,
+        patch_size = self.model_parameters['network']['patch_size']
+        prep_params = self.model_parameters['preprocessing']
+        if self.model_parameters['architecture'].lower() in ['unet_classhead','unetclasshead','unet-classhead']:
+            sys.stdout.write(str(params))
+            sys.stdout.flush()
+            self.training = SegmentationTrainingV2_classhead(network=self.network,
                                                    trn_dl=self.data.trn_dl,
                                                    val_dl=self.data.val_dl,
                                                    model_path=self.model_path,
                                                    network_name=self.network_name,
                                                    augmentation=self.augmentation.torch_augmentation,
+                                                   spacing=prep_params['target_spacing'],
+                                                    patch_size=patch_size,
                                                    **params)
-        except TypeError:
-            print('Caught a Type error, are you trying to load an older model? '
-                  'Creating training object with old implementation of loss function.')
-            self.training = SegmentationTraining(network=self.network,
-                                                 trn_dl=self.data.trn_dl,
-                                                 val_dl=self.data.val_dl,
-                                                 model_path=self.model_path,
-                                                 network_name=self.network_name,
-                                                 augmentation=self.augmentation.torch_augmentation,
-                                                 **params)
+        else:
+            try:
+                self.training = SegmentationTrainingV2(network=self.network,
+                                                       trn_dl=self.data.trn_dl,
+                                                       val_dl=self.data.val_dl,
+                                                       model_path=self.model_path,
+                                                       network_name=self.network_name,
+                                                       augmentation=self.augmentation.torch_augmentation,
+                                                       **params)
+            except TypeError:
+                print('Caught a Type error, are you trying to load an older model? '
+                      'Creating training object with old implementation of loss function.')
+                self.training = SegmentationTraining(network=self.network,
+                                                     trn_dl=self.data.trn_dl,
+                                                     val_dl=self.data.val_dl,
+                                                     model_path=self.model_path,
+                                                     network_name=self.network_name,
+                                                     augmentation=self.augmentation.torch_augmentation,
+                                                     **params)
 
     def __call__(self, data_tpl, do_postprocessing=True):
         '''

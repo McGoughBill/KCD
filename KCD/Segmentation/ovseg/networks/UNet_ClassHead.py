@@ -147,7 +147,6 @@ class GlobalPowerPooling(nn.Module):
         def forward(self, xb):
             b, c, *_ = xb.shape
             # print('xb shape:',xb.shape)
-            print(self.spatial_shape)
             return self.pool(xb).view(b,c) / np.prod(self.spatial_shape)
 
 # %% now simply the logits
@@ -442,7 +441,7 @@ class UNet_ClassHead(nn.Module):
             logs_list.append(logs)
 
         # concatenate all class latents along the channel dimension
-        class_latents = torch.cat(class_latents, dim=1)
+        class_latents = torch.cat(class_latents, dim=1).to(xb.device)
 
         out = self.final_fc2(self.ReLU(self.final_fc(class_latents)))
 

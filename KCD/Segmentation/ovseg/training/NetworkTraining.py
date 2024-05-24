@@ -1,3 +1,5 @@
+import sys
+
 from KCD.Segmentation.ovseg.training.TrainingBase import TrainingBase
 import torch
 import matplotlib.pyplot as plt
@@ -25,10 +27,11 @@ class NetworkTraining(TrainingBase):
 
     def __init__(self, network, trn_dl,  model_path, loss_params={},
                  num_epochs=1000, opt_params=None, lr_params=None,
-                 augmentation=None, val_dl=None, dev='cuda', nu_ema_trn=0.99,
+                 augmentation=None, val_dl=None, nu_ema_trn=0.99,
                  nu_ema_val=0.7, network_name='network', fp32=False,
                  p_plot_list=[1, 0.5, 0.2], opt_name='SGD', lr_schedule='almost_linear', lr_exponent=0,
-                 no_bias_weight_decay=False, save_additional_weights_after_epochs=[],is_voxsim=False):
+                 no_bias_weight_decay=False, save_additional_weights_after_epochs=[],
+                 is_voxsim=None):
         super().__init__(trn_dl, num_epochs, model_path)
 
         self.network = network
