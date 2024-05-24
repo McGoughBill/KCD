@@ -17,10 +17,11 @@ from KCD.Segmentation.ovseg.augmentation.SegmentationAugmentation import Segment
 from KCD.Segmentation.ovseg.data.SegmentationData import SegmentationData, SegmentationData_trainontest
 from KCD.Segmentation.ovseg.data.Dataset import raw_Dataset
 from KCD.Segmentation.ovseg.networks.UNet import UNet
+from KCD.Segmentation.ovseg.networks.UNet_ClassHead import UNet_ClassHead
 from KCD.Segmentation.ovseg.networks.UNetTransformer import UNetTransformer
 from KCD.Segmentation.ovseg.networks.SwinUnetr import Trans_Unetr
 from KCD.Segmentation.ovseg.networks.nfUNet import nfUNet
-from KCD.Segmentation.ovseg.training.SegmentationTraining import SegmentationTraining, SegmentationTrainingV2
+from KCD.Segmentation.ovseg.training.SegmentationTraining import SegmentationTraining, SegmentationTrainingV2, SegmentationTrainingV2_classhead
 from KCD.Segmentation.ovseg.prediction.SlidingWindowPrediction import SlidingWindowPrediction
 from KCD.Segmentation.ovseg.postprocessing.SegmentationPostprocessing import SegmentationPostprocessing
 from KCD.Segmentation.ovseg.utils.io import save_nii_from_data_tpl, save_npy_from_data_tpl, load_pkl, read_nii, save_dcmrt_from_data_tpl, is_dcm_path
@@ -170,6 +171,8 @@ class SegmentationModel(ModelBase):
         params = self.model_parameters['network'].copy()
         if self.model_parameters['architecture'].lower() in ['unet', 'u-net']:
             self.network = UNet(**params).to(self.dev)
+        if self.model_parameters['architecture'].lower() in ['unet_classhead','unetclasshead','unet-classhead']:
+            self.network = UNet_ClassHead(**params).to(self.dev)
         elif self.model_parameters['architecture'].lower() in ['nfunet', 'nf-unet']:
             self.network = nfUNet(**params).to(self.dev)
         elif self.model_parameters['architecture'].lower() in ['unettransformer', 'UNetTransformer', 'unet-transformer']:
@@ -235,24 +238,38 @@ class SegmentationModel(ModelBase):
                                  '\'training\'. These must contain the '
                                  'dict of training paramters.')
         params = self.model_parameters['training'].copy()
-        try:
-            self.training = SegmentationTrainingV2(network=self.network,
+        prep_params = self.model_parameters['preprocessing']
+        if self.model_parameters['network']['architecture'].lower() in ['unet_classhead','unetclasshead','unet-classhead']:
+            self.training = SegmentationTrainingV2_classhead(network=self.network,
                                                    trn_dl=self.data.trn_dl,
                                                    val_dl=self.data.val_dl,
                                                    model_path=self.model_path,
                                                    network_name=self.network_name,
                                                    augmentation=self.augmentation.torch_augmentation,
+                                                   spacing=prep_params['target_spacing'],
+                                                   class_weight = params['class_weight'],
+                                                   class_seg_label = params['class_seg_label'],
+                                                   vol_thresh_mm = params['vol_thresh_mm'],
                                                    **params)
-        except TypeError:
-            print('Caught a Type error, are you trying to load an older model? '
-                  'Creating training object with old implementation of loss function.')
-            self.training = SegmentationTraining(network=self.network,
-                                                 trn_dl=self.data.trn_dl,
-                                                 val_dl=self.data.val_dl,
-                                                 model_path=self.model_path,
-                                                 network_name=self.network_name,
-                                                 augmentation=self.augmentation.torch_augmentation,
-                                                 **params)
+        else:
+            try:
+                self.training = SegmentationTrainingV2(network=self.network,
+                                                       trn_dl=self.data.trn_dl,
+                                                       val_dl=self.data.val_dl,
+                                                       model_path=self.model_path,
+                                                       network_name=self.network_name,
+                                                       augmentation=self.augmentation.torch_augmentation,
+                                                       **params)
+            except TypeError:
+                print('Caught a Type error, are you trying to load an older model? '
+                      'Creating training object with old implementation of loss function.')
+                self.training = SegmentationTraining(network=self.network,
+                                                     trn_dl=self.data.trn_dl,
+                                                     val_dl=self.data.val_dl,
+                                                     model_path=self.model_path,
+                                                     network_name=self.network_name,
+                                                     augmentation=self.augmentation.torch_augmentation,
+                                                     **params)
 
     def __call__(self, data_tpl, do_postprocessing=True):
         '''

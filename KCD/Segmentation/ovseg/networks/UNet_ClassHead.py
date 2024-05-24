@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 import numpy as np
 import os
-# os.environ['OV_DATA_BASE'] = "/Users/mcgoug01/Downloads/ovseg_test"
 from KCD.Segmentation.ovseg.networks.nfUNet import concat_attention, concat
 
 
@@ -140,12 +139,15 @@ class GlobalPowerPooling(nn.Module):
             super().__init__()
             # do LP pooling with a stride of 0 and kernel size of the spatial shape
             # divide by number of elements to make it a mean roughly
-            self.pool = nn.LPPool3d(p, spatial_shape, stride=spatial_shape, ceil_mode=True)
+            # print('GlobalPowerPooling', spatial_shape)
+            self.pool = nn.LPPool3d(p, spatial_shape, stride=1, ceil_mode=True)
             self.p = p
             self.spatial_shape = spatial_shape
 
         def forward(self, xb):
             b, c, *_ = xb.shape
+            # print('xb shape:',xb.shape)
+            print(self.spatial_shape)
             return self.pool(xb).view(b,c) / np.prod(self.spatial_shape)
 
 # %% now simply the logits
@@ -298,10 +300,11 @@ class UNet_ClassHead(nn.Module):
         self.class_pooling = []
         final_fc_size = 0
         self.fcs = []
-        for in_channels, out_channels, hid_channels, kernel_size in zip(self.in_channels_up_list,
+
+        for count,(in_channels, out_channels, hid_channels, kernel_size) in enumerate(zip(self.in_channels_up_list,
                                                                         self.out_channels_up_list,
                                                                         self.hid_channels_up_list,
-                                                                        self.kernel_sizes_up):
+                                                                        self.kernel_sizes_up)):
             block = ConvNormNonlinBlock(in_channels=in_channels,
                                         out_channels=out_channels,
                                         is_2d=self.is_2d,
@@ -312,17 +315,22 @@ class UNet_ClassHead(nn.Module):
                                         nonlin_params=self.nonlin_params,
                                         hid_channels=hid_channels)
             #calculate spatial size at each decoder level
-            decoder_sp_size = patch_size // (2**len(self.blocks_down))
+
+            decoder_sp_size = (patch_size // 2**count)
+            # print("in out sp",in_channels, out_channels, decoder_sp_size)
             self.class_pooling.append(GlobalPowerPooling((decoder_sp_size,decoder_sp_size,decoder_sp_size)))
             self.fcs.append(nn.Linear(out_channels,out_channels))
             final_fc_size += out_channels
 
             self.blocks_up.append(block)
 
+        self.class_pooling = nn.ModuleList(self.class_pooling)
+        self.fcs = nn.ModuleList(self.fcs)
+
         self.final_fc = nn.Linear(final_fc_size, 128)
         self.final_fc2 = nn.Linear(128, 2)
 
-        self.dropout = nn.Dropout(p_dropout_logits)
+        self.dropout = nn.Dropout(0.1)
         self.ReLU = nn.LeakyReLU(0.1)
 
         # upsaplings
@@ -407,13 +415,19 @@ class UNet_ClassHead(nn.Module):
         # print(xb.shape, " bottleneck block shape")
         # expanding path without logits
 
+        class_latents = []
+
         for i in range(self.n_stages - 2, self.n_pyramid_scales-1, -1):
             xb = self.upsamplings[i](xb)
             xb = self.concats[i](xb, xb_list[i])
             del xb_list[i]
             xb = self.blocks_up[i](xb)
+            pool = self.class_pooling[i](xb)
+            #print pool shape and fc shape
+            latents = self.fcs[i](self.dropout(pool))
+            class_latents.append(self.ReLU(latents))
 
-        class_latents = []
+
 
         # expanding path with logits
         for i in range(self.n_pyramid_scales - 1, -1, -1):
@@ -429,6 +443,7 @@ class UNet_ClassHead(nn.Module):
 
         # concatenate all class latents along the channel dimension
         class_latents = torch.cat(class_latents, dim=1)
+
         out = self.final_fc2(self.ReLU(self.final_fc(class_latents)))
 
         if self.stem_kernel_size is not None:
@@ -445,32 +460,36 @@ class UNet_ClassHead(nn.Module):
 
 def get_2d_UNet(in_channels, out_channels, n_stages, filters=32):
     kernel_sizes = [3 for _ in range(n_stages)]
-    return UNet(in_channels, out_channels, kernel_sizes, True)
+    return UNet_ClassHead(in_channels, out_channels, kernel_sizes, True)
 
 
-def get_3d_UNet(in_channels, out_channels, n_stages, n_2d_blocks, filters=32):
-    kernel_sizes = [(3,3,1) if i < n_2d_blocks else 3
-                    for i in range(n_stages)]
-    return UNet(in_channels, out_channels, kernel_sizes, False)
+def get_3d_UNet(in_channels, out_channels, n_stages, filters=32,patch_size = 64):
+    kernel_sizes = [(3,3,3) for i in range(n_stages)]
+    return UNet_ClassHead(in_channels, out_channels, kernel_sizes, False,
+                          filters=filters, patch_size = patch_size)
 
 
 # %%
 if __name__ == '__main__':
     gpu = torch.device('cpu')
-    net_2d = get_2d_UNet(1, 2, 7, 8).to(gpu)
-    xb_2d = torch.randn((3, 1, 512, 512), device=gpu)
-    print('2d')
-    with torch.no_grad():
-        yb_2d = net_2d(xb_2d)
-    print('Output shapes:')
-    for log in yb_2d:
-        print(log.shape)
+    # net_2d = get_2d_UNet(1, 2, 7, 8).to(gpu)
+    # xb_2d = torch.randn((3, 1, 512, 512), device=gpu)
+    # print('2d')
+    # with torch.no_grad():
+    #     yb_2d = net_2d(xb_2d)
+    # print('Output shapes:')
+    # for log in yb_2d:
+    #     print(log.shape)
 
-    net_3d = get_3d_UNet(1, 2, 5, 2, 8).to(gpu)
-    xb_3d = torch.randn((1, 1, 128, 128, 32), device=gpu)
+    patch = 128
+
+    net_3d = get_3d_UNet(1, 2, 7,  filters = 2,patch_size = patch).to(gpu)
+    xb_3d = torch.randn((2, 1, patch, patch, patch), device=gpu)
     print('3d')
     with torch.no_grad():
-        yb_3d = net_3d(xb_3d)
+        yb_3d,out = net_3d(xb_3d)
     print('Output shapes:')
     for log in yb_3d:
         print(log.shape)
+
+    print('Output classification:',out)

@@ -341,3 +341,62 @@ class SegmentationTrainingV2(SegmentationTraining):
         self.loss_fctn = CE_dice_pyramid_loss(**self.loss_params)
         if include_voxsim:
             self.is_voxsim = True
+
+class SegmentationTrainingV2_classhead(SegmentationTrainingV2):
+    def init(self,class_weight = 0.3, class_seg_label = 1, spacing = [2,2,2],
+             vol_thresh_mm = 500, class_loss = nn.CrossEntropyLoss(), *args,**kwargs,):
+        super().__init__(*args,**kwargs)
+        self.class_weight = class_weight
+        self.class_loss = class_loss
+        self.class_seg_label = class_seg_label
+        self.spacing = spacing
+        self.vol_thresh_mm = vol_thresh_mm
+
+
+    def compute_batch_loss(self, batch):
+
+        batch = batch.to(self.dev)
+        batch = self.prg_trn_process_batch(batch)
+
+        if self.augmentation is not None:
+            with torch.no_grad():
+                # in theory we shouldn't need this context, but I had weird memory leaks and
+                # it doesn't hurt
+                if self.dev == torch.device('cpu'):
+                    batch = self.augmentation(batch.to(torch.float32))
+                else:
+                    batch = self.augmentation(batch)
+
+        # now let's get the arrays from the batch
+        # the easiest one:
+        yb = batch[:, -1:]
+        if self.batches_have_masks:
+            # when we have a mask in the batch tensor the channels are orderes as
+            # im_channel[s], mask_channel, label_channel ...
+            xb = batch[:, :-2]
+            mask = batch[:, -2:-1]
+        else:
+            # ... otherwise we have im_channel[s], label_channel
+            xb = batch[:, :-1]
+            mask = None
+
+        if self.mask_with_bin_pred:
+            # masking with the binary prediction just means multipying the previously acquired mask
+            # with the last channel of the input tensor
+            mask = mask * xb[: -1:]
+
+        yb = to_one_hot_encoding(yb, self.network.out_channels)
+        # if yb contains over 500mm3 of class 1, we want to classify it as class 1
+        #get voxel size
+        voxel_vol = np.prod(self.spacing)
+        # for each sample in batch, get the number of class 1 voxels
+        cls = torch.zeros(yb.shape[0])
+        for i in range(yb.shape[0]):
+            cls[i] = (torch.sum(yb[i,1,:,:,:]) * voxel_vol) > self.vol_thresh_mm
+        # if the number of class 1 voxels is greater than 500mm3, set the class label to 1
+        # get a class label for each sample in batch
+
+        out,cls_pred = self.network(xb)
+        loss = self.loss_fctn(out, yb, mask) + self.class_weight * self.class_loss(cls_pred,cls.long())
+        return loss
+

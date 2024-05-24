@@ -65,7 +65,7 @@ for nii_file in os.listdir(nii_path)[::-1]:
             elif nii_file=='131.nii.gz':
                 nii = np.flip(nib.load(os.path.join(nii_path, nii_file)).get_fdata(),1)
                 # crop 50 of each axial side and 200 off the top axial
-                nii = nii[50:-50,50:-50,:-300]
+                nii = nii[50:-50,50:-50,50:-200]
                 nii = nib.Nifti1Image(nii, affine, dtype=np.float32)
                 nib.save(nii,os.path.join(dest_path, df.loc[df['OriginalID'] == nii_file, 'StudyID'].values[0] + '.nii.gz'))
                 continue
@@ -90,5 +90,6 @@ for nii_file in os.listdir(nii_path)[::-1]:
             continue
         else:
             nii = nib.load(os.path.join(nii_path, nii_file)).get_fdata()
+
         nii = nib.Nifti1Image(nii, affine,dtype=np.float32)
         nib.save(nii, os.path.join(dest_path, df.loc[df['OriginalID'] == nii_file,'StudyID'].values[0] + '.nii.gz'))
