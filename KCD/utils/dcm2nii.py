@@ -153,21 +153,25 @@ def _remove_accents_(unicode_filename):
 
 
 if __name__ == '__main__':
-    COLTEA_home = '/media/mcgoug01/Crucial X6/Coltea-Lung-CT-100W/Coltea-Lung-CT-100W/'
-    COLTEA_save = '/media/mcgoug01/Crucial X6/Coltea-Lung-CT-100W-NIFTI/'
+    COLTEA_home = '/rds/project/rds-sDuALntK11g/IMAGING_extracted'
+    COLTEA_save = '/rds/project/rds-sDuALntK11g/IMAGING_nifti'
 
     if not os.path.exists(COLTEA_save):
         os.makedirs(COLTEA_save)
 
-    for phase in ['ARTERIAL', 'NATIVE', 'VENOUS']:
-        if not os.path.exists(os.path.join(COLTEA_save, phase)):
-            os.makedirs(os.path.join(COLTEA_save, phase))
-
-    for patient in os.listdir(COLTEA_home):
+    for patient in os.listdir(COLTEA_home)[::-1]:
+        #patient names have the format ARTISTXXX_TIMEPOINT_OTHERINFO
+        #we want to keep only the ARTISTXXX part
+        patient_name = patient.split('_')[0]
         patient_path = os.path.join(COLTEA_home, patient)
+        # make a patient save directory
+        if not os.path.exists(os.path.join(COLTEA_save, patient_name)):
+            os.makedirs(os.path.join(COLTEA_save, patient_name))
         for phase in os.listdir(patient_path):
-            phase_path = os.path.join(patient_path, phase,'DICOM')
-            s_im_p = os.path.join(COLTEA_save, phase, patient+'.nii.gz')
+            phase_path = os.path.join(patient_path, phase)
+            if not os.path.isdir(phase_path):
+                continue
+            s_im_p = os.path.join(COLTEA_save, patient_name,patient+f'_{phase}'+'.nii.gz')
             try:
                 convert_directory(phase_path, s_im_p, compression=True,
                                           reorient=True)

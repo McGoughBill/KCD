@@ -99,7 +99,7 @@ def nonlinear_coreg(moving,fixed,
 
 if __name__ == '__main__':
 
-    ncct_dir = '/home/wcm23/rds/hpc-work/TCIA/ncct_nii'
+    ncct_dir = '/home/wcm23/rds/hpc-work/FineTuningKITS23/raw_data/kits_ncct/images'
     cect_dir = '/home/wcm23/rds/hpc-work/TCIA/cect_nii'
     save_dir = '/home/wcm23/rds/hpc-work/TCIA/ncct_registered'
 
