@@ -21,10 +21,11 @@ if __name__ == '__main__':
     # load model
     ce_model = fmcib_model()
 
-    mse,cos = fmcib_model(), fmcib_model()
-    ce_model.eval()
+    mse,cos,cos_morebg = fmcib_model(), fmcib_model(), fmcib_model()
     mse.load_state_dict(torch.load('/Users/mcgoug01/Downloads/assessing_latent_resnet/l1-0.2_l2-1.0_var0.01_cov0.2_cce0.0_cos0.0_clip0.0_2e-05lr_0.99998lg_80bs_1500ep_4gpus/network_weights', map_location='cpu'))
     cos.load_state_dict(torch.load('/Users/mcgoug01/Downloads/assessing_latent_resnet/l1-0.2_l2-1.0_var0.01_cov0.2_cce0.0_cos1.0_clip0.0_2e-05lr_0.99998lg_80bs_1500ep_4gpus/network_weights', map_location='cpu'))
+    cos_morebg.load_state_dict(torch.load('/Users/mcgoug01/Downloads/assessing_latent_resnet/l1-0.2_l2-1.0_var0.01_cov0.2_cce0.0_cos1.0_clip0.0_2e-05lr_0.99998lg_80bs_1500ep_4gpus_0.5bgt/network_weights', map_location='cpu'))
+    ce_model.eval(), mse.eval(), cos.eval(), cos_morebg.eval()
 
     ce_data_path = '/Users/mcgoug01/Downloads/assessing_latent_resnet/ce'
     ne_data_path = '/Users/mcgoug01/Downloads/assessing_latent_resnet/nc'
@@ -32,11 +33,11 @@ if __name__ == '__main__':
 
     dataset = CrossPhaseDataset(ne_data_path, ce_data_path, split_path,
                                 device='cpu', is_train=False,patches_per_case=200,
-                                background_threshold=0.5)
+                                background_threshold=0.5,background_value=0.1)
     dataset.apply_foldsplit(split_ratio=0)
 
     # get an inference sample
-    sum_mse, sum_cos, sum_ce = 0, 0, 0
+    sum_mse, sum_cos, sum_ce,sum_cosbg = 0, 0, 0, 0
     for count,(ne, ce) in enumerate(dataset):
 
         ne = ne.unsqueeze(0)
@@ -55,21 +56,24 @@ if __name__ == '__main__':
             latent_mse = mse(ne)[0].reshape(64,64)
             latent_cos = cos(ne)[0].reshape(64,64)
             latent_ce = ce_model(ce)[0].reshape(64,64)
+            latent_cosbg = cos_morebg(ne)[0].reshape(64,64)
             latent_nc_from_ce = ce_model((ce_equiv_ne))[0].reshape(64,64)
 
         abs_diff_mse = torch.abs(latent_mse - latent_ce).mean()
         abs_diff_cos = torch.abs(latent_cos - latent_ce).mean()
         abs_diff_ce = torch.abs(latent_nc_from_ce - latent_ce).mean()
+        abs_diff_cosbg = torch.abs(latent_cosbg - latent_ce).mean()
 
         sum_mse += abs_diff_mse
         sum_cos += abs_diff_cos
         sum_ce += abs_diff_ce
+        sum_cosbg += abs_diff_cosbg
 
         # plot a 3 row 2 column set of plots
         # top row is the ce image and the nc image
         # middle row is the ce latent space and the nc latent space
         # bottom row is the nc latent space from the ce model and the difference between the ce and nc latent spaces
-        if (count+1) %1000 == 0 and count > 0:
+        if (count+1) %200 == 0 and count > 0:
             plt.switch_backend('TkAgg')
             fig, axs = plt.subplots(3, 2, figsize=(15, 15))
             # set location of each figure to the same point on the monitor
@@ -98,6 +102,7 @@ if __name__ == '__main__':
             fig.suptitle(f'Average absolute difference of mse: {sum_mse/(count+1):.3f}\n'
                             f'Average absolute difference of cos: {sum_cos/(count+1):.3f}\n'
                             f'Average absolute difference of ce: {sum_ce/(count+1):.3f}\n'
+                            f'Average absolute difference of cosbg: {sum_cosbg/(count+1):.3f}\n'
                             f'Number of samples: {count+1}', fontsize=12)
             plt.tight_layout()
 

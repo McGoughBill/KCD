@@ -1,3 +1,5 @@
+import sys
+
 from KCD.Segmentation.ovseg.training.NetworkTraining import NetworkTraining
 from KCD.Segmentation.ovseg.training.loss_functions_combined import CE_dice_pyramid_loss, to_one_hot_encoding, \
     weighted_combined_pyramid_loss
@@ -341,3 +343,74 @@ class SegmentationTrainingV2(SegmentationTraining):
         self.loss_fctn = CE_dice_pyramid_loss(**self.loss_params)
         if include_voxsim:
             self.is_voxsim = True
+
+class SegmentationTrainingV2_classhead(SegmentationTraining):
+    def __init__(self,class_weight = 0.3, class_seg_label = 1, spacing = [2,2,2],
+             vol_thresh_mm = 500,patch_size = 64, class_loss = nn.CrossEntropyLoss(),*args,**kwargs,):
+        super().__init__( *args, **kwargs)
+        self.class_weight = class_weight
+        self.class_loss = class_loss.to('cuda' if torch.cuda.is_available() else 'cpu')
+        self.class_seg_label = class_seg_label
+        self.spacing = spacing
+        self.patch_size = patch_size
+        sys.stdout.write(f'self.spacing: {self.spacing}\n')
+        sys.stdout.flush()
+        self.vol_thresh_mm = vol_thresh_mm
+        print('In SegmentationTrainingV2_classhead')
+        print('class_weight:',self.class_weight)
+        print('class_seg_label:',self.class_seg_label)
+        print('vol_thresh_mm:',self.vol_thresh_mm)
+        print('patch_size:',self.patch_size)
+        print(class_loss)
+        print()
+
+        sys.stdout.flush()
+
+    def initialise_loss(self,include_voxsim=False):
+        self.loss_fctn = CE_dice_pyramid_loss(**self.loss_params)
+        if include_voxsim:
+            self.is_voxsim = True
+
+
+    def compute_batch_loss(self, batch):
+
+        batch = batch.to(self.dev)
+        batch = self.prg_trn_process_batch(batch)
+
+        if self.augmentation is not None:
+            with torch.no_grad():
+                # in theory we shouldn't need this context, but I had weird memory leaks and
+                # it doesn't hurt
+                if self.dev == torch.device('cpu'):
+                    batch = self.augmentation(batch.to(torch.float32))
+                else:
+                    batch = self.augmentation(batch)
+
+        # now let's get the arrays from the batch
+        # the easiest one:
+        yb = batch[:, -1:]
+        if self.batches_have_masks:
+            # when we have a mask in the batch tensor the channels are orderes as
+            # im_channel[s], mask_channel, label_channel ...
+            xb = batch[:, :-2]
+            mask = batch[:, -2:-1]
+        else:
+            # ... otherwise we have im_channel[s], label_channel
+            xb = batch[:, :-1]
+            mask = None
+
+        if self.mask_with_bin_pred:
+            # masking with the binary prediction just means multipying the previously acquired mask
+            # with the last channel of the input tensor
+            mask = mask * xb[: -1:]
+
+        yb = to_one_hot_encoding(yb, self.network.out_channels)
+
+        cls_lb = torch.sum(yb[:,self.class_seg_label,:,:,:],dim=(1,2,3)) > (self.vol_thresh_mm/np.prod(self.spacing))
+        cls_lb = cls_lb.to(self.dev)
+
+        out,cls_pred = self.network(xb)
+
+        loss = self.loss_fctn(out, yb, mask) + self.class_weight * self.class_loss(cls_pred,cls_lb.long())
+        return loss
+

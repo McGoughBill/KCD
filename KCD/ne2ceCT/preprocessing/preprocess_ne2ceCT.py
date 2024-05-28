@@ -169,17 +169,18 @@ def Segmentation_Preparation_SSL(home, seg_spacing=np.array([4,4,4]), background
 
 
 if __name__ == "__main__":
-    Segmentation_Preparation(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([1,1,1]),
-                             data_name='tcia_ncct_reg',preprocessed_name='1mm_canceronly_customPP', is_cect=False)
-
-    Segmentation_Preparation(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([1,1,1]),
-                             data_name='tcia_cect',preprocessed_name='1mm_canceronly_customPP', is_cect=True)
+    Segmentation_Preparation(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([2,2,2]),
+                             data_name='coltea_nat',preprocessed_name='2mm_customPP', is_cect=False)
 
     Segmentation_Preparation(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([2,2,2]),
-                             data_name='tcia_ncct_reg',preprocessed_name='2mm_canceronly_customPP', is_cect=False)
+                             data_name='coltea_art',preprocessed_name='2mm_customPP', is_cect=True)
 
-    Segmentation_Preparation(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([2,2,2]),
-                             data_name='tcia_cect',preprocessed_name='2mm_canceronly_customPP', is_cect=True)
+    Segmentation_Preparation(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([1,1,1]),
+                             data_name='coltea_nat',preprocessed_name='1mm_customPP', is_cect=False)
+
+    Segmentation_Preparation(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([1,1,1]),
+                             data_name='coltea_art',preprocessed_name='1mm_customPP', is_cect=True)
+
     #
     # Segmentation_Preparation_SSL(home=os.environ['OV_DATA_BASE'], seg_spacing=np.array([2,2,2]),
     #                          data_name='abdominal_tcia_ncct',preprocessed_name='SSL_2_ISBI', is_cect=False)

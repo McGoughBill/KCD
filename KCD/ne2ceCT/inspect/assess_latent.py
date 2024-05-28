@@ -20,10 +20,10 @@ def get_3d_featureoutput_unet(in_channels, out_channels, n_stages,filters=32, fi
 
 if __name__ == '__main__':
     # load model
-    ce_model = get_3d_featureoutput_unet(1, 10, 6)
+    ce_model = get_3d_featureoutput_unet(1, 2, 7)
     ce_model.load_state_dict(torch.load('/Users/mcgoug01/Downloads/assessing_latent/ce_model', map_location='cpu'))
 
-    nc2ceCT_model = get_3d_featureoutput_unet(1, 10, 6)
+    nc2ceCT_model = get_3d_featureoutput_unet(1, 2, 7)
     nc2ceCT_model.load_state_dict(torch.load('/Users/mcgoug01/Downloads/assessing_latent/network_weights', map_location='cpu'))
 
     ce_model.eval()
@@ -33,7 +33,8 @@ if __name__ == '__main__':
     ne_data_path = '/Users/mcgoug01/Downloads/assessing_latent/nc'
     split_path = '/Users/mcgoug01/Downloads/assessing_latent'
 
-    dataset = CrossPhaseDataset(ne_data_path, ce_data_path,split_path, device='cpu', is_train=False)
+    dataset = CrossPhaseDataset(ne_data_path, ce_data_path,split_path, device='cpu', is_train=False,
+                                patch_size=128)
     dataset.apply_foldsplit()
 
 
@@ -47,7 +48,7 @@ if __name__ == '__main__':
     for count,(ne, ce) in enumerate(dataset):
         ne = ne.unsqueeze(0)
         ce = ce.unsqueeze(0)
-        ce_from_ne = ((ne*55.6 + 68).clamp(-120,240) -60)/60
+        ce_from_ne = ne
 
         # get the latent space
         with torch.no_grad():
@@ -77,16 +78,16 @@ if __name__ == '__main__':
         latent_nc_reshape = latent_nc.view(latent_nc.shape[0], -1).T
         latent_nc_from_ce_reshape = latent_nc_from_ce.view(latent_nc_from_ce.shape[0], -1).T
 
-        pca = PCA(n_components=3)
-        pca.fit(latent_ce_reshape.cpu().detach().numpy())
-        latent_ce_pca = pca.transform(latent_ce_reshape.cpu().detach().numpy())
-        latent_nc_pca = pca.transform(latent_nc_reshape.cpu().detach().numpy())
-        latent_nc_from_ce_pca = pca.transform(latent_nc_from_ce_reshape.cpu().detach().numpy())
+        # pca = PCA(n_components=3)
+        # pca.fit(latent_ce_reshape.cpu().detach().numpy())
+        # latent_ce_pca = pca.transform(latent_ce_reshape.cpu().detach().numpy())
+        # latent_nc_pca = pca.transform(latent_nc_reshape.cpu().detach().numpy())
+        # latent_nc_from_ce_pca = pca.transform(latent_nc_from_ce_reshape.cpu().detach().numpy())
 
-        # reshape the latent spaces to 3D, back to the original shape
-        latent_nc_pca = latent_nc_pca.T.reshape(3,latent_nc.shape[1],latent_nc.shape[2],latent_nc.shape[3])
-        latent_ce_pca = latent_ce_pca.T.reshape(3,latent_ce.shape[1],latent_ce.shape[2],latent_ce.shape[3])
-        latent_nc_from_ce_pca = latent_nc_from_ce_pca.T.reshape(3,latent_nc_from_ce.shape[1],latent_nc_from_ce.shape[2],latent_nc_from_ce.shape[3])
+        # # reshape the latent spaces to 3D, back to the original shape
+        # latent_nc_pca = latent_nc_pca.T.reshape(3,latent_nc.shape[1],latent_nc.shape[2],latent_nc.shape[3])
+        # latent_ce_pca = latent_ce_pca.T.reshape(3,latent_ce.shape[1],latent_ce.shape[2],latent_ce.shape[3])
+        # latent_nc_from_ce_pca = latent_nc_from_ce_pca.T.reshape(3,latent_nc_from_ce.shape[1],latent_nc_from_ce.shape[2],latent_nc_from_ce.shape[3])
 
         # set slice index to the slice with the maximum difference between latent_nc_pca and latent_nc_from_ce_pca
         slice = np.argmax(seg_output.sum(dim=(0,2,3)).cpu().detach().numpy())
@@ -96,32 +97,36 @@ if __name__ == '__main__':
         # middle row is the ce latent space and the nc latent space
         # bottom row is the nc latent space from the ce model and the difference between the ce and nc latent spaces
         plt.switch_backend('TkAgg')
-        fig, axs = plt.subplots(3, 2, figsize=(15, 15))
-        axs[0, 0].imshow(ne[0, 0, slice, :, :].T.cpu().detach().numpy(), cmap='gray', vmin=-3, vmax=3)
-        #add title
-        axs[0, 0].set_title('NC')
-        axs[0, 0].axis('off')
-        axs[0, 1].imshow(ce[0, 0, slice, :, :].T.cpu().detach().numpy(), cmap='gray', vmin=-3, vmax=3)
-        axs[0, 1].set_title('CE')
-        axs[0, 1].axis('off')
-        # axs[1, 0].imshow(latent_nc_pca[:, slice, :, :].T)
-        # axs[1, 0].set_title('NC latent')
-        # axs[1, 0].axis('off')
-        # axs[1, 1].imshow(latent_ce_pca[:, slice, :, :].T)
-        # axs[1, 1].set_title('CE latent')
+        # fig, axs = plt.subplots(3, 2, figsize=(15, 15))
+        plt.imshow(ne[0, 0, slice, :, :].T.cpu().detach().numpy(), cmap='gray', vmin=-3, vmax=3)
+        # axs[0, 0].imshow(ne[0, 0, slice, :, :].T.cpu().detach().numpy(), cmap='gray', vmin=-3, vmax=3)
+        # #add title
+        # axs[0, 0].set_title('NC')
+        # axs[0, 0].axis('off')
+        # axs[0, 1].imshow(ce[0, 0, slice, :, :].T.cpu().detach().numpy(), cmap='gray', vmin=-3, vmax=3)
+        # axs[0, 1].set_title('CE')
+        # axs[0, 1].axis('off')
+        # # axs[1, 0].imshow(latent_nc_pca[:, slice, :, :].T)
+        # # axs[1, 0].set_title('NC latent')
+        # # axs[1, 0].axis('off')
+        # # axs[1, 1].imshow(latent_ce_pca[:, slice, :, :].T)
+        # # axs[1, 1].set_title('CE latent')
+        # # axs[1, 1].axis('off')
+        # axs[1, 1].imshow(ne[0, 0, slice, :, :].T.cpu().detach().numpy(), cmap='gray', vmin=-3, vmax=3)
+        # axs[1, 1].imshow(seg_output[:,slice, :, :].T.cpu().detach().numpy(), alpha=0.5)
+        # axs[1, 1].set_title('Segmentation Output from NC Data')
         # axs[1, 1].axis('off')
-        # axs[2, 1].imshow(np.abs(latent_nc_pca - latent_ce_pca)[:, slice, :, :].T)
-        # axs[2, 1].set_title('Difference between CE and NC latent spaces')
-        # axs[2, 1].axis('off')
-        axs[2,0].set_title('Segmentation Output from CE Model on NC input')
-        axs[2,0].imshow(seg_output_from_ce[:,slice, :, :].T.cpu().detach().numpy(), cmap='gray')
-        axs[2,0].axis('off')
-        axs[1, 0].imshow(seg_output[:,slice, :, :].T.cpu().detach().numpy(), cmap='gray')
-        axs[1, 0].set_title('Segmentation Output from Domain-Adapted NC Model')
-        axs[1, 0].axis('off')
-        axs[1,1].set_title('Segmentation Output from CE Model on CE input')
-        axs[1,1].imshow(seg_output_ce[:,slice, :, :].T.cpu().detach().numpy(), cmap='gray')
-        axs[1,1].axis('off')
+        # axs[1,0].set_title('Segmentation Output from CE Data')
+        # axs[1, 0].imshow(ce[0, 0, slice, :, :].T.cpu().detach().numpy(), cmap='gray', vmin=-3, vmax=3)
+        # # axs[1, 0].imshow(ne[0, 0, slice, :, :].T.cpu().detach().numpy(), cmap='gray', vmin=-3, vmax=3)
+        # axs[1,0].imshow(seg_output_from_ce[:,slice, :, :].T.cpu().detach().numpy(), alpha=0.5)
+        # axs[1,0].axis('off')
+        # # axs[1, 0].imshow(seg_output[:,slice, :, :].T.cpu().detach().numpy(), cmap='gray')
+        # # axs[1, 0].set_title('Segmentation Output from Domain-Adapted NC Model')
+        # # axs[1, 0].axis('off')
+        # # axs[1,1].set_title('Segmentation Output from CE Model on CE input')
+        # # axs[1,1].imshow(seg_output_ce[:,slice, :, :].T.cpu().detach().numpy(), cmap='gray')
+        # # axs[1,1].axis('off')
         plt.tight_layout()
 
         abs_diff_latent = 0
@@ -131,7 +136,7 @@ if __name__ == '__main__':
 
         for output in zip(original_nc, original_ce,original_nc_from_ce):
             nc_l,ce_l,ne_from_ce_l = output
-            if nc_l.shape[1] == 10 :
+            if nc_l.shape[1] == 2 :
                 if nc_l.shape[-1]>16:
                     # add the cross entropy difference between the output spaces
                     abs_diff_output += (torch.nn.CrossEntropyLoss()(nc_l, ce_l.argmax(dim=1)) + torch.nn.CrossEntropyLoss()(ce_l, nc_l.argmax(dim=1)))/2
