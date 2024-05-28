@@ -15,7 +15,7 @@ spacing = 2
 fold = 0
 
 preprocessed_name = '2mm_cancer_customPP'
-model_name = '6_tot_ch'
+model_name = '6_tot_ch_talkative'
 
 vfs = [fold]
 

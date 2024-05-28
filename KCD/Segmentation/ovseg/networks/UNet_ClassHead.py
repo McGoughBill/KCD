@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torch.functional as F
 import numpy as np
 import os
 from KCD.Segmentation.ovseg.networks.nfUNet import concat_attention, concat
@@ -140,14 +141,11 @@ class GlobalPowerPooling(nn.Module):
             # do LP pooling with a stride of 0 and kernel size of the spatial shape
             # divide by number of elements to make it a mean roughly
             # print('GlobalPowerPooling', spatial_shape)
-            self.pool = nn.LPPool3d(p, spatial_shape, stride=1, ceil_mode=True)
-            self.p = p
-            self.spatial_shape = spatial_shape
 
         def forward(self, xb):
             b, c, *_ = xb.shape
             # print('xb shape:',xb.shape)
-            return self.pool(xb).view(b,c) / np.prod(self.spatial_shape)
+            return xb.view(b,c,-1).pow(2).sum(dim=-1).pow(1/2)
 
 # %% now simply the logits
 class Logits(nn.Module):

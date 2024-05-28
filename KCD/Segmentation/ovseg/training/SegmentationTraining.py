@@ -410,7 +410,18 @@ class SegmentationTrainingV2_classhead(SegmentationTraining):
         cls_lb = cls_lb.to(self.dev)
 
         out,cls_pred = self.network(xb)
+        seg_loss = self.loss_fctn(out, yb, mask)
+        cls_loss = self.class_loss(cls_pred,cls_lb.long())
+        print('seg loss {} cls loss {}'.format(seg_loss.item(),cls_loss.item()))
+        #check if cls loss is not a number
+        if torch.isnan(cls_loss):
+            print('cls loss is nan')
+            print('cls_pred',cls_pred)
+            print('cls_lb',cls_lb)
+            sys.stdout.flush()
+            assert False
 
-        loss = self.loss_fctn(out, yb, mask) + self.class_weight * self.class_loss(cls_pred,cls_lb.long())
+        sys.stdout.flush()
+        loss = seg_loss + self.class_weight * cls_loss
         return loss
 
