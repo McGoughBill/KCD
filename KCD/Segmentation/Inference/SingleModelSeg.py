@@ -164,7 +164,7 @@ class Ensemble_Seg(nn.Module):
         model_files = [file for file in listdir(path) if "fold_" in file]
 
         for foldpath in model_files:
-            self.SegModel = SegLoader(1, 2, 7, 2, filters=32, filters_max=1024)
+            self.SegModel = SegLoader(1, 2, 6, 2, filters=32, filters_max=1024)
             sm = torch.load(join(path, foldpath, "network_weights"), map_location='cpu')
             self.SegModel.load_state_dict(sm)
             self.SegModel.to(self.seg_dev)
