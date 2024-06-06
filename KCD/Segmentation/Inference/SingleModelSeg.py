@@ -448,9 +448,9 @@ class Ensemble_Seg(nn.Module):
                                      use_fill_holes_3d=True)
         self.segmodel_parameters_low = np.load(join(self.seg_mp_low, "model_parameters.pkl"), allow_pickle=True)
         params_low = self.segmodel_parameters_low['data'].copy()
-        params_low['n_folds']=len(self.Segment)
+        params_low['n_folds']=5
 
-        for i in range(len(self.Segment)):
+        for i in range(params_low['n_folds']):
             seg_ppdata = SegmentationData(None, False, i, preprocessed_path=split(self.preprocess_path)[0], **params_low)
             for j in range(len(seg_ppdata.val_ds)):
                 data_tpl = seg_ppdata.val_ds[j]
