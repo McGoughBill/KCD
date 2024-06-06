@@ -22,41 +22,6 @@ import nibabel as nib
 warnings.filterwarnings("ignore")
 
 
-# Define a function to grab the required image:
-def get_image(image_path):
-    '''
-    :param image_path: str
-    :return hu_array, dcm_metadata: arr, dicom object
-    '''
-    image = dicom.dcmread(image_path).pixel_array.astype(np.float32).reshape(512, 512, 1)
-    dcm_metadata = dicom.dcmread(image_path)
-    # Correctly set the HU values, using dicom metadata lookup table:
-    hu_array = pydicom.pixel_data_handlers.util.apply_modality_lut(image, dcm_metadata)
-
-    return hu_array, dcm_metadata
-
-
-# Define a function to get the dose from a given image:
-def get_dose(image_path):
-    '''
-    :param image_path: str
-    :return exposure: float
-    '''
-    img = pydicom.dcmread(image_path)
-    exposure = img[0x0018, 0x1152].value
-    return exposure
-
-def get_current(image_path):
-    '''
-    :param image_path: str
-    :return current: float
-    '''
-    # img = pydicom.dcmread(image_path)
-    # current = img[0x0018, 0x1151].value
-    # return current
-    return 300
-
-
 def from_HU_to_normal(image):
     '''
     :param image: numpy array_like
@@ -86,7 +51,7 @@ def XCIST_incident_photon_number(current):
     return m*current + c
 
 # Define a function to calculate the noise using equation (11) in the paper:
-def calculate_noise(image, current=400, dose_fraction=0.75, sigma_e=np.sqrt(8.2), num_detectors=1276):
+def calculate_noise(image, current=400, dose_fraction=0.75, sigma_e=np.sqrt(2), num_detectors=1276):
     '''
     :param image: numpy array_like
     :param current: float
@@ -100,7 +65,7 @@ def calculate_noise(image, current=400, dose_fraction=0.75, sigma_e=np.sqrt(8.2)
     N_0a = XCIST_incident_photon_number(current)
     # Normalise image values:
     image = from_HU_to_normal(image)
-    shape = image.shape
+    shape = np.squeeze(image).shape[::-1]
     # Obtain sinogram of image using tomosipo:
     vg = ts.volume(shape=(1, *shape), size=(5, 300, 300))
     pg = ts.cone(angles=360, shape=(1, num_detectors), size=(1, num_detectors), src_det_dist=1080)
@@ -116,5 +81,6 @@ def calculate_noise(image, current=400, dose_fraction=0.75, sigma_e=np.sqrt(8.2)
     expP_noisy = expP + added_noise
     # Reconstruct the image from the noisy sinogram:
     noisy_image = from_normal_to_HU(fbp(A, torch.Tensor(expP_noisy)).detach().cpu().numpy())[0].T
-    noisy_image = noisy_image.reshape(*shape, 1)
+    noisy_image = noisy_image
+
     return noisy_image
