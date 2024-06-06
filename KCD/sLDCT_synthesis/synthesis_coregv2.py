@@ -2,6 +2,7 @@ from KCD.sLDCT_synthesis.jack_additive import calculate_noise
 import os
 import numpy as np
 import nibabel as nib
+import sys
 
 def get_nii_image(image_path):
     '''
@@ -9,32 +10,47 @@ def get_nii_image(image_path):
     :return hu_array: arr
     '''
     image = nib.load(image_path).get_fdata()
-    header = nib.load(image_path).header
-    return image, header
+    aff = nib.load(image_path).affine
+    return image, aff
 
-def simulate_noise(image, dose_fraction=0.75, exposure_time=0.5, current = 400):
+def simulate_noise(image, is_kits, dose_fraction=0.75, exposure_time=0.5, current = 400):
     '''
     :param image_path: str
     :param dose_fraction: float
     :param current: float
     :return: numpy array_like
     '''
-    noise = np.zeros_like(image)
-    for i in range(image.shape[0]):
-        noise[i] = calculate_noise(np.squeeze(image[i]), current= current*exposure_time, dose_fraction=dose_fraction)
-    return image + noise
+    noised_image = np.zeros_like(image)
+    if is_kits:
+        print('KITS',image.shape)
+        for i in range(image.shape[0]):
+            slice = image[i]
+            slice = slice[:,: ,np.newaxis]
+            noisy_slice = calculate_noise(slice, current= current*exposure_time, dose_fraction=dose_fraction)
+            noised_image[i] = noisy_slice
+    else:
+        print('RCC',image.shape)
+        for i in range(image.shape[-1]):
+            slice = image[:,:,i]
+            slice = slice[:,: ,np.newaxis]
+            noisy_slice = calculate_noise(slice, current= current*exposure_time, dose_fraction=dose_fraction)
+            noised_image[:,:,i] = noisy_slice
+    sys.stdout.flush()
+    return noised_image
 
-def save_nii_image(image, header, save_path):
+def save_nii_image(image, aff, save_path,dtype=np.float32):
     '''
     :param image: numpy array_like
     :param header: nibabel.nifti1.Nifti1Header
     :param save_path: str
     :return: None
     '''
-    nii_image = nib.Nifti1Image(image, None, header)
+    image = image.astype(dtype)
+    nii_image = nib.Nifti1Image(image, affine=aff.astype(dtype))
     nib.save(nii_image, save_path)
 
-def main(raw_data_path, output_data_path):
+
+def main(raw_data_path, output_data_path,dose_fraction=0.75,current=400,exposure_time=0.5):
     '''
     :param raw_data_path: str
     :return: None
@@ -46,12 +62,15 @@ def main(raw_data_path, output_data_path):
         os.makedirs(output_data_path)
 
     for file in [f for f in os.listdir(raw_data_path) if f.endswith('.nii.gz')]:
+        is_kits =  'kits' in file.lower()
         image_path = os.path.join(raw_data_path, file)
-        image, header = get_nii_image(image_path)
-        noised_image = simulate_noise(image)
-        save_nii_image(noised_image, header, os.path.join(output_data_path, file))
+        image, aff = get_nii_image(image_path)
+        noised_image = simulate_noise(image,is_kits,dose_fraction=dose_fraction,current=current,exposure_time=exposure_time)
+        save_nii_image(noised_image, aff, os.path.join(output_data_path, file))
 
 if __name__ == '__main__':
-    raw_data_path = '/Users/mcgoug01/Downloads/process_coregv2/images'
-    output_data_path = '/Users/mcgoug01/Downloads/process_coregv2/noised_images'
-    main(raw_data_path, output_data_path)
+    raw_data_path = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/raw_data/sldct_vs_ldct_test/tcia_nc/images'
+    dose_fractions = [0.8,0.9]
+    for dose_fraction in dose_fractions[::-1]:
+        output_data_path = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/raw_data/sldct_vs_ldct_test/tcia_nc/noised_ims_{}'.format(dose_fraction)
+        main(raw_data_path, output_data_path,dose_fraction=dose_fraction,current=1000,exposure_time=0.5)

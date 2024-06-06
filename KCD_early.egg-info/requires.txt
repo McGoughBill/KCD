@@ -1,8 +1,9 @@
 torch
-dgl
 matplotlib
 nibabel
 bpy
+dicom2nifti
+gecatsim
 numpy
 opencv-python
 pandas
@@ -15,4 +16,3 @@ simpleitk
 torchvision
 pymeshfix
 rt_utils
-xgboost
