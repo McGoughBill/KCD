@@ -9,10 +9,11 @@ Keywords: pip,pytorch,cancer
 Requires-Python: >=3.10
 License-File: LICENSE
 Requires-Dist: torch
-Requires-Dist: dgl
 Requires-Dist: matplotlib
 Requires-Dist: nibabel
 Requires-Dist: bpy
+Requires-Dist: dicom2nifti
+Requires-Dist: gecatsim
 Requires-Dist: numpy
 Requires-Dist: opencv-python
 Requires-Dist: pandas
@@ -25,4 +26,3 @@ Requires-Dist: simpleitk
 Requires-Dist: torchvision
 Requires-Dist: pymeshfix
 Requires-Dist: rt_utils
-Requires-Dist: xgboost

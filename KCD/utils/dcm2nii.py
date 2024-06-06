@@ -153,24 +153,24 @@ def _remove_accents_(unicode_filename):
 
 
 if __name__ == '__main__':
-    COLTEA_home = '/media/mcgoug01/Crucial X6/Coltea-Lung-CT-100W/Coltea-Lung-CT-100W/'
-    COLTEA_save = '/media/mcgoug01/Crucial X6/Coltea-Lung-CT-100W-NIFTI/'
+    COLTEA_home = '/Users/mcgoug01/Downloads/wcm23-20240604_141336'
+    COLTEA_save = '/Users/mcgoug01/Downloads/nii_folder'
 
     if not os.path.exists(COLTEA_save):
         os.makedirs(COLTEA_save)
 
-    for phase in ['ARTERIAL', 'NATIVE', 'VENOUS']:
-        if not os.path.exists(os.path.join(COLTEA_save, phase)):
-            os.makedirs(os.path.join(COLTEA_save, phase))
-
-    for patient in os.listdir(COLTEA_home):
+    for i, patient in enumerate([file for file in os.listdir(COLTEA_home) if file != '.DS_Store']):
+        print(i,patient)
         patient_path = os.path.join(COLTEA_home, patient)
-        for phase in os.listdir(patient_path):
-            phase_path = os.path.join(patient_path, phase,'DICOM')
-            s_im_p = os.path.join(COLTEA_save, phase, patient+'.nii.gz')
-            try:
-                convert_directory(phase_path, s_im_p, compression=True,
-                                          reorient=True)
-            except:
-                print('Failed to convert directory')
-                continue
+        patient_path = os.path.join(patient_path, os.listdir(patient_path)[0],'DICOM')
+        s_im_p = os.path.join(COLTEA_save,  patient+f'-{i}.nii.gz')
+        try:
+            convert_directory(patient_path, s_im_p, compression=True,
+                                      reorient=True)
+            print('Converted')
+        except:
+            print(patient)
+            print('Failed to convert directory')
+            continue
+
+        print()
