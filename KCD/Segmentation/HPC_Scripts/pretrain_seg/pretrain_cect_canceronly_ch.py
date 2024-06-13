@@ -15,7 +15,7 @@ spacing = 2
 fold = 0
 
 preprocessed_name = '2mm_cancer_customPP'
-model_name = '6_tot_ch_talkative'
+model_name = '6_tot_ch_talkative_cls10'
 
 vfs = [fold]
 
@@ -36,7 +36,7 @@ model_params = get_model_params_3d_res_encoder_U_Net(patch_size,
                                                      n_fg_classes=n_fg_classes,
                                                      use_prg_trn=False, fp32=True)
 
-model_params['training']['class_weight'] = 0.3
+model_params['training']['class_weight'] = 10
 model_params['training']['class_seg_label'] = 1
 model_params['training']['vol_thresh_mm'] = 500
 model_params['network']['patch_size'] = patch_size[0]

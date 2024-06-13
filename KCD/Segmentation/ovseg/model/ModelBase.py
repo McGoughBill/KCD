@@ -1,3 +1,4 @@
+import sys
 from os.path import join, exists
 from KCD.Segmentation.ovseg.utils import io, path_utils
 from KCD.Segmentation.ovseg.utils.dict_equal import dict_equal, print_dict_diff
@@ -14,8 +15,25 @@ except ModuleNotFoundError:
 import numpy as np
 import torch.nn.functional as F
 
-
 NO_NAME_FOUND_WARNING_PRINTED = False
+
+def _get_xyz_list(shape, overlap,patch_size):
+    nz, nx, ny = shape
+
+    n_patches = np.ceil((np.array([nz, nx, ny]) - patch_size) /
+                        (overlap * patch_size)).astype(int) + 1
+
+    z_list = np.linspace(0, nz - patch_size[0], n_patches[0]).astype(int).tolist()
+    x_list = np.linspace(0, nx - patch_size[1], n_patches[1]).astype(int).tolist()
+    y_list = np.linspace(0, ny - patch_size[2], n_patches[2]).astype(int).tolist()
+
+    zxy_list = []
+    for z in z_list:
+        for x in x_list:
+            for y in y_list:
+                zxy_list.append((z, x, y))
+
+    return zxy_list
 
 
 class ModelBase(object):
@@ -269,6 +287,35 @@ class ModelBase(object):
                     s = metric+': '+self.fmt_write+'\n'
                     file.write(s.format(self.global_metrics[metric]))
 
+                if ('max_pospred' in metric_names) and ('max_negpred' in metric_names):
+                    # for each case, take the max pospred and min negpred and use them to calculate
+                    # fold-wise ROC AUC
+                    predictions = [results[case]['max_negpred'] for case in cases]
+                    predictions += [results[case]['max_pospred'] for case in cases]
+                    predictions = np.asarray(predictions)
+                    labels = np.concatenate([np.zeros(len(cases)),np.ones(len(cases))])
+
+                    #define ROC using numpy
+                    bounds = np.linspace(0,1,200)
+                    tpr, fpr = [], []
+                    for bound in bounds:
+                        tpr.append(np.sum(predictions[labels==1]>bound)/np.sum(labels==1))
+                        fpr.append(np.sum(predictions[labels==0]>bound)/np.sum(labels==0))
+                    tpr,fpr = np.array(tpr),np.array(fpr)
+                    roc_auc = np.trapz(tpr,fpr)
+                    file.write('ROC AUC: {:.4f}\n'.format(roc_auc))
+
+                    for spec in [0.9,0.95,0.98,0.99]:
+                        sens_index = np.argmax(tpr[fpr<=1-spec])
+                        sens = tpr[fpr<=1-spec][sens_index]
+                        threshold = bounds[fpr<=1-spec][sens_index]
+                        file.write('Sensitivity at '+str(spec*100)+'% specificity: {:.4f}\n'.format(sens))
+                        file.write('Threshold at '+str(spec*100)+'% specificity: {:.4f}\n'.format(threshold))
+
+
+
+
+
             # now the per volume results from the results dict
             # here the mean and median
             file.write('PER VOLUME RESULTS:\n')
@@ -392,15 +439,95 @@ class ModelBase(object):
             else:
                 names_for_txt[scan] = scan
 
-            # predict from this datapoint
-            pred = self.__call__(data_tpl)
-            if torch.is_tensor(pred):
-                pred = pred.cpu().numpy()
+
+
+            if self.model_parameters['architecture'].lower() in ['unet_classhead','unetclasshead','unet-classhead']:
+
+                # predict from this datapoint
+                pred, cls = self.__call__(data_tpl)
+                if torch.is_tensor(pred):
+                    pred = pred.cpu().numpy()
+                if torch.is_tensor(cls):
+                    cls = cls.cpu().numpy()
+
+                seg = data_tpl['label']
+                #get cls labels using seg in datatpl and get_xzy_list
+                shape_in = np.array(seg.shape)
+                patch_size = self.model_parameters['data']['trn_dl_params']['patch_size']
+
+                # %% possible padding of too small volumes
+                pad = [0, patch_size[2] - shape_in[3], 0, patch_size[1] - shape_in[2],
+                       0, patch_size[0] - shape_in[1]]
+                pad = np.maximum(pad, 0).tolist()
+                seg = F.pad(torch.Tensor(seg), pad).type(torch.float).numpy()
+                overlap = self.model_parameters['prediction']['overlap']
+                threshold = self.model_parameters['training']['vol_thresh_mm']
+                targ_label = self.model_parameters['training']['class_seg_label']
+                xyz_list = _get_xyz_list(np.array(seg.shape[1:]),overlap=overlap,patch_size=np.array(patch_size))
+                #cls label is 1 if label 1 exists in patch with a volume above 500mm^3
+                cls_labels = []
+
+                for xyz in xyz_list:
+                    x,y,z = xyz
+                    patch = seg[:,x:x+patch_size[0],
+                                y:y+patch_size[1],
+                                z:z+patch_size[2]]
+
+                    if np.sum(patch==targ_label) > threshold/np.prod(data_tpl['spacing']):
+                        cls_labels.append(1)
+                    else:
+                        cls_labels.append(0)
+
+                cls_labels = np.array(cls_labels)>0
+
+                pos_clspred = cls[cls_labels,0,1]
+                neg_clspred = cls[np.logical_not(cls_labels),0,1]
+                # print(cls_labels.shape,cls.shape)
+                # for i in range(len(cls_labels)):
+                #     print('cls_label:',cls_labels[i],'cls:',cls[i])
+                #
+                # print('pos_clspred:',pos_clspred)
+                # print('neg_clspred:',neg_clspred)
+
+                sys.stdout.flush()
+                # assert False
+                cls = cls[:,0,1] > 0.5
+
+                # calculate DSC, sensitivity, specificity, PPV, NPV, accuracy for cls predictions
+                dsc = 2*np.sum(np.logical_and(cls_labels,cls))/(np.sum(cls_labels)+np.sum(cls))
+                max_pospred = np.max(pos_clspred)
+                min_negpred = np.min(neg_clspred)
+                max_negpred = np.max(neg_clspred)
+                min_pospred = np.min(pos_clspred)
+                sensitivity = np.sum(np.logical_and(cls_labels,cls))/np.sum(cls_labels)
+                specificity = np.sum(np.logical_and(np.logical_not(cls_labels),np.logical_not(cls)))/np.sum(np.logical_not(cls_labels))
+                ppv = np.sum(np.logical_and(cls_labels,cls))/np.sum(cls)
+                npv = np.sum(np.logical_and(np.logical_not(cls_labels),np.logical_not(cls)))/np.sum(np.logical_not(cls))
+                accuracy = np.sum(np.logical_and(cls_labels,cls)+np.logical_and(np.logical_not(cls_labels),np.logical_not(cls)))/len(cls)
+            else:
+                # predict from this datapoint
+                pred = self.__call__(data_tpl)
+                if torch.is_tensor(pred):
+                    pred = pred.cpu().numpy()
 
             # now compute the error metrics that we like
             metrics = self.compute_error_metrics(data_tpl)
             if metrics is not None:
                 results[scan] = metrics
+
+            if self.model_parameters['architecture'].lower() in ['unet_classhead', 'unetclasshead', 'unet-classhead']:
+                results[scan]['class_dsc'] = dsc
+                results[scan]['class_sensitivity'] = sensitivity
+                results[scan]['class_specificity'] = specificity
+                results[scan]['class_ppv'] = ppv
+                results[scan]['class_npv'] = npv
+                results[scan]['class_accuracy'] = accuracy
+                results[scan]['max_pospred'] = max_pospred
+                results[scan]['min_negpred'] = min_negpred
+                results[scan]['max_negpred'] = max_negpred
+                results[scan]['min_pospred'] = min_pospred
+
+
             self._update_global_metrics(data_tpl)
 
             # store the prediction for example as nii files
@@ -559,7 +686,6 @@ class ModelBase(object):
             return
 
         if continuous:
-            print('so true bestie')
             self.eval_ds_continuous(self.data.val_ds, ds_name='validation_cont',
                          save_preds=save_preds, save_plots=save_plots,
                          force_evaluation=force_evaluation,

@@ -23,7 +23,7 @@ from KCD.Segmentation.ovseg.networks.UNetTransformer import UNetTransformer
 from KCD.Segmentation.ovseg.networks.SwinUnetr import Trans_Unetr
 from KCD.Segmentation.ovseg.networks.nfUNet import nfUNet
 from KCD.Segmentation.ovseg.training.SegmentationTraining import SegmentationTraining, SegmentationTrainingV2, SegmentationTrainingV2_classhead
-from KCD.Segmentation.ovseg.prediction.SlidingWindowPrediction import SlidingWindowPrediction
+from KCD.Segmentation.ovseg.prediction.SlidingWindowPrediction import SlidingWindowPrediction, SlidingWindowPrediction_classhead
 from KCD.Segmentation.ovseg.postprocessing.SegmentationPostprocessing import SegmentationPostprocessing
 from KCD.Segmentation.ovseg.utils.io import save_nii_from_data_tpl, save_npy_from_data_tpl, load_pkl, read_nii, save_dcmrt_from_data_tpl, is_dcm_path
 from KCD.Segmentation.ovseg.utils.torch_np_utils import maybe_add_channel_dim
@@ -194,7 +194,14 @@ class SegmentationModel(ModelBase):
         else:
             params.update(self.model_parameters['prediction'])
 
-        self.prediction = SlidingWindowPrediction(**params)
+        if self.model_parameters['architecture'].lower() in ['unet_classhead','unetclasshead','unet-classhead']:
+            self.prediction = SlidingWindowPrediction_classhead(**params)
+        else:
+            self.prediction = SlidingWindowPrediction(**params)
+
+        for i in range(10):
+            print(f'Initialised prediction object',self.prediction)
+        sys.stdout.flush()
 
     def initialise_postprocessing(self):
         try:
@@ -974,7 +981,14 @@ class SegmentationModel_trainontest(ModelBase):
         else:
             params.update(self.model_parameters['prediction'])
 
-        self.prediction = SlidingWindowPrediction(**params)
+        if self.model_parameters['architecture'].lower() in ['unet_classhead','unetclasshead','unet-classhead']:
+            self.prediction = SlidingWindowPrediction_classhead(**params)
+        else:
+            self.prediction = SlidingWindowPrediction(**params)
+
+        for i in range(10):
+            print(f'Initialised prediction object',self.prediction)
+        sys.stdout.flush()
 
     def initialise_postprocessing(self):
         try:
@@ -1095,14 +1109,14 @@ class SegmentationModel_trainontest(ModelBase):
             else:
                 bin_pred = None
         # now the importat part: the sliding window evaluation (or derivatives of it)
-        pred = self.prediction(im)
+        pred,cls = self.prediction(im)
         data_tpl[self.pred_key] = pred
 
         # inside the postprocessing the result will be attached to the data_tpl
         if do_postprocessing:
             self.postprocessing.postprocess_data_tpl(data_tpl, self.pred_key, bin_pred)
 
-        return data_tpl[self.pred_key]
+        return data_tpl[self.pred_key], cls
 
     def __callcont__(self, data_tpl, do_postprocessing=True):
         '''
