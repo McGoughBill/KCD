@@ -439,9 +439,9 @@ class ModelBase(object):
             else:
                 names_for_txt[scan] = scan
 
-
-
-            if self.model_parameters['architecture'].lower() in ['unet_classhead','unetclasshead','unet-classhead']:
+            if self.model_parameters['architecture'].lower() in ['unet_classhead', 'unetclasshead', 'unet-classhead',
+                                                                 'unet_classhead_maxpool', 'unetclassheadmaxpool',
+                                                                 'unet-classhead-maxpool']:
 
                 # predict from this datapoint
                 pred, cls = self.__call__(data_tpl)
@@ -461,7 +461,7 @@ class ModelBase(object):
                 pad = np.maximum(pad, 0).tolist()
                 seg = F.pad(torch.Tensor(seg), pad).type(torch.float).numpy()
                 overlap = self.model_parameters['prediction']['overlap']
-                threshold = self.model_parameters['training']['vol_thresh_mm']
+                threshold = 0
                 targ_label = self.model_parameters['training']['class_seg_label']
                 xyz_list = _get_xyz_list(np.array(seg.shape[1:]),overlap=overlap,patch_size=np.array(patch_size))
                 #cls label is 1 if label 1 exists in patch with a volume above 500mm^3
@@ -515,7 +515,9 @@ class ModelBase(object):
             if metrics is not None:
                 results[scan] = metrics
 
-            if self.model_parameters['architecture'].lower() in ['unet_classhead', 'unetclasshead', 'unet-classhead']:
+            if self.model_parameters['architecture'].lower() in ['unet_classhead', 'unetclasshead', 'unet-classhead',
+                                                                 'unet_classhead_maxpool', 'unetclassheadmaxpool',
+                                                                 'unet-classhead-maxpool']:
                 results[scan]['class_dsc'] = dsc
                 results[scan]['class_sensitivity'] = sensitivity
                 results[scan]['class_specificity'] = specificity

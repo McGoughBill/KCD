@@ -18,7 +18,7 @@ from KCD.Segmentation.ovseg.augmentation.SegmentationAugmentation import Segment
 from KCD.Segmentation.ovseg.data.SegmentationData import SegmentationData, SegmentationData_trainontest
 from KCD.Segmentation.ovseg.data.Dataset import raw_Dataset
 from KCD.Segmentation.ovseg.networks.UNet import UNet
-from KCD.Segmentation.ovseg.networks.UNet_ClassHead import UNet_ClassHead
+from KCD.Segmentation.ovseg.networks.UNet_ClassHead import UNet_ClassHead, UNet_ClassHead_MaxPool
 from KCD.Segmentation.ovseg.networks.UNetTransformer import UNetTransformer
 from KCD.Segmentation.ovseg.networks.SwinUnetr import Trans_Unetr
 from KCD.Segmentation.ovseg.networks.nfUNet import nfUNet
@@ -174,6 +174,8 @@ class SegmentationModel(ModelBase):
             self.network = UNet(**params).to(self.dev)
         elif self.model_parameters['architecture'].lower() in ['unet_classhead','unetclasshead','unet-classhead']:
             self.network = UNet_ClassHead(**params).to(self.dev)
+        elif self.model_parameters['architecture'].lower() in ['unet_classhead_maxpool','unetclassheadmaxpool','unet-classhead-maxpool']:
+            self.network = UNet_ClassHead_MaxPool(**params).to(self.dev)
         elif self.model_parameters['architecture'].lower() in ['nfunet', 'nf-unet']:
             self.network = nfUNet(**params).to(self.dev)
         elif self.model_parameters['architecture'].lower() in ['unettransformer', 'UNetTransformer', 'unet-transformer']:
@@ -194,7 +196,8 @@ class SegmentationModel(ModelBase):
         else:
             params.update(self.model_parameters['prediction'])
 
-        if self.model_parameters['architecture'].lower() in ['unet_classhead','unetclasshead','unet-classhead']:
+        if self.model_parameters['architecture'].lower() in ['unet_classhead','unetclasshead','unet-classhead',
+                                                            'unet_classhead_maxpool','unetclassheadmaxpool','unet-classhead-maxpool']:
             self.prediction = SlidingWindowPrediction_classhead(**params)
         else:
             self.prediction = SlidingWindowPrediction(**params)
@@ -247,7 +250,9 @@ class SegmentationModel(ModelBase):
                                  'dict of training paramters.')
         params = self.model_parameters['training'].copy()
         prep_params = self.model_parameters['preprocessing']
-        if self.model_parameters['network']['architecture'].lower() in ['unet_classhead','unetclasshead','unet-classhead']:
+        if self.model_parameters['architecture'].lower() in ['unet_classhead', 'unetclasshead', 'unet-classhead',
+                                                             'unet_classhead_maxpool', 'unetclassheadmaxpool',
+                                                             'unet-classhead-maxpool']:
             self.training = SegmentationTrainingV2_classhead(network=self.network,
                                                    trn_dl=self.data.trn_dl,
                                                    val_dl=self.data.val_dl,
@@ -960,6 +965,8 @@ class SegmentationModel_trainontest(ModelBase):
             self.network = UNet(**params).to(self.dev)
         elif self.model_parameters['architecture'].lower() in ['unet_classhead','unetclasshead','unet-classhead']:
             self.network = UNet_ClassHead(**params).to(self.dev)
+        elif self.model_parameters['architecture'].lower() in ['unet_classhead_maxpool','unetclassheadmaxpool','unet-classhead-maxpool']:
+            self.network = UNet_ClassHead_MaxPool(**params).to(self.dev)
         elif self.model_parameters['architecture'].lower() in ['nfunet', 'nf-unet']:
             self.network = nfUNet(**params).to(self.dev)
         elif self.model_parameters['architecture'].lower() in ['unettransformer', 'UNetTransformer',
@@ -981,7 +988,9 @@ class SegmentationModel_trainontest(ModelBase):
         else:
             params.update(self.model_parameters['prediction'])
 
-        if self.model_parameters['architecture'].lower() in ['unet_classhead','unetclasshead','unet-classhead']:
+        if self.model_parameters['architecture'].lower() in ['unet_classhead', 'unetclasshead', 'unet-classhead',
+                                                             'unet_classhead_maxpool', 'unetclassheadmaxpool',
+                                                             'unet-classhead-maxpool']:
             self.prediction = SlidingWindowPrediction_classhead(**params)
         else:
             self.prediction = SlidingWindowPrediction(**params)
@@ -1035,9 +1044,9 @@ class SegmentationModel_trainontest(ModelBase):
         params = self.model_parameters['training'].copy()
         patch_size = self.model_parameters['network']['patch_size']
         prep_params = self.model_parameters['preprocessing']
-        if self.model_parameters['architecture'].lower() in ['unet_classhead','unetclasshead','unet-classhead']:
-            sys.stdout.write(str(params))
-            sys.stdout.flush()
+        if self.model_parameters['architecture'].lower() in ['unet_classhead', 'unetclasshead', 'unet-classhead',
+                                                             'unet_classhead_maxpool', 'unetclassheadmaxpool',
+                                                             'unet-classhead-maxpool']:
             self.training = SegmentationTrainingV2_classhead(network=self.network,
                                                    trn_dl=self.data.trn_dl,
                                                    val_dl=self.data.val_dl,

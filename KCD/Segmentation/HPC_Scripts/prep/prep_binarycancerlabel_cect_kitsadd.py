@@ -19,5 +19,5 @@ prep = SegmentationPreprocessing(apply_resizing=True,
 
 prep.initialise_preprocessing()
 
-prep.preprocess_raw_data(raw_data='kits_add_nooverlap_v2',
+prep.preprocess_raw_data(raw_data='masked_kits_add_nooverlap_v2',
                           preprocessed_name=preprocessed_name)

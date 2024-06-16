@@ -6,8 +6,8 @@ import numpy as np
 
 seg_fp = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/trained_models/kits_nooverlap_v2/2mm_kidneybinary_customPP/6_tot'
 # seg_fp = '/home/wcm23/rds/hpc-work/FineTuningKITS23/trained_models/all_cect/4mm_binary/6,3x3x3,32'
-data_names = ['tcia_cect']
-do_prep = False
+data_names = ['kits_add_nooverlap_v2']
+do_prep = True
 do_infer = True
 
 for data_name in data_names:
