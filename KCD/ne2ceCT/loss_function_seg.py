@@ -14,6 +14,50 @@ def off_diagonal(x):
     assert n == m
     return x.flatten()[:-1].view(n - 1, n + 1)[:, 1:].flatten()
 
+class DomainAdaptationLoss(nn.Module):
+    def __init__(self, l2_weight = 0, cce_weight = 0, cos_weight = 0):
+        super(DomainAdaptationLoss, self).__init__()
+        self.cos = nn.CosineSimilarity(reduction='none')
+        self.cce = nn.CrossEntropyLoss(reduction='none')
+        self.l2 = nn.MSELoss(reduction='none')
+        self.l2_weight = l2_weight
+        self.cce_weight = cce_weight
+        self.cos_weight = cos_weight
+
+    def normalize(self, z):
+        mag = torch.linalg.vector_norm(z, dim=-1, keepdim=True)
+        return z / mag
+
+    def forward(self, ne_log_list,ne_cls_features,enhancement_pred,
+                ce_log_list,ce_cls_features,enhancement_label,seg_mask = None):
+
+        cce_loss, l2_loss, cos_loss = 0, 0, 0
+
+        if self.cce_weight>0:
+            scale_weights = 2 ** np.arange(len(ne_log_list))
+            scale_weights = scale_weights / scale_weights.sum()
+            cce_spatial = self.cce(ne_log_list[0], torch.argmax(ce_log_list[0], dim=1))*scale_weights[0]
+            for i in range(1,len(ne_log_list)):
+                cce_spatial += self.cce(ne_log_list[i], torch.argmax(ce_log_list[i], dim=1))*scale_weights[i]
+            if seg_mask is not None:
+                cce_loss = torch.masked_select(cce_spatial,seg_mask).mean()
+            else:
+                cce_loss = cce_spatial.mean()
+
+        if self.l2_weight>0:
+            l2_spatial = self.l2(enhancement_pred, enhancement_label)
+            if seg_mask is not None:
+                l2_loss = torch.masked_select(l2_spatial,seg_mask).mean()
+            else:
+                l2_loss = l2_spatial.mean()
+
+        if self.cos_weight>0:
+            cos_loss = (1 - self.cos(self.normalize(ne_cls_features), self.normalize(ce_cls_features))).mean()
+
+        loss = cce_loss*self.cce_weight + l2_loss*self.l2_weight + cos_loss*self.cos_weight
+
+        return loss, cce_loss.item(), l2_loss.item(), cos_loss.item()
+
 
 class LatentSimilarityLoss(nn.Module):
     def __init__(self, l2_weight = 0, l1_weight = 0, cce_weight = 0, cos_weight = 0,
