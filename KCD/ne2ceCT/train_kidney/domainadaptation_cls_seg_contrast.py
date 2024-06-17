@@ -8,6 +8,7 @@ torch.multiprocessing.set_sharing_strategy('file_system')
 import argparse
 import torch.distributed as dist
 from datetime import timedelta
+import nibabel as nib
 
 from KCD.ne2ceCT.dataloader_seg_contrastprediction import CrossPhaseDataset
 from KCD.ne2ceCT.loss_function_seg import DomainAdaptationLoss as Loss
@@ -109,11 +110,19 @@ def main_worker(gpu,args):
                                                                                    world_size))
 
     log_path = os.path.join(ne2ceCT_path, 'logs.txt')
+    patch_save_path = os.path.join(ne2ceCT_path, 'patches')
     if args.rank == 0:
         if not os.path.exists(ne2ceCT_path):
             os.makedirs(ne2ceCT_path)
         if os.path.exists(log_path):
             os.remove(log_path)
+        if os.path.exists(patch_save_path):
+            # delete all files in the directory
+            for file in os.listdir(patch_save_path):
+                os.remove(os.path.join(patch_save_path, file))
+        else:
+            os.makedirs(patch_save_path)
+
 
     dataset = CrossPhaseDataset(dataset_ne_path, dataset_ce_path,
                                 home_path, seg_ce_path,
@@ -221,6 +230,26 @@ def main_worker(gpu,args):
                 print('Model saved')
                 with open(log_path, 'a') as f:
                     f.write('Model saved\n')
+
+                # save the last image patch, seg output, predicted enhancement, seg label, and diff as nifti files
+                epoch_patch_save_path = os.path.join(patch_save_path, 'epoch_{}'.format(epoch))
+                if not os.path.exists(epoch_patch_save_path):
+                    os.makedirs(epoch_patch_save_path)
+
+                ne = nib.Nifti1Image(ne.cpu().detach().numpy(), np.eye(4))
+                ce = nib.Nifti1Image(ce.cpu().detach().numpy(), np.eye(4))
+                seg_output = nib.Nifti1Image(S_loglist[-1].cpu().detach().numpy().argmax(dim=1), np.eye(4))
+                predicted_enhancement = nib.Nifti1Image(predicted_enhancement.cpu().detach().numpy(), np.eye(4))
+                seg_label = nib.Nifti1Image(seg.cpu().detach().numpy().argmax(dim=1), np.eye(4))
+                diff = nib.Nifti1Image(diff.cpu().detach().numpy(), np.eye(4))
+
+                nib.save(ne, os.path.join(epoch_patch_save_path, 'ne.nii.gz'))
+                nib.save(ce, os.path.join(epoch_patch_save_path, 'ce.nii.gz'))
+                nib.save(seg_output, os.path.join(epoch_patch_save_path, 'seg_output.nii.gz'))
+                nib.save(predicted_enhancement, os.path.join(epoch_patch_save_path, 'predicted_enhancement.nii.gz'))
+                nib.save(seg_label, os.path.join(epoch_patch_save_path, 'seg_label.nii.gz'))
+                nib.save(diff, os.path.join(epoch_patch_save_path, 'diff.nii.gz'))
+
 
             with open(log_path, 'a') as f:
                 f.write('\n')
