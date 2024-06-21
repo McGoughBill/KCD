@@ -235,6 +235,19 @@ class CrossPhaseDataset(Dataset):
 
         contrast_enhancedment = ce_patch - ne_patch
 
+        shapes = [ne_patch.shape == torch.Size([64,64,64]),ce_patch.shape == torch.Size([64,64,64]),
+              seg_patch.shape == torch.Size([64,64,64]),contrast_enhancedment.shape == torch.Size([64,64,64])]
+
+        if not all(shapes):
+            # print actual shapes and case
+            sys.stdout.write(f'ne shape: {ne_patch.shape}, ce shape: {ce_patch.shape}, seg shape: {seg_patch.shape}, diff shape: {contrast_enhancedment.shape}\n')
+            sys.stdout.write(f'case: {case}\n')
+            sys.stdout.flush()
+
+        print('DL patch shapes equal to torch.Size([64,64,64])',ne_patch.shape == torch.Size([64,64,64]),ce_patch.shape == torch.Size([64,64,64]),
+              seg_patch.shape == torch.Size([64,64,64]),contrast_enhancedment.shape == torch.Size([64,64,64]))
+        sys.stdout.flush()
+
         return ne_patch.unsqueeze(0), ce_patch.unsqueeze(0), seg_patch.unsqueeze(0), contrast_enhancedment.unsqueeze(0)
 
 

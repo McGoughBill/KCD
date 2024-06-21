@@ -888,7 +888,6 @@ class UNet_regressivehead_wrapper(nn.Module):
     def __init__(self,UNet,depth,start_filters=32,patch_size=64):
         super().__init__()
         self.UNet = UNet
-        self.kernel_sizes = kernel_sizes
         self.depth = depth
         self.num_upsamplers = self.depth - 2
 
@@ -918,7 +917,7 @@ class UNet_regressivehead_wrapper(nn.Module):
         regressive = torch.cat(regressives,dim=1)
         regressive = self.regressive_head(regressive)
 
-        return logs_list, out, feature_list, out_class_latents, regressive
+        return logs_list, out_class_latents, regressive
 
 
 

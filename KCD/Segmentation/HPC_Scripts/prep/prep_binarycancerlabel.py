@@ -5,7 +5,7 @@ from KCD.Segmentation.ovseg.preprocessing.SegmentationPreprocessing import Segme
 data_name = 'masked_coreg_ncct'
 spacing = 2
 
-preprocessed_name = '2mm_binary_canceronly'
+preprocessed_name = '2mm_canceronly_customPP'
 
 lb_classes = [2]
 

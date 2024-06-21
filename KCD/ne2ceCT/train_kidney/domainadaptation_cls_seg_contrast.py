@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 import os
-os.environ['OV_DATA_BASE'] ='/bask/projects/p/phwq4930-renal-canc/data/seg_data'
+os.environ['OV_DATA_BASE'] ="/rds/project/rds-sDuALntK11g"
 from torch.utils.data import DataLoader
 import torch.multiprocessing as mp
 torch.multiprocessing.set_sharing_strategy('file_system')
@@ -10,7 +10,7 @@ import torch.distributed as dist
 from datetime import timedelta
 import nibabel as nib
 
-from KCD.ne2ceCT.dataloader_seg_contrastprediction import CrossPhaseDataset
+from KCD.ne2ceCT.dataloader_contrastprediction import CrossPhaseDataset
 from KCD.ne2ceCT.loss_function_seg import DomainAdaptationLoss as Loss
 from KCD.ne2ceCT.lr_scheduler import LinearWarmupExponentialDecayScheduler
 import matplotlib.pyplot as plt
@@ -68,13 +68,17 @@ def main_worker(gpu,args):
     if args.distributed:
         torch.multiprocessing.set_start_method('fork', force=True)
     args.gpu = gpu
+    print('gpu', args.gpu)
     if args.distributed:
+        print('distributed',torch.distributed.is_available())
         args.rank = args.rank * args.ngpus_per_node + gpu
         dist.init_process_group(backend=args.dist_backend,
                                 init_method=args.dist_url,
                                 world_size=args.world_size,
                                 rank=args.rank,
                                 timeout=timedelta(300))
+    print('Dist is initialized',torch.distributed.is_initialized(),torch.distributed.is_nccl_available())
+    print('Cuda enabled',torch.cuda.is_available())
     torch.cuda.set_device(args.gpu)
     print(args.rank, ' gpu', args.gpu)
     if args.rank == 0:
@@ -92,9 +96,8 @@ def main_worker(gpu,args):
     workers = args.workers
     world_size = args.world_size
 
-    dataset_ne_path = os.path.join(os.environ['OV_DATA_BASE'], 'preprocessed/tcia_ncct_reg/cmd_ready_2/')
-    dataset_ce_path = os.path.join(os.environ['OV_DATA_BASE'], 'preprocessed/tcia_cect/cmd_ready_2/')
-    seg_ce_path = os.path.join(os.environ['OV_DATA_BASE'], 'predictions_npy/tcia_cect/[2 2 2]mm_correctedDA')
+    dataset_ne_path = os.path.join(os.environ['OV_DATA_BASE'], 'preprocessed/masked_final_pairedpretrain_nc/2mm_canceronly_customPP/')
+    dataset_ce_path = os.path.join(os.environ['OV_DATA_BASE'], 'preprocessed/masked_final_pairedpretrain_ce/2mm_canceronly_customPP/')
 
     assert os.path.exists(dataset_ne_path) and os.path.exists(dataset_ce_path)
     home_path = os.path.join(os.environ['OV_DATA_BASE'], 'ne2ceCT', 'kidney_{}_cancer'.format(spacing))
@@ -125,22 +128,23 @@ def main_worker(gpu,args):
 
 
     dataset = CrossPhaseDataset(dataset_ne_path, dataset_ce_path,
-                                home_path, seg_ce_path,
+                                home_path,
                                 device='cuda',
-                                is_train=True, patches_per_case=40, patch_size=64)
+                                is_train=True, patches_per_case=20, patch_size=64)
     if args.rank == 0:
         print(dataset.cases)
 
+    sys.stdout.flush()
     dataset.apply_foldsplit()
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers=workers)
 
-    mod_path = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/trained_models/kits_add_nooverlap_v2/2mm_canceronly_customPP/7_tot/fold_0/network_weights'
+    mod_path = '/rds/project/rds-sDuALntK11g/trained_models/masked_kits_add_nooverlap_v2_small/2mm_canceronly_customPP/6_tot_ch_talkative_cls1/fold_0/network_weights'
     model_T = get_3d_featureoutput_unet(1, out_dim, 6, filters=32, filters_max=1024).cuda(args.gpu)
-    model_T.load_state_dict(torch.load(mod_path))
+    model_T.load_state_dict(torch.load(mod_path,map_location='cuda:{}'.format(args.gpu)))
     model_S = get_3d_featureoutput_unet(1, out_dim, 6, filters=32, filters_max=1024).cuda(args.gpu)
-    model_S.load_state_dict(torch.load(mod_path))
+    model_S.load_state_dict(torch.load(mod_path,map_location='cuda:{}'.format(args.gpu)))
 
-    model_S = infer_network.UNet_regressivehead_wrapper(model_S, out_dim, 6, filters=32, filters_max=1024).cuda(args.gpu)
+    model_S = infer_network.UNet_regressivehead_wrapper(model_S, 6, start_filters=32).cuda(args.gpu)
 
     model_T.eval()
     model_S.train()
@@ -162,13 +166,13 @@ def main_worker(gpu,args):
     for epoch in range(epochs):
         dataloader.dataset.is_train = True
         model_S.train()
-        for i, (ne, ce, seg,diff) in enumerate(dataloader):
+        for i, (ne, ce, diff) in enumerate(dataloader):
             # forward
             ne = ne.cuda(args.gpu)
             ce = ce.cuda(args.gpu)
             diff = diff.cuda(args.gpu)
             with torch.no_grad():
-                T_loglist,cls_latent = model_T(ce)
+                T_loglist,_, _, cls_latent = model_T(ce)
             S_loglist, cls_latentpred,predicted_enhancement = model_S(ne)
 
             loss,cce_term,cls_term,mse_term = loss_func(S_loglist,cls_latentpred,predicted_enhancement,
@@ -206,13 +210,12 @@ def main_worker(gpu,args):
             with torch.no_grad():
                 model_S.eval()
                 val_losses_list = []
-                for i, (ne, ce,seg,diff) in enumerate(dataloader):
+                for i, (ne, ce,diff) in enumerate(dataloader):
                     ne = ne.cuda(args.gpu)
                     ce = ce.cuda(args.gpu)
-                    seg = seg.cuda(args.gpu)
                     diff = diff.cuda(args.gpu)
                     with torch.no_grad():
-                        T_loglist, cls_latent = model_T(ce)
+                        T_loglist,_, _, cls_latent = model_T(ce)
                     S_loglist, cls_latentpred, predicted_enhancement = model_S(ne)
                     loss, cce_term, cls_term, mse_term = loss_func(S_loglist, cls_latentpred, predicted_enhancement,
                                                                    T_loglist, cls_latent, diff)
@@ -238,9 +241,9 @@ def main_worker(gpu,args):
 
                 ne = nib.Nifti1Image(ne.cpu().detach().numpy(), np.eye(4))
                 ce = nib.Nifti1Image(ce.cpu().detach().numpy(), np.eye(4))
-                seg_output = nib.Nifti1Image(S_loglist[-1].cpu().detach().numpy().argmax(dim=1), np.eye(4))
+                seg_output = nib.Nifti1Image(torch.argmax(S_loglist[-1],dim=1).cpu().detach().numpy(), np.eye(4))
                 predicted_enhancement = nib.Nifti1Image(predicted_enhancement.cpu().detach().numpy(), np.eye(4))
-                seg_label = nib.Nifti1Image(seg.cpu().detach().numpy().argmax(dim=1), np.eye(4))
+                seg_label = nib.Nifti1Image(torch.argmax(T_loglist[-1],dim=1).cpu().detach().numpy(), np.eye(4))
                 diff = nib.Nifti1Image(diff.cpu().detach().numpy(), np.eye(4))
 
                 nib.save(ne, os.path.join(epoch_patch_save_path, 'ne.nii.gz'))
