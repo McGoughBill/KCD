@@ -7,14 +7,14 @@ import torch
 import sys
 
 
-data_name = 'coreg_ncct'
-spacing = 4
-fold = int(sys.argv[1])
+data_name = 'coreg_ncct_v2'
+spacing = int(sys.argv[1])
+fold = int(sys.argv[2])
 
 # preprocessed_name = '4mm_binary'
-preprocessed_name = '4mm_binary_customPP'
+preprocessed_name = '{}mm_kidneybinary_customPP'.format(spacing)
 # preprocessed_name='4mm_binary_test'
-model_name = '6,3x3x3,32_finetune_fromkits23forjacklong'
+model_name = '6_finetune'
 # model_name = 'del'
 
 dev = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -53,13 +53,13 @@ del model_params['training']['loss_params']
 lr=0.000001
 model_params['data']['folders'] = ['images', 'labels']
 model_params['data']['keys'] = ['image', 'label']
-model_params['training']['num_epochs'] = 300
+model_params['training']['num_epochs'] = 100
 model_params['training']['opt_name'] = 'ADAM'
 model_params['training']['opt_params'] = {'lr': lr,
                                             'betas': (0.95, 0.9),
                                             'eps': 1e-08}
-model_params['training']['lr_params'] = {'n_warmup_epochs': 15, 'lr_max': 0.0002}
-model_params['data']['trn_dl_params']['epoch_len']=500
+model_params['training']['lr_params'] = {'n_warmup_epochs': 15, 'lr_max': 0.0001}
+model_params['data']['trn_dl_params']['epoch_len']=1000
 model_params['data']['trn_dl_params']['padded_patch_size']=[2*patch_size[0]]*3
 model_params['data']['val_dl_params']['padded_patch_size']=[2*patch_size[0]]*3
 model_params['training']['lr_schedule'] = 'lin_ascent_log_decay'
@@ -69,7 +69,7 @@ model_params['data']['val_dl_params']['epoch_len']=100
 
 
 for vf in vfs:
-    path_to_model = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/trained_models/kits23_nooverlap/4mm_binary/for_jack_long/fold_0/network_weights'
+    path_to_model = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/trained_models/kits_nooverlap_v2/{}mm_kidneybinary_customPP/6_tot/fold_0/network_weights'.format(spacing)
 
     model = SegmentationModel(val_fold=vf,
                                 data_name=data_name,

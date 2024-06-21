@@ -69,8 +69,31 @@ def main(raw_data_path, output_data_path,dose_fraction=0.75,current=400,exposure
         save_nii_image(noised_image, aff, os.path.join(output_data_path, file))
 
 if __name__ == '__main__':
-    raw_data_path = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/raw_data/sldct_vs_ldct_test/tcia_nc/images'
-    dose_fractions = [0.8,0.9]
+    raw_data_path = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/raw_data/coreg_ncct_v2/images'
+    dose_fractions = [0.7]
     for dose_fraction in dose_fractions[::-1]:
-        output_data_path = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/raw_data/sldct_vs_ldct_test/tcia_nc/noised_ims_{}'.format(dose_fraction)
+        output_data_path = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/raw_data/coreg_ncct_v2/noised_ims_{}'.format(dose_fraction)
         main(raw_data_path, output_data_path,dose_fraction=dose_fraction,current=1000,exposure_time=0.5)
+
+    # copy the original images, noised images, and the corresponding masks to a new folder
+    #when copying masks, copy the masks with the original name and the noised name
+
+    new_folder = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/raw_data/coreg_v2_noised'
+    nf_im = os.path.join(new_folder,'images')
+    nf_mk = os.path.join(new_folder,'labels')
+
+    if not os.path.exists(new_folder):
+        os.makedirs(new_folder)
+        os.makedirs(nf_im)
+        os.makedirs(nf_mk)
+
+    for file in [f for f in os.listdir(raw_data_path) if f.endswith('.nii.gz')]:
+        # copy the original images
+        os.system(f'cp {os.path.join(raw_data_path, file)} {os.path.join(nf_im, file)}')
+        # copy the noised images
+        noised_name = file.replace('.nii.gz','_noised_{}.nii.gz'.format(dose_fractions[0]))
+        os.system(f'cp {os.path.join(output_data_path, file)} {os.path.join(nf_im, noised_name)}')
+        # copy the masks
+        os.system(f"cp {os.path.join(raw_data_path.replace('images','labels'), file)} {os.path.join(nf_mk, file)}")
+        os.system(f"cp {os.path.join(raw_data_path.replace('images','labels'), file)} {os.path.join(nf_mk, noised_name)}")
+

@@ -14,7 +14,7 @@ data_name = 'masked_kits_add_nooverlap_v2_small'
 spacing = 2
 fold = 0
 
-preprocessed_name = '2mm_cancer_customPP'
+preprocessed_name = '2mm_canceronly_customPP'
 model_name = '6_tot_ch_talkative_cls1_mp'
 
 vfs = [fold]
@@ -73,7 +73,7 @@ model_params['training']['is_voxsim'] = False
 
 
 for vf in vfs:
-    path_to_model = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/trained_models/masked_kits_add_nooverlap_v2/2mm_cancer_customPP/6_tot_ch_talkative_MP_cls1.0/fold_0/network_weights'
+    path_to_model = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/trained_models/kits_add_nooverlap_v2/2mm_cancer_customPP/6_tot_ch_talkative_MP_cls1.0/fold_0/network_weights'
 
     model = SegmentationModel(val_fold=vf,
                               data_name=data_name,

@@ -10,12 +10,12 @@ import gc
 import torch
 import sys
 
-data_name = 'masked_kits_add_nooverlap_v2'
+data_name = 'kits_add_nooverlap_v2'
 spacing = 2
 fold = 0
 
 preprocessed_name = '2mm_cancer_customPP'
-model_name = '6_tot_ch_talkative_MP_cls1.0'
+model_name = '6_tot_ch_talkative_MP_cls10.0'
 
 vfs = [fold]
 
@@ -34,7 +34,7 @@ model_params = get_model_params_3d_res_encoder_U_Net(patch_size,
                                                      n_fg_classes=n_fg_classes,
                                                      use_prg_trn=False, fp32=True)
 
-model_params['training']['class_weight'] = 1
+model_params['training']['class_weight'] = 10.0
 model_params['training']['class_seg_label'] = 1
 model_params['training']['vol_thresh_mm'] = 500
 model_params['network']['patch_size'] = patch_size[0]
