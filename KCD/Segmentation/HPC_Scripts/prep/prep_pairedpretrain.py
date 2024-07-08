@@ -2,10 +2,10 @@ import os
 os.environ['OV_DATA_BASE'] = "/rds/project/rds-sDuALntK11g"
 from KCD.Segmentation.ovseg.preprocessing.SegmentationPreprocessing import SegmentationPreprocessing
 
-spacing = 2
-preprocessed_name = '2mm_canceronly_customPP'
+spacing = 4
+preprocessed_name = '4mm_canceronly_customPP'
 
-lb_classes = [2]
+lb_classes = [1,2,3]
 target_spacing=[spacing]*3
 prep = SegmentationPreprocessing(apply_resizing=True,
                                     apply_pooling=False,
@@ -19,8 +19,9 @@ prep = SegmentationPreprocessing(apply_resizing=True,
 
 prep.initialise_preprocessing()
 
-prep.preprocess_raw_data(raw_data='masked_final_pairedpretrain_ce',
+prep.preprocess_raw_data(raw_data='final_pairedpretrain_ce',
                           preprocessed_name=preprocessed_name)
+
 
 prep = SegmentationPreprocessing(apply_resizing=True,
                                     apply_pooling=False,
@@ -34,5 +35,5 @@ prep = SegmentationPreprocessing(apply_resizing=True,
 
 prep.initialise_preprocessing()
 
-prep.preprocess_raw_data(raw_data='masked_final_pairedpretrain_nc',
+prep.preprocess_raw_data(raw_data='final_pairedpretrain_nc',
                           preprocessed_name=preprocessed_name)

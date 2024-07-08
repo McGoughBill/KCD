@@ -175,7 +175,7 @@ def main_worker(gpu,args):
                 T_loglist,_, _, cls_latent = model_T(ce)
             S_loglist, cls_latentpred,predicted_enhancement = model_S(ne)
 
-            loss,cce_term,cls_term,mse_term = loss_func(S_loglist,cls_latentpred,predicted_enhancement,
+            loss,cce_term,mse_term,cls_term = loss_func(S_loglist,cls_latentpred,predicted_enhancement,
                                                         T_loglist,cls_latent,diff)
             dist.all_reduce(loss, op=dist.ReduceOp.AVG)
 
@@ -217,7 +217,7 @@ def main_worker(gpu,args):
                     with torch.no_grad():
                         T_loglist,_, _, cls_latent = model_T(ce)
                     S_loglist, cls_latentpred, predicted_enhancement = model_S(ne)
-                    loss, cce_term, cls_term, mse_term = loss_func(S_loglist, cls_latentpred, predicted_enhancement,
+                    loss, cce_term, mse_term, cls_term = loss_func(S_loglist, cls_latentpred, predicted_enhancement,
                                                                    T_loglist, cls_latent, diff)
                     val_losses_list.append([loss.item(), cce_term, cls_term, mse_term])
                 val_loss_list = np.array(val_losses_list)
@@ -239,12 +239,12 @@ def main_worker(gpu,args):
                 if not os.path.exists(epoch_patch_save_path):
                     os.makedirs(epoch_patch_save_path)
 
-                ne = nib.Nifti1Image(ne.cpu().detach().numpy(), np.eye(4))
-                ce = nib.Nifti1Image(ce.cpu().detach().numpy(), np.eye(4))
-                seg_output = nib.Nifti1Image(torch.argmax(S_loglist[-1],dim=1).cpu().detach().numpy(), np.eye(4))
-                predicted_enhancement = nib.Nifti1Image(predicted_enhancement.cpu().detach().numpy(), np.eye(4))
-                seg_label = nib.Nifti1Image(torch.argmax(T_loglist[-1],dim=1).cpu().detach().numpy(), np.eye(4))
-                diff = nib.Nifti1Image(diff.cpu().detach().numpy(), np.eye(4))
+                ne = nib.Nifti1Image(ne.cpu().detach().numpy()[0].squeeze(), np.eye(4))
+                ce = nib.Nifti1Image(ce.cpu().detach().numpy()[0].squeeze(), np.eye(4))
+                seg_output = nib.Nifti1Image(torch.argmax(S_loglist[-1],dim=1).cpu().detach().numpy().astype(np.int16)[0].squeeze(), np.eye(4),dtype=np.int16)
+                predicted_enhancement = nib.Nifti1Image(predicted_enhancement.cpu().detach().numpy()[0].squeeze(), np.eye(4))
+                seg_label = nib.Nifti1Image(torch.argmax(T_loglist[-1],dim=1).cpu().detach().numpy().astype(np.int16)[0].squeeze(), np.eye(4),dtype=np.int16)
+                diff = nib.Nifti1Image(diff.cpu().detach().numpy()[0].squeeze(), np.eye(4))
 
                 nib.save(ne, os.path.join(epoch_patch_save_path, 'ne.nii.gz'))
                 nib.save(ce, os.path.join(epoch_patch_save_path, 'ce.nii.gz'))

@@ -31,7 +31,7 @@ class DomainAdaptationLoss(nn.Module):
     def forward(self, ne_log_list,ne_cls_features,enhancement_pred,
                 ce_log_list,ce_cls_features,enhancement_label,seg_mask = None):
 
-        cce_loss, l2_loss, cos_loss = 0, 0, 0
+        cce_loss, l2_loss, cos_loss = torch.Tensor([0]), torch.Tensor([0]), torch.Tensor([0])
 
         if self.cce_weight>0:
             scale_weights = 2 ** np.arange(len(ne_log_list))
@@ -61,8 +61,10 @@ class DomainAdaptationLoss(nn.Module):
         if self.cos_weight>0:
             cos_loss = (1 - self.cos(self.normalize(ne_cls_features), self.normalize(ce_cls_features))).mean()
 
-        loss = cce_loss * self.cce_weight + l2_loss * self.l2_weight + cos_loss * self.cos_weight
-
+        if self.cce_weight>0:
+            loss = cce_loss * self.cce_weight + l2_loss.to(cce_loss.get_device()) * self.l2_weight + cos_loss.to(cce_loss.get_device()) * self.cos_weight
+        else:
+            loss = l2_loss.to(cos_loss.get_device()) * self.l2_weight + cos_loss * self.cos_weight
         # print('Loss shapes',cce_loss.shape, l2_loss.shape, cos_loss.shape)
         # print('Loss values',cce_loss.item(), l2_loss.item(), cos_loss.item())
         # print('Loss',loss)
@@ -70,6 +72,55 @@ class DomainAdaptationLoss(nn.Module):
 
         return loss, cce_loss.item(), l2_loss.item(), cos_loss.item()
 
+class DomainAdaptationLoss_kidney(nn.Module):
+    def __init__(self, l2_weight = 0, cce_weight = 0):
+        super(DomainAdaptationLoss_kidney, self).__init__()
+        self.cce = nn.CrossEntropyLoss()
+        self.l2 = nn.MSELoss()
+        self.l2_weight = l2_weight
+        self.cce_weight = cce_weight
+
+    def normalize(self, z):
+        mag = torch.linalg.vector_norm(z, dim=-1, keepdim=True)
+        return z / mag
+
+    def forward(self, ne_log_list,enhancement_pred,
+                ce_log_list,enhancement_label,seg_mask = None):
+
+        cce_loss, l2_loss = torch.Tensor([0]), torch.Tensor([0])
+
+        if self.cce_weight>0:
+            scale_weights = 2 ** np.arange(len(ne_log_list))
+            scale_weights = scale_weights / scale_weights.sum()
+            scale_weights = scale_weights[::-1]
+            # print(ne_log_list[0].shape, scale_weights[0])
+            cce_loss = self.cce(ne_log_list[0], torch.argmax(ce_log_list[0], dim=1))*scale_weights[0]
+            # if seg_mask is not None:
+            #     cce_loss = torch.masked_select(cce_spatial,seg_mask).mean()
+            # else:
+            #     cce_loss = cce_spatial.mean()
+
+            for i in range(1,len(ne_log_list)):
+                # print(ne_log_list[i].shape,ce_log_list[i].shape, torch.argmax(ce_log_list[i], dim=1).shape, scale_weights[i])
+                # print(ne_log_list[i].shape,ce_log_list[i].shape, torch.argmax(ce_log_list[i], dim=1).shape)
+                # sys.stdout.flush()
+                cce_loss = self.cce(ne_log_list[i], torch.argmax(ce_log_list[i], dim=1))*scale_weights[i]
+                # if seg_mask is not None:
+                #     cce_loss += torch.masked_select(cce_spatial,seg_mask).mean()
+                # else:
+                #     cce_loss += cce_spatial.mean()
+
+        if self.l2_weight>0:
+            l2_loss = self.l2(enhancement_pred, enhancement_label)
+            # if seg_mask is not None:
+            #     l2_loss = torch.masked_select(l2_spatial,seg_mask).mean()
+            # else:
+            #     l2_loss = l2_spatial.mean()
+
+        loss = cce_loss * self.cce_weight + l2_loss.to(cce_loss.get_device()) * self.l2_weight
+
+
+        return loss, cce_loss.item(), l2_loss.item()
 
 class LatentSimilarityLoss(nn.Module):
     def __init__(self, l2_weight = 0, l1_weight = 0, cce_weight = 0, cos_weight = 0,
