@@ -11,13 +11,13 @@ from KCD.Segmentation.Inference import infer_network
 def get_3d_featureoutput_unet(in_channels, out_channels, n_stages,filters=32, filters_max=1024):
     kernel_sizes = n_stages * [(3, 3, 3)]
 
-    return infer_network.UNet_featureoutput(in_channels, out_channels, kernel_sizes, False, filters_max=filters_max, filters=filters, )
+    return infer_network.UNet_ClassHead_PowerPool_featureoutput(in_channels, out_channels, kernel_sizes, False, filters_max=filters_max, filters=filters, )
 
 
 
 data_name = 'masked_coreg_v2_noised'
 spacing = 2
-pretrain_name = ''
+pretrain_name = str(sys.argv[1])
 fold = int(sys.argv[2])
 
 # preprocessed_name = '4mm_binary'
@@ -77,14 +77,18 @@ model_params['data']['trn_dl_params']['batch_size'] = 32
 model_params['data']['val_dl_params']['epoch_len'] = 100
 
 for vf in vfs:
-    path_to_model = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/trained_models/masked_kits_add_nooverlap_v2_small/2mm_canceronly_customPP/6_tot_ch_talkative_cls1/fold_0/network_weights'
+    opt_save_loc = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/ne2ceCT/kidney_2_cancer_ckpt_delay/{}/optimizer_state'.format(pretrain_name)
+    checkpoint = torch.load(opt_save_loc)
+    load_model = infer_network.UNet_regressivehead_wrapper(get_3d_featureoutput_unet(1, 2, 6, filters=32, filters_max=1024),
+                                                           6,start_filters=32)
+    load_model.load_state_dict(checkpoint['model_state_dict'])
 
     model = SegmentationModel(val_fold=vf,
                               data_name=data_name,
                               preprocessed_name=preprocessed_name,
                               model_name=model_name,
                               model_parameters=model_params)
-    model.network.load_state_dict(torch.load(path_to_model, map_location=dev))
+    model.network.load_state_dict(load_model.UNet.state_dict())
 
     model.training.train()
     model.eval_validation_set()
