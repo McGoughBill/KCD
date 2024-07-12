@@ -8,13 +8,13 @@ import torch
 import sys
 
 data_name = 'coreg_v2_noised'
-spacing = int(sys.argv[1])
-fold = int(sys.argv[2])
+spacing = 4
+fold = int(sys.argv[1])
 
 # preprocessed_name = '4mm_binary'
 preprocessed_name = '{}mm_kidneybinary_customPP'.format(spacing)
 # preprocessed_name='4mm_binary_test'
-model_name = '6_finetune'
+model_name = '6_finetune_compare'
 # model_name = 'del'
 
 dev = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -65,15 +65,15 @@ model_params['data']['trn_dl_params']['batch_size'] = 32
 model_params['data']['val_dl_params']['epoch_len'] = 100
 
 for vf in vfs:
-    path_to_model = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/trained_models/kits_nooverlap_v2/{}mm_kidneybinary_customPP/6_tot/fold_0/network_weights'.format(
-        spacing)
+    # path_to_model = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/trained_models/kits_nooverlap_v2/{}mm_kidneybinary_customPP/6_tot/fold_0/network_weights'.format(
+    #     spacing)
 
     model = SegmentationModel(val_fold=vf,
                               data_name=data_name,
                               preprocessed_name=preprocessed_name,
                               model_name=model_name,
                               model_parameters=model_params)
-    model.network.load_state_dict(torch.load(path_to_model, map_location=dev))
+    # model.network.load_state_dict(torch.load(path_to_model, map_location=dev))
 
-    model.training.train()
+    # model.training.train()
     model.eval_validation_set()

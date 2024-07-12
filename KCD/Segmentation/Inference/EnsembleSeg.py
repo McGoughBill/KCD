@@ -43,7 +43,7 @@ except ModuleNotFoundError:
 SegLoader, Segment, SegProcess = infer_network.get_3d_UNet, SlidingWindowPrediction, SegmentationPostprocessing
 
 class Ensemble_Seg(nn.Module):
-    def __init__(self, data_name: str = None,  ##seg preprocess args
+    def __init__(self, data_name: str = None,name='',  ##seg preprocess args
                  seg_fp: str = None, spacing=np.array([3, 3, 3]),
                  do_prep=False, do_infer=False,is_cect=False,cont=False,
                  patch_size = 64, batch_size=4,overlap=0.5):  ##seg args
@@ -85,11 +85,11 @@ class Ensemble_Seg(nn.Module):
         if not exists(lrsv_fold):
             mkdir(lrsv_fold)
 
-        self.lrsv_fold_size = join(lrsv_fold, "{}mm".format(self.spacing))
+        self.lrsv_fold_size = join(lrsv_fold, name+"_{}mm".format(self.spacing))
         if not exists(self.lrsv_fold_size):
             mkdir(self.lrsv_fold_size)
 
-        self.sv_fold_size = join(self.seg_save_loc, self.data_name, '{}mm'.format(self.spacing))
+        self.sv_fold_size = join(self.seg_save_loc, self.data_name, name+'_{}mm'.format(self.spacing))
         if not exists(self.sv_fold_size):
             mkdir(self.sv_fold_size)
 
@@ -131,8 +131,8 @@ class Ensemble_Seg(nn.Module):
                                                       apply_windowing=True,
                                                       target_spacing=seg_spacing,
                                                       pooling_stride=None,
-                                                      window=np.array([-60.5, 314]),
-                                                      scaling=np.array([74.9, 104.3]),
+                                                      window=np.array([-200,300]),
+                                                      scaling=np.array([100, 0]),
                                                       lb_classes=None,
                                                       reduce_lb_to_single_class=True,
                                                       lb_min_vol=None,
@@ -145,8 +145,8 @@ class Ensemble_Seg(nn.Module):
                                                       apply_windowing=True,
                                                       target_spacing=seg_spacing,
                                                       pooling_stride=None,
-                                                      window=np.array([-116., 130.]),
-                                                      scaling=np.array([41.301857, 12.257426]),
+                                                      window=np.array([-200,200]),
+                                                      scaling=np.array([100, 0]),
                                                       lb_classes=None,
                                                       reduce_lb_to_single_class=True,
                                                       lb_min_vol=None,

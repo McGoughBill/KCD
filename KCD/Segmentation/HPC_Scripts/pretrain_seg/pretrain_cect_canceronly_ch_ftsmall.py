@@ -15,7 +15,7 @@ spacing = 2
 fold = 0
 
 preprocessed_name = '2mm_canceronly_customPP'
-model_name = '6_tot_ch_talkative_cls1_mp'
+model_name = '6_tot_ch_talkative_cls1_highestthresh'
 
 vfs = [fold]
 
@@ -37,7 +37,7 @@ model_params = get_model_params_3d_res_encoder_U_Net(patch_size,
 
 model_params['training']['class_weight'] = 1
 model_params['training']['class_seg_label'] = 1
-model_params['training']['vol_thresh_mm'] = 500
+model_params['training']['vol_thresh_mm'] = 2000
 model_params['network']['patch_size'] = patch_size[0]
 
 model_params['architecture'] = 'UNet_classhead_maxpool'
@@ -73,7 +73,7 @@ model_params['training']['is_voxsim'] = False
 
 
 for vf in vfs:
-    path_to_model = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/trained_models/kits_add_nooverlap_v2/2mm_cancer_customPP/6_tot_ch_talkative_MP_cls1.0/fold_0/network_weights'
+    path_to_model = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/trained_models/kits_add_nooverlap_v2/2mm_cancer_customPP/6_tot_ch_talkative_cls1/fold_0/network_weights'
 
     model = SegmentationModel(val_fold=vf,
                               data_name=data_name,
