@@ -655,7 +655,12 @@ class ModelBase(object):
                 names_for_txt[scan] = scan
 
             # predict from this datapoint
-            pred = self.__callcont__(data_tpl,do_postprocessing=True)
+            if self.model_parameters['architecture'].lower() in ['unet_classhead', 'unetclasshead', 'unet-classhead',
+                                                                 'unet_classhead_maxpool', 'unetclassheadmaxpool',
+                                                                 'unet-classhead-maxpool']:
+                pred, cls = self.__callcont__(data_tpl,do_postprocessing=True)
+            else:
+                pred = self.__callcont__(data_tpl,do_postprocessing=True)
 
             if torch.is_tensor(pred):
                 pred = pred.cpu().numpy()

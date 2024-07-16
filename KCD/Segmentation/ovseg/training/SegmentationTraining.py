@@ -51,7 +51,7 @@ class SegmentationTraining(NetworkTraining):
         if include_voxsim:
             self.is_voxsim = True
 
-    def compute_batch_loss(self, batch):
+    def compute_batch_loss(self, batch,step=-1):
 
         batch = batch.to(self.dev)
         batch = self.prg_trn_process_batch(batch)
@@ -345,7 +345,7 @@ class SegmentationTrainingV2(SegmentationTraining):
             self.is_voxsim = True
 
 class SegmentationTrainingV2_classhead(SegmentationTraining):
-    def __init__(self,class_weight = 0.3, class_seg_label = 1, spacing = [2,2,2],
+    def __init__(self,class_weight = 0.3, class_seg_label = 1, spacing = [2,2,2], encoder_freeze = 0, decoder_freeze = 0,
              vol_thresh_mm = 500,patch_size = 64, class_loss = nn.CrossEntropyLoss(),*args,**kwargs,):
         super().__init__( *args, **kwargs)
         self.class_weight = class_weight
@@ -356,11 +356,17 @@ class SegmentationTrainingV2_classhead(SegmentationTraining):
         sys.stdout.write(f'self.spacing: {self.spacing}\n')
         sys.stdout.flush()
         self.vol_thresh_mm = vol_thresh_mm
+        self.encoder_freeze = encoder_freeze
+        self.decoder_freeze = decoder_freeze
+        self.encoder_frozen = False
+        self.decoder_frozen = False
         print('In SegmentationTrainingV2_classhead')
         print('class_weight:',self.class_weight)
         print('class_seg_label:',self.class_seg_label)
         print('vol_thresh_mm:',self.vol_thresh_mm)
         print('patch_size:',self.patch_size)
+        print('encoder_freeze:',self.encoder_freeze)
+        print('decoder_freeze:',self.decoder_freeze)
         print(class_loss)
         print()
 
@@ -372,7 +378,7 @@ class SegmentationTrainingV2_classhead(SegmentationTraining):
             self.is_voxsim = True
 
 
-    def compute_batch_loss(self, batch):
+    def compute_batch_loss(self, batch, epochs_done = -1):
 
         batch = batch.to(self.dev)
         batch = self.prg_trn_process_batch(batch)
@@ -409,10 +415,38 @@ class SegmentationTrainingV2_classhead(SegmentationTraining):
         cls_lb = torch.sum(yb[:,self.class_seg_label,:,:,:],dim=(1,2,3)) > (self.vol_thresh_mm/np.prod(self.spacing))
         cls_lb = cls_lb.to(self.dev)
 
+        if epochs_done != -1:
+            if epochs_done<self.encoder_freeze and not self.encoder_frozen:
+                for block in self.network.blocks_down:
+                    for param in block.parameters():
+                        param.requires_grad = False
+
+                self.encoder_frozen = True
+            elif epochs_done>=self.encoder_freeze and self.encoder_frozen:
+                for block in self.network.blocks_down:
+                    for param in block.parameters():
+                        param.requires_grad = True
+
+                self.encoder_frozen = False
+
+            if epochs_done<self.decoder_freeze and not self.decoder_frozen:
+                for block in self.network.blocks_up:
+                    for param in block.parameters():
+                        param.requires_grad = False
+
+                self.decoder_frozen = True
+            elif epochs_done>=self.decoder_freeze and self.decoder_frozen:
+                for block in self.network.blocks_up:
+                    for param in block.parameters():
+                        param.requires_grad = True
+
+                self.decoder_frozen = False
+
         out,cls_pred = self.network(xb)
         seg_loss = self.loss_fctn(out, yb, mask)
         cls_loss = self.class_loss(cls_pred,cls_lb.long())
         print('seg loss {} cls loss {}'.format(seg_loss.item(),cls_loss.item()))
+        print('Encoder frozen:',self.encoder_frozen,'Decoder frozen:',self.decoder_frozen)
         #check if cls loss is not a number
         if torch.isnan(cls_loss):
             print('cls loss is nan')

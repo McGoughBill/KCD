@@ -31,7 +31,7 @@ class NetworkTraining(TrainingBase):
                  nu_ema_val=0.7, network_name='network', fp32=False,
                  p_plot_list=[1, 0.5, 0.2], opt_name='SGD', lr_schedule='almost_linear', lr_exponent=0,
                  no_bias_weight_decay=False, save_additional_weights_after_epochs=[],
-                 is_voxsim=None):
+                 is_voxsim=None,decoder_frozen = 0,encoder_frozen = 0):
         super().__init__(trn_dl, num_epochs, model_path)
 
         self.network = network
@@ -61,6 +61,8 @@ class NetworkTraining(TrainingBase):
         # training loss
         self.trn_loss = None
         self.is_voxsim = is_voxsim
+        self.decoder_frozen = decoder_frozen
+        self.encoder_frozen = encoder_frozen
         self.trn_losses = []
         self.checkpoint_attributes.append('trn_losses')
         if self.val_dl is not None:
@@ -277,19 +279,19 @@ class NetworkTraining(TrainingBase):
         for param in self.network.parameters():
             param.grad = None
 
-    def do_trn_step(self, batch, step):
+    def do_trn_step(self, batch, step, epochs_done):
 
         self.zero_grad()
         self.update_lr(step)
 
 
         if self.fp32:
-            loss = self.compute_batch_loss(batch)
+            loss = self.compute_batch_loss(batch, epochs_done)
             loss.backward()
             self.opt.step()
         else:
             with amp.autocast():
-                loss = self.compute_batch_loss(batch)
+                loss = self.compute_batch_loss(batch, epochs_done)
             self.scaler.scale(loss).backward()
             self.scaler.unscale_(self.opt)
             torch.nn.utils.clip_grad_norm_(self.network.parameters(), 12)
@@ -352,12 +354,12 @@ class NetworkTraining(TrainingBase):
             with torch.no_grad():
                 if self.fp32:
                     for batch in self.val_dl:
-                        loss = self.compute_batch_loss(batch)
+                        loss = self.compute_batch_loss(batch,epochs_done=-1)
                         val_loss += loss.item()
                 else:
                     with torch.cuda.amp.autocast():
                         for batch in self.val_dl:
-                            loss = self.compute_batch_loss(batch)
+                            loss = self.compute_batch_loss(batch,epochs_done=-1)
                             val_loss += loss.item()
 
             val_loss = val_loss / len(self.val_dl)

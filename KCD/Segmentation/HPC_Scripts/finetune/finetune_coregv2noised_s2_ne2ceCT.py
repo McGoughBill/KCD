@@ -47,6 +47,10 @@ model_params = get_model_params_3d_res_encoder_U_Net(patch_size,
 model_params['architecture'] = 'UNet_classhead'
 model_params['training']['class_seg_label'] = 1
 model_params['training']['vol_thresh_mm'] = 500
+model_params['training']['class_weight'] = 1
+
+model_params['training']['decoder_frozen'] = 0
+model_params['training']['encoder_frozen'] = 0
 
 model_params['network']['kernel_sizes'] = 6 * [(3, 3, 3)]
 model_params['network']['norm'] = 'inst'
@@ -67,14 +71,15 @@ model_params['training']['opt_name'] = 'ADAM'
 model_params['training']['opt_params'] = {'lr': lr,
                                           'betas': (0.95, 0.9),
                                           'eps': 1e-08}
-model_params['training']['lr_params'] = {'n_warmup_epochs': 15, 'lr_max': 0.0001}
+model_params['training']['lr_params'] = {'n_warmup_epochs': 15, 'lr_max': 0.00005}
 model_params['data']['trn_dl_params']['epoch_len'] = 1000
 model_params['data']['trn_dl_params']['padded_patch_size'] = [2 * patch_size[0]] * 3
 model_params['data']['val_dl_params']['padded_patch_size'] = [2 * patch_size[0]] * 3
 model_params['training']['lr_schedule'] = 'lin_ascent_log_decay'
-model_params['training']['lr_exponent'] = 3
+model_params['training']['lr_exponent'] = 2
 model_params['data']['trn_dl_params']['batch_size'] = 32
-model_params['data']['val_dl_params']['epoch_len'] = 100
+model_params['data']['val_dl_params']['epoch_len'] = 200
+model_params['data']['trn_dl_params']['min_biased_samples'] = (model_params['data']['trn_dl_params']['batch_size'] //4)*3
 
 for vf in vfs:
     opt_save_loc = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/ne2ceCT/kidney_2_cancer_ckpt_delay/{}/optimizer_state'.format(pretrain_name)
@@ -91,4 +96,4 @@ for vf in vfs:
     model.network.load_state_dict(load_model.UNet.state_dict())
 
     model.training.train()
-    model.eval_validation_set()
+    model.eval_validation_set(continuous=True)

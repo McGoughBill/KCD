@@ -260,6 +260,8 @@ class SegmentationModel(ModelBase):
                                                    network_name=self.network_name,
                                                    augmentation=self.augmentation.torch_augmentation,
                                                    spacing=prep_params['target_spacing'],
+                                                   encoder_freeze=params['encoder_frozen'],
+                                                   decoder_freeze=params['decoder_frozen'],
                                                    **params)
         else:
             try:
@@ -323,12 +325,22 @@ class SegmentationModel(ModelBase):
             else:
                 bin_pred = None
         # now the importat part: the sliding window evaluation (or derivatives of it)
-        pred = self.prediction(im)
+        if self.model_parameters['architecture'].lower() in ['unet_classhead', 'unetclasshead', 'unet-classhead',
+                                                             'unet_classhead_maxpool', 'unetclassheadmaxpool',
+                                                             'unet-classhead-maxpool']:
+            pred,cls = self.prediction(im)
+        else:
+            pred = self.prediction(im)
         data_tpl[self.pred_key] = pred
 
         # inside the postprocessing the result will be attached to the data_tpl
         if do_postprocessing:
             self.postprocessing.postprocess_data_tpl(data_tpl, self.pred_key, bin_pred)
+
+        if self.model_parameters['architecture'].lower() in ['unet_classhead', 'unetclasshead', 'unet-classhead',
+                                                             'unet_classhead_maxpool', 'unetclassheadmaxpool',
+                                                             'unet-classhead-maxpool']:
+            return data_tpl[self.pred_key],cls
 
         return data_tpl[self.pred_key]
 
@@ -374,7 +386,13 @@ class SegmentationModel(ModelBase):
             else:
                 bin_pred = None
         # now the importat part: the sliding window evaluation (or derivatives of it)
-        pred = np.expand_dims(self.prediction(im)[1], axis=0)
+        if self.model_parameters['architecture'].lower() in ['unet_classhead', 'unetclasshead', 'unet-classhead',
+                                                             'unet_classhead_maxpool', 'unetclassheadmaxpool',
+                                                             'unet-classhead-maxpool']:
+            pred,cls = self.prediction(im)
+            pred = np.expand_dims(pred[1], axis=0)
+        else:
+            pred = np.expand_dims(self.prediction(im)[1], axis=0)
         #print the median of the prediction
         data_tpl[self.pred_key] = pred
 
@@ -383,6 +401,12 @@ class SegmentationModel(ModelBase):
             self.postprocessing.postprocess_cont_data_tpl(data_tpl, self.pred_key, bin_pred)
         data_tpl[self.pred_key] = data_tpl[self.pred_key][0]
         data_tpl[self.pred_key+'_orig_shape'] = data_tpl[self.pred_key+'_orig_shape'][0]
+
+        if self.model_parameters['architecture'].lower() in ['unet_classhead', 'unetclasshead', 'unet-classhead',
+                                                             'unet_classhead_maxpool', 'unetclassheadmaxpool',
+                                                             'unet-classhead-maxpool']:
+            return data_tpl[self.pred_key],cls
+
         return data_tpl[self.pred_key]
 
 
@@ -1163,13 +1187,20 @@ class SegmentationModel_trainontest(ModelBase):
                 #     prev_preds.append(pred)
 
                 # bin_pred = (np.sum(prev_preds, 0) > 0).astype(float)
+
                 # if the data_tpl is preprocessed the binary prediction should already be in there
                 bin_pred = data_tpl['bin_pred'][np.newaxis]
                 im = np.concatenate([im, bin_pred])
             else:
                 bin_pred = None
         # now the importat part: the sliding window evaluation (or derivatives of it)
-        pred = np.expand_dims(self.prediction(im)[1], axis=0)
+        if self.model_parameters['architecture'].lower() in ['unet_classhead', 'unetclasshead', 'unet-classhead',
+                                                             'unet_classhead_maxpool', 'unetclassheadmaxpool',
+                                                             'unet-classhead-maxpool']:
+            pred,cls = self.prediction(im)
+            pred = np.expand_dims(pred[1], axis=0)
+        else:
+            pred = np.expand_dims(self.prediction(im)[1], axis=0)
         # print the median of the prediction
         data_tpl[self.pred_key] = pred
 
@@ -1178,6 +1209,12 @@ class SegmentationModel_trainontest(ModelBase):
             self.postprocessing.postprocess_cont_data_tpl(data_tpl, self.pred_key, bin_pred)
         data_tpl[self.pred_key] = data_tpl[self.pred_key][0]
         data_tpl[self.pred_key + '_orig_shape'] = data_tpl[self.pred_key + '_orig_shape'][0]
+
+        if self.model_parameters['architecture'].lower() in ['unet_classhead', 'unetclasshead', 'unet-classhead',
+                                                             'unet_classhead_maxpool', 'unetclassheadmaxpool',
+                                                             'unet-classhead-maxpool']:
+            return data_tpl[self.pred_key], cls
+
         return data_tpl[self.pred_key]
 
     def save_prediction(self, data_tpl, folder_name, filename=None):
