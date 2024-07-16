@@ -43,7 +43,7 @@ except ModuleNotFoundError:
 SegLoader, Segment, SegProcess = infer_network.get_3d_UNet, SlidingWindowPrediction, SegmentationPostprocessing
 
 class Ensemble_Seg(nn.Module):
-    def __init__(self, data_name: str = None,  ##seg preprocess args
+    def __init__(self, data_name: str = None,name='',  ##seg preprocess args
                  seg_fp: str = None, spacing=np.array([3, 3, 3]),
                  do_prep=False, do_infer=False,is_cect=False,cont=False,
                  patch_size = 64, batch_size=4,overlap=0.5):  ##seg args
@@ -64,7 +64,7 @@ class Ensemble_Seg(nn.Module):
         self.batch_size = batch_size
         self.overlap = overlap
         # ### SEG PREPROCESS ###
-        self.preprocessed_name = str(spacing[0]) + ',' + str(spacing[1]) + ',' + str(spacing[2]) + "mm"
+        self.preprocessed_name = name+'_'+str(spacing[0]) + ',' + str(spacing[1]) + ',' + str(spacing[2]) + "mm"
         self.spacing = spacing
 
         self.seg_dev = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -85,20 +85,20 @@ class Ensemble_Seg(nn.Module):
         if not exists(lrsv_fold):
             mkdir(lrsv_fold)
 
-        self.lrsv_fold_size = join(lrsv_fold, "{}mm".format(self.spacing))
+        self.lrsv_fold_size = join(lrsv_fold, name+"_{}mm".format(self.spacing))
         if not exists(self.lrsv_fold_size):
             mkdir(self.lrsv_fold_size)
 
-        self.sv_fold_size = join(self.seg_save_loc, self.data_name, '{}mm'.format(self.spacing))
+        self.sv_fold_size = join(self.seg_save_loc, self.data_name, name+'_{}mm'.format(self.spacing))
         if not exists(self.sv_fold_size):
             mkdir(self.sv_fold_size)
 
         if cont:
-            self.lrsv_fold_size_c = join(lrsv_fold, "{}mm_cont".format(self.spacing))
+            self.lrsv_fold_size_c = join(lrsv_fold, name+"_{}mm_cont".format(self.spacing))
             if not exists(self.lrsv_fold_size_c):
                 mkdir(self.lrsv_fold_size_c)
 
-            self.sv_fold_size_c = join(self.seg_save_loc, self.data_name, '{}mm_cont'.format(self.spacing))
+            self.sv_fold_size_c = join(self.seg_save_loc, self.data_name, name+'_{}mm_cont'.format(self.spacing))
             if not exists(self.sv_fold_size_c):
                 mkdir(self.sv_fold_size_c)
 
