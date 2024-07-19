@@ -1,3 +1,5 @@
+import sys
+
 import numpy as np
 import torch
 from torch.nn import functional as F
@@ -417,7 +419,6 @@ class SlidingWindowPrediction_classhead(object):
                 batch = batch[:, :, 0] if self.is_2d else batch
                 # remember that the network is outputting a list of predictions for each scale
                 out,cls = self.network(batch.to(self.dev))
-
                 #convert cls to the softmax
                 cls_preds.append(F.softmax(cls, 1).cpu().numpy())
 

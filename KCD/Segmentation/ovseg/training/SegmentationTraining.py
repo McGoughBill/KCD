@@ -51,7 +51,7 @@ class SegmentationTraining(NetworkTraining):
         if include_voxsim:
             self.is_voxsim = True
 
-    def compute_batch_loss(self, batch,step=-1):
+    def compute_batch_loss(self, batch,epochs_done=-1):
 
         batch = batch.to(self.dev)
         batch = self.prg_trn_process_batch(batch)

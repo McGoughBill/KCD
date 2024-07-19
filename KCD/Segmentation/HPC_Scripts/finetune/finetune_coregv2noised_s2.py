@@ -6,8 +6,11 @@ from KCD.Segmentation.ovseg.model.model_parameters_segmentation import get_model
 import gc
 import torch
 import sys
+import numpy as np
 
-
+torch.manual_seed(0)
+torch.cuda.manual_seed(0)
+np.random.seed(0)
 
 data_name = 'masked_coreg_v2_noised'
 spacing = 2
@@ -16,7 +19,7 @@ fold = int(sys.argv[1])
 # preprocessed_name = '4mm_binary'
 preprocessed_name = '{}mm_cancerbinary_customPP'.format(spacing)
 # preprocessed_name='4mm_binary_test'
-model_name = '6_finetune'
+model_name = '6_finetune_balanced'
 # model_name = 'del'
 
 dev = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -40,7 +43,7 @@ model_params = get_model_params_3d_res_encoder_U_Net(patch_size,
 model_params['architecture'] = 'UNet_classhead'
 model_params['training']['class_seg_label'] = 1
 model_params['training']['vol_thresh_mm'] = 500
-model_params['training']['class_weight'] = 1
+model_params['training']['class_weight'] = 0.1
 model_params['training']['encoder_frozen'] = 0
 model_params['training']['decoder_frozen'] = 0
 
@@ -71,7 +74,7 @@ model_params['training']['lr_schedule'] = 'lin_ascent_log_decay'
 model_params['training']['lr_exponent'] = 2
 model_params['data']['trn_dl_params']['batch_size'] = 32
 model_params['data']['val_dl_params']['epoch_len'] = 200
-model_params['data']['trn_dl_params']['min_biased_samples'] = (model_params['data']['trn_dl_params']['batch_size'] //4)*3
+model_params['data']['trn_dl_params']['min_biased_samples'] = model_params['data']['trn_dl_params']['batch_size'] //2
 
 
 for vf in vfs:
@@ -85,4 +88,4 @@ for vf in vfs:
     model.network.load_state_dict(torch.load(path_to_model, map_location=dev))
 
     model.training.train()
-    model.eval_validation_set(continuous=True)
+    model.eval_validation_set(continuous=False)
