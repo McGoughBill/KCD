@@ -519,6 +519,8 @@ class ModelBase(object):
                 pred_pos_centroids = []
                 for i in range(1,np.max(pred_components)+1):
                     pred_component = pred_components==i
+                    if pred_component.sum() <50:
+                        continue
                     pred_pos_centroid = np.round(np.mean(np.where(pred_component),axis=1)).astype(int)
                     pred_pos_centroids.append(pred_pos_centroid)
                 pred_pos_centroids = np.array(pred_pos_centroids)
