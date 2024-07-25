@@ -566,6 +566,7 @@ class ModelBase(object):
             else:
                 results[scan]['ppv'] = ppv
                 results[scan]['sensitivity'] = sensitivity
+                results[scan]['average'] = (ppv + sensitivity) / 2
 
 
             self._update_global_metrics(data_tpl)
