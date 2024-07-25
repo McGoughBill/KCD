@@ -507,6 +507,8 @@ class ModelBase(object):
                     pred = pred.cpu().numpy()
 
                 seg = np.squeeze(data_tpl['label'])
+                voxvol = np.prod(data_tpl['spacing'])
+
                 # want to generate a set of detection predictions from inference and segmentation map
                 # we use the connected components of the inference map as positive detection
                 # we use the segmentation map as ground truth
@@ -519,7 +521,7 @@ class ModelBase(object):
                 pred_pos_centroids = []
                 for i in range(1,np.max(pred_components)+1):
                     pred_component = pred_components==i
-                    if pred_component.sum() <50:
+                    if pred_component.sum() <(500/voxvol):
                         continue
                     pred_pos_centroid = np.round(np.mean(np.where(pred_component),axis=1)).astype(int)
                     pred_pos_centroids.append(pred_pos_centroid)
