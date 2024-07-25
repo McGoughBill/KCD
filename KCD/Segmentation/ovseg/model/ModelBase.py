@@ -506,7 +506,7 @@ class ModelBase(object):
                 if torch.is_tensor(pred):
                     pred = pred.cpu().numpy()
 
-                seg = data_tpl['label']
+                seg = np.squeeze(data_tpl['label'])
                 # want to generate a set of detection predictions from inference and segmentation map
                 # we use the connected components of the inference map as positive detection
                 # we use the segmentation map as ground truth
@@ -514,7 +514,7 @@ class ModelBase(object):
                 label_foreground = (seg>0.5).astype(int)
                 pred_foreground = (pred>0.5).astype(int)
                 pred_components = label(np.squeeze(pred_foreground))
-                label_components = label(np.squeeze(pred_foreground))
+                label_components = label(np.squeeze(label_foreground))
                 # find the centroids of each prediction
                 pred_pos_centroids = []
                 for i in range(1,np.max(pred_components)+1):
