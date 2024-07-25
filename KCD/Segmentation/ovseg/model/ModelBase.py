@@ -14,6 +14,7 @@ except ModuleNotFoundError:
     tqdm = lambda x: x
 import numpy as np
 import torch.nn.functional as F
+from skimage.measure import label
 
 NO_NAME_FOUND_WARNING_PRINTED = False
 
@@ -482,12 +483,6 @@ class ModelBase(object):
 
                 pos_clspred = cls[cls_labels,0,1]
                 neg_clspred = cls[np.logical_not(cls_labels),0,1]
-                # print(cls_labels.shape,cls.shape)
-                # for i in range(len(cls_labels)):
-                #     print('cls_label:',cls_labels[i],'cls:',cls[i])
-                #
-                # print('pos_clspred:',pos_clspred)
-                # print('neg_clspred:',neg_clspred)
 
                 sys.stdout.flush()
                 # assert False
@@ -507,8 +502,48 @@ class ModelBase(object):
             else:
                 # predict from this datapoint
                 pred = self.__call__(data_tpl)
+
                 if torch.is_tensor(pred):
                     pred = pred.cpu().numpy()
+
+                seg = data_tpl['label']
+                # want to generate a set of detection predictions from inference and segmentation map
+                # we use the connected components of the inference map as positive detection
+                # we use the segmentation map as ground truth
+
+                label_foreground = (seg>0.5).astype(int)
+                pred_foreground = (pred>0.5).astype(int)
+                pred_components = label(pred_foreground)
+                label_components = label(label_foreground)
+                # find the centroids of each prediction
+                pred_pos_centroids = []
+                for i in range(1,np.max(pred_components)+1):
+                    pred_component = pred_components==i
+                    pred_pos_centroid = np.round(np.mean(np.where(pred_component),axis=1)).astype(int)
+                    pred_pos_centroids.append(pred_pos_centroid)
+                pred_pos_centroids = np.array(pred_pos_centroids)
+
+                # now we have a set of positive detections - evaluate these using the label
+                # as ground truth. It is not possible to calculate true negative predictions
+
+                tp = 0
+                fp = 0
+                fn = 0
+
+                # loop through all label sections - if it doesn't have a prediction in it, it is a false negative
+                for i in range(1,np.max(label_components)+1):
+                    label_component = label_components==i
+                    label_pos_centroid = np.round(np.mean(np.where(label_component),axis=1)).astype(int)
+                    if pred_foreground[label_pos_centroid[0],label_pos_centroid[1],label_pos_centroid[2]]<1:
+                        fn += 1
+
+                for pred_centroid in pred_pos_centroids:
+                    if seg[pred_centroid[0],pred_centroid[1],pred_centroid[2]]>0:
+                        tp += 1
+                    else:
+                        fp += 1
+                ppv = tp/(tp+fp)
+                sensitivity = tp/(tp+fn)
 
             # now compute the error metrics that we like
             metrics = self.compute_error_metrics(data_tpl)
@@ -528,6 +563,9 @@ class ModelBase(object):
                 results[scan]['min_negpred'] = min_negpred
                 results[scan]['max_negpred'] = max_negpred
                 results[scan]['min_pospred'] = min_pospred
+            else:
+                results[scan]['ppv'] = ppv
+                results[scan]['sensitivity'] = sensitivity
 
 
             self._update_global_metrics(data_tpl)
