@@ -542,8 +542,8 @@ class ModelBase(object):
                         tp += 1
                     else:
                         fp += 1
-                ppv = tp/(tp+fp)
-                sensitivity = tp/(tp+fn)
+                ppv = tp/(tp+fp+(1e-6))
+                sensitivity = tp/(tp+fn+(1e-6))
 
             # now compute the error metrics that we like
             metrics = self.compute_error_metrics(data_tpl)
