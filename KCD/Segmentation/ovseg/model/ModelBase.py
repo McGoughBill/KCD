@@ -568,9 +568,9 @@ class ModelBase(object):
                 results[scan]['max_negpred'] = max_negpred
                 results[scan]['min_pospred'] = min_pospred
             else:
-                results[scan]['ppv'] = ppv
-                results[scan]['sensitivity'] = sensitivity
-                results[scan]['average'] = (ppv + sensitivity) / 2
+                results[scan]['ppv'] = ppv*100
+                results[scan]['sensitivity'] = sensitivity*100
+                results[scan]['average'] = 100*(ppv + sensitivity) / 2
 
 
             self._update_global_metrics(data_tpl)
