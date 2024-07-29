@@ -117,7 +117,7 @@ for vf in vfs:
                               preprocessed_name=preprocessed_name,
                               model_name=model_name,
                               model_parameters=model_params)
-    model.network.load_state_dict(sd)
+    # model.network.load_state_dict(sd)
 
-    model.training.train()
-    model.eval_validation_set(continuous=False)
+    # model.training.train()
+    model.eval_validation_set(continuous=True)
