@@ -1,7 +1,6 @@
 torch
 matplotlib
 nibabel
-bpy
 dicom2nifti
 gecatsim
 numpy

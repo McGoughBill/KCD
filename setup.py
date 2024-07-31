@@ -3,7 +3,7 @@ from setuptools import setup,find_packages
 setup(
     name='KCD_early',
     packages=find_packages('KCD_src', exclude=['test']),
-    install_requires=['torch','matplotlib','nibabel','bpy','dicom2nifti',
+    install_requires=['torch','matplotlib','nibabel','dicom2nifti',
                 'gecatsim',
               'numpy','opencv-python','pandas','pydicom',
               'scikit-image','scikit-learn','scipy','numpy-stl',
