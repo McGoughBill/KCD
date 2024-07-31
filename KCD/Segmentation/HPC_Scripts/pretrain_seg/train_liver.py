@@ -58,11 +58,11 @@ model_params['training']['opt_params'] = {'lr': lr,
                                             'betas': (0.95, 0.9),
                                             'eps': 1e-08}
 model_params['training']['lr_params'] = {'n_warmup_epochs': 15, 'lr_max': 0.004}
-model_params['data']['trn_dl_params']['epoch_len']=1000
+model_params['data']['trn_dl_params']['epoch_len']=500
 model_params['data']['trn_dl_params']['padded_patch_size']=[2*patch_size[0]]*3
 model_params['data']['val_dl_params']['padded_patch_size']=[2*patch_size[0]]*3
 model_params['training']['lr_schedule'] = 'lin_ascent_log_decay'
-model_params['training']['lr_exponent'] = 3
+model_params['training']['lr_exponent'] = 4
 model_params['data']['trn_dl_params']['min_biased_samples'] = model_params['data']['trn_dl_params']['batch_size']//2
 model_params['data']['trn_dl_params']['batch_size']=8
 model_params['data']['val_dl_params']['epoch_len']=100
