@@ -94,11 +94,11 @@ class Ensemble_Seg(nn.Module):
             mkdir(self.sv_fold_size)
 
         if cont:
-            self.lrsv_fold_size_c = join(lrsv_fold, "{}mm_cont".format(self.spacing))
+            self.lrsv_fold_size_c = join(lrsv_fold, name+"_{}mm_cont".format(self.spacing))
             if not exists(self.lrsv_fold_size_c):
                 mkdir(self.lrsv_fold_size_c)
 
-            self.sv_fold_size_c = join(self.seg_save_loc, self.data_name, '{}mm_cont'.format(self.spacing))
+            self.sv_fold_size_c = join(self.seg_save_loc, self.data_name, name+'_{}mm_cont'.format(self.spacing))
             if not exists(self.sv_fold_size_c):
                 mkdir(self.sv_fold_size_c)
 
