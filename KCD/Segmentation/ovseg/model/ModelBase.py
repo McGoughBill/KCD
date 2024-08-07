@@ -500,54 +500,62 @@ class ModelBase(object):
                 npv = np.sum(np.logical_and(np.logical_not(cls_labels),np.logical_not(cls)))/np.sum(np.logical_not(cls))
                 accuracy = np.sum(np.logical_and(cls_labels,cls)+np.logical_and(np.logical_not(cls_labels),np.logical_not(cls)))/len(cls)
             else:
-                # predict from this datapoint
-                pred = self.__call__(data_tpl)
+                op_point_results = {}
+                op_points = [0.01,0.1,0.5,0.91,0.99]
+                for op_point in op_points:
+                    # predict from this datapoint
+                    pred = self.__callcont__(data_tpl)
 
+                    if torch.is_tensor(pred):
+                        pred = pred.cpu().numpy()
+
+                    seg = np.squeeze(data_tpl['label'])
+                    voxvol = np.prod(data_tpl['spacing'])
+
+                    # want to generate a set of detection predictions from inference and segmentation map
+                    # we use the connected components of the inference map as positive detection
+                    # we use the segmentation map as ground truth
+
+                    label_foreground = (seg>0.5).astype(int)
+                    pred_foreground = (pred>op_point).astype(int)
+                    pred_components = label(np.squeeze(pred_foreground))
+                    label_components = label(np.squeeze(label_foreground))
+                    # find the centroids of each prediction
+                    pred_pos_centroids = []
+                    for i in range(1,np.max(pred_components)+1):
+                        pred_component = pred_components==i
+                        if pred_component.sum() <(500/voxvol):
+                            continue
+                        pred_pos_centroid = np.round(np.mean(np.where(pred_component),axis=1)).astype(int)
+                        pred_pos_centroids.append(pred_pos_centroid)
+                    pred_pos_centroids = np.array(pred_pos_centroids)
+
+                    # now we have a set of positive detections - evaluate these using the label
+                    # as ground truth. It is not possible to calculate true negative predictions
+
+                    tp = 0
+                    fp = 0
+                    fn = 0
+
+                    # loop through all label sections - if it doesn't have a prediction in it, it is a false negative
+                    for i in range(1,np.max(label_components)+1):
+                        label_component = label_components==i
+                        label_pos_centroid = np.round(np.mean(np.where(label_component),axis=1)).astype(int)
+                        if pred_foreground[label_pos_centroid[0],label_pos_centroid[1],label_pos_centroid[2]]<1:
+                            fn += 1
+
+                    for pred_centroid in pred_pos_centroids:
+                        if seg[pred_centroid[0],pred_centroid[1],pred_centroid[2]]>0:
+                            tp += 1
+                        else:
+                            fp += 1
+                    ppv = tp/(tp+fp+(1e-6))
+                    sensitivity = tp/(tp+fn+(1e-6))
+
+                    op_point_results[op_point] = {'ppv':ppv,'sensitivity':sensitivity}
+                pred = self.__call__(data_tpl)
                 if torch.is_tensor(pred):
                     pred = pred.cpu().numpy()
-
-                seg = np.squeeze(data_tpl['label'])
-                voxvol = np.prod(data_tpl['spacing'])
-
-                # want to generate a set of detection predictions from inference and segmentation map
-                # we use the connected components of the inference map as positive detection
-                # we use the segmentation map as ground truth
-
-                label_foreground = (seg>0.5).astype(int)
-                pred_foreground = (pred>0.5).astype(int)
-                pred_components = label(np.squeeze(pred_foreground))
-                label_components = label(np.squeeze(label_foreground))
-                # find the centroids of each prediction
-                pred_pos_centroids = []
-                for i in range(1,np.max(pred_components)+1):
-                    pred_component = pred_components==i
-                    if pred_component.sum() <(500/voxvol):
-                        continue
-                    pred_pos_centroid = np.round(np.mean(np.where(pred_component),axis=1)).astype(int)
-                    pred_pos_centroids.append(pred_pos_centroid)
-                pred_pos_centroids = np.array(pred_pos_centroids)
-
-                # now we have a set of positive detections - evaluate these using the label
-                # as ground truth. It is not possible to calculate true negative predictions
-
-                tp = 0
-                fp = 0
-                fn = 0
-
-                # loop through all label sections - if it doesn't have a prediction in it, it is a false negative
-                for i in range(1,np.max(label_components)+1):
-                    label_component = label_components==i
-                    label_pos_centroid = np.round(np.mean(np.where(label_component),axis=1)).astype(int)
-                    if pred_foreground[label_pos_centroid[0],label_pos_centroid[1],label_pos_centroid[2]]<1:
-                        fn += 1
-
-                for pred_centroid in pred_pos_centroids:
-                    if seg[pred_centroid[0],pred_centroid[1],pred_centroid[2]]>0:
-                        tp += 1
-                    else:
-                        fp += 1
-                ppv = tp/(tp+fp+(1e-6))
-                sensitivity = tp/(tp+fn+(1e-6))
 
             # now compute the error metrics that we like
             metrics = self.compute_error_metrics(data_tpl)
@@ -568,9 +576,13 @@ class ModelBase(object):
                 results[scan]['max_negpred'] = max_negpred
                 results[scan]['min_pospred'] = min_pospred
             else:
-                results[scan]['ppv'] = ppv*100
-                results[scan]['sensitivity'] = sensitivity*100
-                results[scan]['average'] = 100*(ppv + sensitivity) / 2
+                # results[scan]['ppv'] = ppv*100
+                # results[scan]['sensitivity'] = sensitivity*100
+                # results[scan]['average'] = 100*(ppv + sensitivity) / 2
+                for op_point in op_points:
+                    # results[scan]['ppv_'+str(op_point)] = op_point_results[op_point]['ppv']
+                    # results[scan]['sensitivity_'+str(op_point)] = op_point_results[op_point]['sensitivity']
+                    results[scan]['average_detection_'+str(op_point)] = 100*(op_point_results[op_point]['ppv'] + op_point_results[op_point]['sensitivity']) / 2
 
 
             self._update_global_metrics(data_tpl)

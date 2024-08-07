@@ -3,6 +3,7 @@ os.environ['OV_DATA_BASE'] = '/bask/projects/p/phwq4930-renal-canc/data/seg_data
 from KCD.Segmentation.Inference.endtoend import EnsembleSeg, masking
 import numpy as np
 from skimage.measure import label
+import nibabel as nib
 
 def detection(home, pred_path, op_point, name):
     assert os.path.exists(home), 'Path does not exist'
@@ -60,25 +61,25 @@ def EndToEnd(dataset, stage1_path, stage_2path, op_points = [0.01,0.91,0.99],
     # high sens - based on small cancer detection
     # high acc and high spec - based on all cancer detection
 
-    # s1 = EnsembleSeg.Ensemble_Seg(dataset,name='s1',
-    #                         seg_fp=stage1_path,
-    #                         spacing=np.array([4] * 3),
-    #                         do_prep=True, do_infer=True,
-    #                         is_cect=False, cont=False,overlap=0.5,
-    #                         batch_size=4, patch_size=64)
-    #
+    s1 = EnsembleSeg.Ensemble_Seg(dataset,name='s1',
+                            seg_fp=stage1_path,
+                            spacing=np.array([4] * 3),
+                            do_prep=True, do_infer=True,
+                            is_cect=False, cont=False,overlap=0.5,
+                            batch_size=4, patch_size=64)
+
     dataset_path = os.path.join(os.environ['OV_DATA_BASE'], 'raw_data', dataset, 'images')
     masked_dataset_path = os.path.join(os.environ['OV_DATA_BASE'], 'raw_data', 'masked_' + dataset, 'images')
     pred_path = os.path.join(os.environ['OV_DATA_BASE'], 'predictions_nii', dataset, 's1_[4 4 4]mm')
 
     masking.mask_dataset(dataset_path, pred_path, masked_dataset_path)
 
-    # s2 = EnsembleSeg.Ensemble_Seg('masked_' + dataset,name='s2',
-    #                         seg_fp=stage_2path,
-    #                         spacing=np.array([2] * 3),
-    #                         do_prep=True, do_infer=True,
-    #                         is_cect=False, cont=True,overlap=0.5,
-    #                         batch_size=4, patch_size=64)
+    s2 = EnsembleSeg.Ensemble_Seg('masked_' + dataset,name='s2',
+                            seg_fp=stage_2path,
+                            spacing=np.array([2] * 3),
+                            do_prep=True, do_infer=True,
+                            is_cect=False, cont=True,overlap=0.5,
+                            batch_size=4, patch_size=64)
 
     cont_pred_path = os.path.join(os.environ['OV_DATA_BASE'], 'predictions_nii', 'masked_' + dataset, 's2_[2 2 2]mm_cont')
 
