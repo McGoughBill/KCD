@@ -7,11 +7,13 @@ from skimage.measure import label
 import pandas as pd
 
 
-home = '/Users/mcgoug01/Downloads/conf_intv'
-preds = os.path.join(home, 'preds')
+home = '/Users/mcgoug01/Dropbox/conf_intv'
+# preds = os.path.join(home, 'preds_highspec')
 labels = os.path.join(home, 'labels')
-save_loc = os.path.join(home, 'conf_ROC_fine.npy')
-csv_path = os.path.join(home, 'conf_ROC_fine.csv')
+preds = '/Users/mcgoug01/Dropbox/conf_intv/preds_highsens'
+save_loc = os.path.join(home, 'conf_ROC_highsens.npy')
+csv_path = os.path.join(home, 'conf_ROC_highsens.csv')
+png_path = os.path.join(home, 'conf_ROC_highsens.png')
 
 confidences = [0.0001,0.001,0.005,0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,
                0.91,0.92,0.93,0.94,0.95,0.96,0.97,0.98,0.99,0.995,0.999,0.9999]
@@ -135,7 +137,7 @@ if not os.path.exists(save_loc):
 
     df = pd.DataFrame(results, columns=['Sensitivity', 'Specificity'])
     df['Confidence'] = np.concatenate([[0], confidences, [1]])
-    df.to_csv(os.path.join(home, 'conf_ROC.csv'))
+    df.to_csv(csv_path)
 else:
     results = np.load(save_loc)
     df = pd.read_csv(csv_path)
@@ -147,5 +149,5 @@ plt.plot(df['1-Specificity'], df['Sensitivity'])
 plt.xlabel('1-Specificity')
 plt.ylabel('Sensitivity')
 plt.title(f'AUC: {AUC}')
-plt.savefig(os.path.join(home, 'conf_ROC_fine.png'))
+plt.savefig(png_path)
 plt.show()
