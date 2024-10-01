@@ -20,7 +20,7 @@ fold = int(sys.argv[1])
 # preprocessed_name = '4mm_binary'
 preprocessed_name = '{}mm_cancerbinary_customPP'.format(spacing)
 # preprocessed_name='4mm_binary_test'
-model_name = '6_finetune_seg'
+model_name = '6_finetune_seg_150epochs'
 # model_name = 'del'
 
 dev = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -59,7 +59,7 @@ del model_params['training']['loss_params']
 lr = 0.000001
 model_params['data']['folders'] = ['images', 'labels']
 model_params['data']['keys'] = ['image', 'label']
-model_params['training']['num_epochs'] = 100
+model_params['training']['num_epochs'] = 150
 model_params['training']['opt_name'] = 'ADAM'
 model_params['training']['opt_params'] = {'lr': lr,
                                           'betas': (0.95, 0.9),
@@ -76,20 +76,20 @@ model_params['data']['trn_dl_params']['min_biased_samples'] = model_params['data
 
 
 for vf in vfs:
-    path_to_model = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/trained_models/masked_kits_add_nooverlap_v2_small/2mm_canceronly_customPP/6_tot_ch_talkative_cls1/fold_0/network_weights'
-    sd = torch.load(path_to_model, map_location=dev)
-    # remove keys from state_dict that contain 'fcs','class_pooling', and 'final_fc'
-
-    for k in list(sd.keys()):
-        print(k)
-        if 'fcs' in k or 'class_pooling' in k or 'final_fc' in k:
-            del sd[k]
+    # path_to_model = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/trained_models/masked_kits_add_nooverlap_v2_small/2mm_canceronly_customPP/6_tot_ch_talkative_cls1/fold_0/network_weights'
+    # sd = torch.load(path_to_model, map_location=dev)
+    # # remove keys from state_dict that contain 'fcs','class_pooling', and 'final_fc'
+    #
+    # for k in list(sd.keys()):
+    #     print(k)
+    #     if 'fcs' in k or 'class_pooling' in k or 'final_fc' in k:
+    #         del sd[k]
     model = SegmentationModel(val_fold=vf,
                               data_name=data_name,
                               preprocessed_name=preprocessed_name,
                               model_name=model_name,
                               model_parameters=model_params)
-    model.network.load_state_dict(sd)
-
-    model.training.train()
-    model.eval_validation_set(continuous=False)
+    # model.network.load_state_dict(sd)
+    #
+    # model.training.train()
+    model.eval_validation_set(continuous=False,force_evaluation=True)

@@ -10,10 +10,10 @@ import torch.nn as nn
 from scipy import stats
 import sys
 from KCD.Detection.Preprocessing.AxialSlices import array_manipulation_utils as amu
-
-nii_label_loc = str(sys.argv[1]) # '/Users/mcgoug01/Downloads/inferences/[4 4 4]mm'
-nii_image_loc = str(sys.argv[2]) # '/Users/mcgoug01/Library/CloudStorage/OneDrive-CRUKCambridgeInstitute/SecondYear/Segmentation/seg_data/raw_data/coreg_ncct/images'
-save_loc =  str(sys.argv[3]) # '/Users/mcgoug01/Downloads/masked_coreg_ncct/images'
+#
+# nii_label_loc = str(sys.argv[1]) # '/Users/mcgoug01/Downloads/inferences/[4 4 4]mm'
+# nii_image_loc = str(sys.argv[2]) # '/Users/mcgoug01/Library/CloudStorage/OneDrive-CRUKCambridgeInstitute/SecondYear/Segmentation/seg_data/raw_data/coreg_ncct/images'
+# save_loc =  str(sys.argv[3]) # '/Users/mcgoug01/Downloads/masked_coreg_ncct/images'
 
 
 def mask_dataset(nii_image_loc,nii_label_loc,save_loc):
@@ -36,6 +36,10 @@ def mask_dataset(nii_image_loc,nii_label_loc,save_loc):
             print('Error loading image or label for {}'.format(nii_label))
             print(e)
             continue
+        nib.as_closest_canonical(image)
+        nib.as_closest_canonical(label)
+        aff = image.affine
+        header = image.header
         label_data = label.get_fdata()
         image_data = image.get_fdata()
         label_spacing = np.abs(image.header['pixdim'][1:4])
@@ -54,11 +58,8 @@ def mask_dataset(nii_image_loc,nii_label_loc,save_loc):
                                     mode='nearest', size=label_data.shape).numpy()[0, 0]
 
         masked_image = np.where(dilated_label == 0, -500, image_data)
-        spacing_vector = scale_factors * np.array([2,2,2])
-
-        #generate new affine matrix
-        affine = np.eye(4)*np.append(spacing_vector,1)
 
         # create masked nifti image and save
-        masked_nifti = nib.Nifti1Image(masked_image,affine=affine)
+        masked_nifti = nib.Nifti1Image(masked_image,affine= aff, header=header)
+        nib.as_closest_canonical(masked_nifti)
         nib.save(masked_nifti, os.path.join(save_loc, nii_label))
