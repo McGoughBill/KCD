@@ -44,11 +44,14 @@ if __name__ == '__main__':
         # and create a mask of the same shape as the image
         mask = np.zeros_like(orig_im)
         mask[bbox[0]:bbox[3], bbox[1]:bbox[4], bbox[2]:bbox[5]] = 1
-        mask = (orig_im > -150) & (orig_im < -50) & mask
+        print(bbox)
+        mask = (orig_im > -150) & (orig_im < -50) & (mask>1)
         # numbers from this paper: https://www.tandfonline.com/doi/full/10.1080/0284186X.2020.1800087#abstract
 
         # find std dev in original image
         orig_im_std = np.std(orig_im[mask])
+        print(orig_im_std)
+        sys.stdout.flush()
         datum['1.0'] = orig_im_std
         for dose in doses:
             dose_path = preformatted_dose_path + str(dose)
