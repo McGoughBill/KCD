@@ -1066,7 +1066,7 @@ class SegmentationModel_trainontest(ModelBase):
                                  '\'training\'. These must contain the '
                                  'dict of training paramters.')
         params = self.model_parameters['training'].copy()
-        patch_size = self.model_parameters['network']['patch_size']
+
         prep_params = self.model_parameters['preprocessing']
         if self.model_parameters['architecture'].lower() in ['unet_classhead', 'unetclasshead', 'unet-classhead',
                                                              'unet_classhead_maxpool', 'unetclassheadmaxpool',
@@ -1078,7 +1078,8 @@ class SegmentationModel_trainontest(ModelBase):
                                                    network_name=self.network_name,
                                                    augmentation=self.augmentation.torch_augmentation,
                                                    spacing=prep_params['target_spacing'],
-                                                    patch_size=patch_size,
+                                                     encoder_freeze=params['encoder_frozen'],
+                                                     decoder_freeze=params['decoder_frozen'],
                                                    **params)
         else:
             try:

@@ -1,5 +1,4 @@
 import os
-
 os.environ['OV_DATA_BASE'] = "/bask/projects/p/phwq4930-renal-canc/data/seg_data/"
 from KCD.Segmentation.ovseg.model.SegmentationModel import SegmentationModel
 from KCD.Segmentation.ovseg.model.model_parameters_segmentation import get_model_params_3d_res_encoder_U_Net
@@ -24,7 +23,7 @@ spacing = 2
 pretrain_name = str(sys.argv[1])
 efr = int(sys.argv[2])
 dfr = int(sys.argv[3])
-lr = float(sys.argv[4])
+lr_max = float(sys.argv[4])
 fold = int(sys.argv[5])
 
 # preprocessed_name = '4mm_binary'
@@ -33,6 +32,7 @@ preprocessed_name = '2mm_cancerbinary_customPP'
 
 dev = 'cuda' if torch.cuda.is_available() else 'cpu'
 vfs = [fold]
+# vfs = [0,1,2,3,4]
 
 patch_size = [64, 64, 64]
 # patch dimension must be divisible by respective (((kernel_dimension+1)//2)^depth)/2
@@ -72,7 +72,7 @@ model_params['training']['opt_name'] = 'ADAM'
 model_params['training']['opt_params'] = {'lr': lr,
                                           'betas': (0.95, 0.9),
                                           'eps': 1e-08}
-model_params['training']['lr_params'] = {'n_warmup_epochs': 25, 'lr_max': lr}
+model_params['training']['lr_params'] = {'n_warmup_epochs': 25, 'lr_max': lr_max}
 model_params['data']['trn_dl_params']['epoch_len'] = 1000
 model_params['data']['trn_dl_params']['padded_patch_size'] = [2 * patch_size[0]] * 3
 model_params['data']['val_dl_params']['padded_patch_size'] = [2 * patch_size[0]] * 3
@@ -92,14 +92,12 @@ elif efr<=model_params['training']['num_epochs'] and dfr<=model_params['training
 else:
     model_name = '6_finetune_'+pretrain_name+'_efr_dfr'
 
-model_name = model_name + '_seg_lr{}'.format(lr)
+model_name = model_name + '_seg_lr{}'.format(lr_max)
 for vf in vfs:
     opt_save_loc = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/ne2ceCT/kidney_2_cancer_ckpt_delay/{}/optimizer_state'.format(pretrain_name)
     checkpoint = torch.load(opt_save_loc)
     sd = checkpoint['model_state_dict']
     # remove keys from state_dict that contain 'fcs','class_pooling', and 'final_fc'
-
-
 
     # extract only keys that begin with 'UNet', and remove 'UNet.' from the beginning of the key
     for k in list(sd.keys()):
@@ -121,4 +119,4 @@ for vf in vfs:
     model.network.load_state_dict(sd)
 
     model.training.train()
-    model.eval_validation_set(continuous=False,force_evaluation=True)
+    model.eval_validation_set(continuous=True,force_evaluation=True)

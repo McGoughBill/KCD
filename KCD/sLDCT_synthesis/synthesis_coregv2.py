@@ -11,7 +11,7 @@ def get_nii_image(image_path):
     '''
     image = nib.load(image_path).get_fdata()
     aff = nib.load(image_path).affine
-    return image, aff
+    return image, aff, nib.load(image_path).header
 
 def simulate_noise(image, is_kits, dose_fraction=0.75, exposure_time=0.5, current = 400):
     '''
@@ -38,7 +38,7 @@ def simulate_noise(image, is_kits, dose_fraction=0.75, exposure_time=0.5, curren
     sys.stdout.flush()
     return noised_image
 
-def save_nii_image(image, aff, save_path,dtype=np.float32):
+def save_nii_image(image, aff, save_path,header,dtype=np.float32):
     '''
     :param image: numpy array_like
     :param header: nibabel.nifti1.Nifti1Header
@@ -64,13 +64,13 @@ def main(raw_data_path, output_data_path,dose_fraction=0.75,current=400,exposure
     for file in [f for f in os.listdir(raw_data_path) if f.endswith('.nii.gz')]:
         is_kits =  'kits' in file.lower()
         image_path = os.path.join(raw_data_path, file)
-        image, aff = get_nii_image(image_path)
+        image, aff, header = get_nii_image(image_path)
         noised_image = simulate_noise(image,is_kits,dose_fraction=dose_fraction,current=current,exposure_time=exposure_time)
-        save_nii_image(noised_image, aff, os.path.join(output_data_path, file))
+        save_nii_image(noised_image, aff, os.path.join(output_data_path, file),header)
 
 if __name__ == '__main__':
     raw_data_path = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/raw_data/coreg_ncct_v2/images'
-    dose_fractions = [0.7]
+    dose_fractions = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9]
     for dose_fraction in dose_fractions[::-1]:
         output_data_path = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/raw_data/coreg_ncct_v2/noised_ims_{}'.format(dose_fraction)
         main(raw_data_path, output_data_path,dose_fraction=dose_fraction,current=1000,exposure_time=0.5)

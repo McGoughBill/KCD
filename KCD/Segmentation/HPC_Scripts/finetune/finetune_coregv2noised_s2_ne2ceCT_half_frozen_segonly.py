@@ -32,6 +32,7 @@ preprocessed_name = '2mm_cancerbinary_customPP'
 
 dev = 'cuda' if torch.cuda.is_available() else 'cpu'
 vfs = [fold]
+# vfs = [0,1,2,3,4]
 
 patch_size = [64, 64, 64]
 # patch dimension must be divisible by respective (((kernel_dimension+1)//2)^depth)/2
@@ -93,31 +94,31 @@ else:
 
 model_name = model_name + '_seg'
 for vf in vfs:
-    # opt_save_loc = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/ne2ceCT/kidney_2_cancer_ckpt_delay/{}/optimizer_state'.format(pretrain_name)
-    # checkpoint = torch.load(opt_save_loc)
-    # sd = checkpoint['model_state_dict']
-    # # remove keys from state_dict that contain 'fcs','class_pooling', and 'final_fc'
-    #
-    #
-    #
-    # # extract only keys that begin with 'UNet', and remove 'UNet.' from the beginning of the key
-    # for k in list(sd.keys()):
-    #     if not k.startswith('UNet'):
-    #         del sd[k]
-    #     else:
-    #         sd[k[5:]] = sd.pop(k)
-    #
-    # for k in list(sd.keys()):
-    #     print(k)
-    #     if 'fcs' in k or 'class_pooling' in k or 'final_fc' in k:
-    #         del sd[k]
+    opt_save_loc = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/ne2ceCT/kidney_2_cancer_ckpt_delay/{}/optimizer_state'.format(pretrain_name)
+    checkpoint = torch.load(opt_save_loc)
+    sd = checkpoint['model_state_dict']
+    # remove keys from state_dict that contain 'fcs','class_pooling', and 'final_fc'
+
+
+
+    # extract only keys that begin with 'UNet', and remove 'UNet.' from the beginning of the key
+    for k in list(sd.keys()):
+        if not k.startswith('UNet'):
+            del sd[k]
+        else:
+            sd[k[5:]] = sd.pop(k)
+
+    for k in list(sd.keys()):
+        print(k)
+        if 'fcs' in k or 'class_pooling' in k or 'final_fc' in k:
+            del sd[k]
 
     model = SegmentationModel(val_fold=vf,
                               data_name=data_name,
                               preprocessed_name=preprocessed_name,
                               model_name=model_name,
                               model_parameters=model_params)
-    # model.network.load_state_dict(sd)
+    model.network.load_state_dict(sd)
 
-    # model.training.train()
-    model.eval_validation_set(continuous=False,force_evaluation=True)
+    model.training.train()
+    model.eval_validation_set(continuous=True,force_evaluation=True)

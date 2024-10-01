@@ -15,6 +15,7 @@ import logging
 import dicom2nifti.common as common
 import dicom2nifti.convert_dicom as convert_dicom
 import dicom2nifti.settings
+import sys
 
 logger = logging.getLogger(__name__)
 
@@ -153,8 +154,8 @@ def _remove_accents_(unicode_filename):
 
 
 if __name__ == '__main__':
-    COLTEA_home = '/Users/mcgoug01/Downloads/wcm23-20240604_141336'
-    COLTEA_save = '/Users/mcgoug01/Downloads/nii_folder'
+    COLTEA_home = '/bask/projects/p/phwq4930-renal-canc/YKST/unpacked'
+    COLTEA_save = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/raw_data/ykst/images'
 
     if not os.path.exists(COLTEA_save):
         os.makedirs(COLTEA_save)
@@ -171,6 +172,8 @@ if __name__ == '__main__':
         except:
             print(patient)
             print('Failed to convert directory')
-            continue
+            assert 1==2
 
         print()
+
+        sys.stdout.flush()

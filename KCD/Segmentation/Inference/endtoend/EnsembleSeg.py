@@ -46,7 +46,7 @@ class Ensemble_Seg(nn.Module):
     def __init__(self, data_name: str = None,name='',  ##seg preprocess args
                  seg_fp: str = None, spacing=np.array([3, 3, 3]),
                  do_prep=False, do_infer=False,is_cect=False,cont=False,
-                 patch_size = 64, batch_size=4,overlap=0.5):  ##seg args
+                 patch_size = 64, batch_size=4,overlap=0.5,cont_multiplier=1e5):  ##seg args
         super().__init__()
 
         print("")
@@ -59,6 +59,7 @@ class Ensemble_Seg(nn.Module):
         self.cases = [file for file in listdir(case_path) if file.endswith('.nii.gz') or file.endswith('.nii')]
         self.data_name = data_name
         self.is_cect = is_cect
+        self.cont_multiplier = cont_multiplier
         self.cont = cont
         self.patch_size = patch_size
         self.batch_size = batch_size
@@ -393,10 +394,10 @@ class Ensemble_Seg(nn.Module):
             if isinstance(im_file, (list, tuple)):
                 im_file = im_file[0]
             img = nib.load(im_file)
-            nii_img = nib.Nifti1Image((arr*1000).astype(int), img.affine, img.header)
+            nii_img = nib.Nifti1Image((arr*self.cont_multiplier).astype(int), img.affine, img.header)
         else:
             # if we couldn't find anything (e.g. if the image was given as a DICOM)
-            nii_img = nib.Nifti1Image((arr*1000).astype(int), np.eye(4))
+            nii_img = nib.Nifti1Image((arr*self.cont_multiplier).astype(int), np.eye(4))
             if key.endswith('orig_shape') and 'orig_spacing' in data_tpl:
                 nii_img.header['pixdim'][1:4] = data_tpl['orig_spacing']
             else:
@@ -462,19 +463,17 @@ class Ensemble_Seg(nn.Module):
                     pred_cont, pred_lowres_cont = self.seg_pred_cont(data_tpl)
                     data_tpl['pred_cont_orig_shape'] = pred_cont
                     data_tpl['pred_cont'] = pred_lowres_cont
-
-                # predict from this datapoint
-                pred, pred_lowres = self.seg_pred(data_tpl)
-                data_tpl['pred_orig_shape'] = pred
-                data_tpl['pred_lowres'] = pred_lowres
-
-                if torch.is_tensor(pred):
-                    pred = pred.cpu().numpy()
-                    if cont: pred_cont = pred_cont.cpu().numpy()
-
-                self.save_prediction(data_tpl, filename=data_tpl['scan'])
-                if cont:
+                    if torch.is_tensor(pred_cont):
+                        pred_cont = pred_cont.cpu().numpy()
                     self.save_prediction_cont(data_tpl, filename=data_tpl['scan'])
+                else:
+                    # predict from this datapoint
+                    pred, pred_lowres = self.seg_pred(data_tpl)
+                    data_tpl['pred_orig_shape'] = pred
+                    data_tpl['pred_lowres'] = pred_lowres
+                    if torch.is_tensor(pred):
+                        pred = pred.cpu().numpy()
+                    self.save_prediction(data_tpl, filename=data_tpl['scan'])
                 print("")
 
             print("Segmentations complete!\n")
