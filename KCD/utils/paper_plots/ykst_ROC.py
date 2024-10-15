@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import os
 
 home = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/YKST/ROCs'
+save_loc = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/nat_paper'
 subfolders = [folder for folder in os.listdir(home) if os.path.isdir(os.path.join(home, folder))]
 cancers_sensspec = []
 masses_sensspec = []
@@ -92,6 +93,7 @@ radiologist_all_sensspec = [100*(36/42),100*(4019-155+42)/4019]
 #             markersize=5)
 plt.title('ROC Curves for External Test: YKST',fontdict={'fontsize': 15})
 plt.legend()
+plt.savefig(os.path.join(save_loc,'YKST_ROC.png'))
 plt.show()
 
 # # loop through the meta dataframes, plot ROC curves

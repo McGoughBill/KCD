@@ -2,8 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
-home = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions/fulldose_ROC/'
-titlename = 'Waterfall Plot of Confidence and Size of Cancers in Full-Dose Internal Test Set'
+home = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions/lowdose_ROC/'
+titlename = 'Waterfall Plot of Confidence and Size of Cancers in Low-Dose Internal Test Set'
 observations = home + 'observations.csv'
 observations = pd.read_csv(observations)
 #sort by confidence primarily, then by size if confidence is the same

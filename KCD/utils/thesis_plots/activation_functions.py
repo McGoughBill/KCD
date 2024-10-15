@@ -23,6 +23,12 @@ def leaky_relu(x, alpha=0.01):
 def step_function(x, tau=0):
     return np.where(x > tau, 1, 0)
 
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+
+def derivativeofsigmoid(x):
+    return sigmoid(x) * (1 - sigmoid(x))
+
 # Generate input values between -1 and 1
 x = np.linspace(-0.1, 1.1, 1000)
 
@@ -31,6 +37,7 @@ relu_output = relu(x)
 tanh_output = tanh(x)
 leaky_relu_output = leaky_relu(x)
 step_output = step_function(x, tau=0)  # You can adjust tau as needed
+sigmoid_output = sigmoid(x)
 
 # For Softmax, compute the probability of the positive class
 # Assume the negative class has a constant score of 0
@@ -43,6 +50,7 @@ plt.figure(figsize=(6, 4))
 plt.plot(x, relu_output, label='ReLU', color='red',linewidth=2)
 plt.plot(x, step_output, label='Step Function (τ=0)', color='green', linestyle='--',linewidth=2)
 plt.plot(x, softmax_positive, label='Softmax (Negative Class = 0)', color='blue',linewidth=2)
+# plt.plot(x, sigmoid_output, label='Sigmoid', color='purple',linewidth=2)
 plt.xlabel('Input', fontsize=14)
 plt.ylabel('Output', fontsize=14)
 plt.legend(fontsize=12)

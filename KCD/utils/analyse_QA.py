@@ -8,6 +8,7 @@ import nibabel as nib
 plt.switch_backend('TkAgg')
 
 home = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/Bill/QA'
+save_loc = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/nat_paper'
 hania_response = pd.read_csv(home + '/hania_qa.csv')
 iztok_response = pd.read_csv(home + '/iztok_qa.csv')
 cathal_response = pd.read_csv(home + '/cathal_qa.csv')
@@ -122,11 +123,11 @@ overall_cm_90 = (cm_90_h + cm_90_i + cm_90_c)/(3*88)
 #         ax[i,j].set_yticklabels(['Full Dose', 'Synthetic Low Dose', 'Real Low Dose'])
 
 #plot overall confusion matrix
-fig, ax = plt.subplots(1, 2, figsize=(12, 5))
+fig, ax = plt.subplots(1, 2, figsize=(16, 6))
 sns.heatmap(overall_cm_80, annot=True, ax=ax[0])
-ax[0].set_title('Overall Confusion Matrix for 80pc_sldct')
+ax[0].set_title('Normalised Confusion Matrix for 80pc_sldct')
 sns.heatmap(overall_cm_90, annot=True, ax=ax[1])
-ax[1].set_title('Overall Confusion Matrix for 90pc_sldct')
+ax[1].set_title('Normalised Confusion Matrix for 90pc_sldct')
 for i in range(2):
     ax[i].set_xlabel('Predicted')
     ax[i].set_ylabel('True')
@@ -145,11 +146,13 @@ print(df[['label_class_q', 'quality_hania']])
 print(df.groupby('label_class_q')['quality_hania'].mean())
 print(df.groupby('label_class_q')['quality_hania'].std())
 
+plt.savefig(os.path.join(save_loc, 'confusion_matrix.png'))
+
 
 #plot average quality scores
 #check for statistical significance
 import scipy.stats as stats
-fig, ax = plt.subplots(3, 1, figsize=(5, 12))
+fig, ax = plt.subplots(3, 1, figsize=(12, 12))
 from statannot import add_stat_annotation
 # sns.boxplot(x='label_class_q', y='average_quality', data=df, ax=ax)
 
@@ -173,7 +176,8 @@ ax[0].set_ylabel('Average Quality Score')
 ax[0].set_title('Qualitative Quality Scores for Hania, Cathal, and Iztok')
 #change x axis labels
 ax[0].set_xticklabels(['Full Dose', '80% Synthetic Low Dose','90% Synthetic Low Dose', 'Real Low Dose'])
-
+#remove x axis label
+ax[0].set_xlabel('')
 #plot box plots with clusters and significance
 sns.boxplot(x='label_class_q', y='stddev', data=df, ax=ax[1])
 #add stats cluster and significance
@@ -212,16 +216,11 @@ ax[2].set_xticklabels(['Full Dose', '80% Synthetic Low Dose','90% Synthetic Low 
 # print correlation between z_spacing, quality, and stddev
 print(df[['z_spacing', 'average_quality', 'stddev']].corr())
 # set y extent
-plt.show()
+ax[0].set_xlabel('')
+ax[1].set_xlabel('')
+ax[2].set_xlabel('')
 
+plt.savefig(os.path.join(save_loc, 'quality_scores.png'))
+plt.show()
 #print average z_spacing for each of the 4 types of images
 print(df.groupby('label_class_q')['z_spacing'].mean())
-
-
-
-
-
-
-
-
-

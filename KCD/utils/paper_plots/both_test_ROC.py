@@ -9,7 +9,7 @@ full_dose = False
 meta_folder = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions/fulldose_ROC'
 sub_folders = [os.path.join(meta_folder, f,'predictions.csv') for f in os.listdir(meta_folder) if os.path.isdir(os.path.join(meta_folder, f))]
 names = [float(f.split('/')[-2]) for f in sub_folders]
-
+save_loc = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/nat_paper'
 # sort sub_folders by names_sub_folders
 folders = [x for _,x in sorted(zip(names,sub_folders))]
 names_sub_folders = sorted(names)
@@ -265,5 +265,5 @@ axin.spines[['top','right','bottom','left']].set_linewidth(5)
 ax.indicate_inset_zoom(axin, edgecolor='yellowgreen',linewidth=3,alpha=1)
 
 plt.legend(fontsize=14,ncol=2)
-
+plt.savefig(os.path.join(save_loc,'internaltest_ROC.png'),dpi=300)
 plt.show()
