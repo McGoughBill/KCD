@@ -4,6 +4,8 @@ import numpy as np
 import nibabel as nib
 from torch.nn.functional import interpolate
 import torch
+#connected components import
+from skimage.measure import label, regionprops
 
 import matplotlib.pyplot as plt
 plt.switch_backend('TkAgg')
@@ -94,6 +96,54 @@ for id,ai,studyid in zip(original_ids,['pos','neg','pos'],ids):
     labels.append(nib.load(cectlb_path).get_fdata())
 
 
+# get labels for ALL images
+all_labels = []
+for i,row in highacc_pred.iterrows():
+    entry = {}
+    entry['studyid'] = row['StudyID']
+    entry['originalid'] = truth[truth['StudyID'] == row['StudyID']]['OriginalID'].values[0]
+
+    if not (('rcc' in entry['originalid'].lower()) or  ('kits' in entry['originalid'].lower())):
+        continue
+
+    if 'rcc' in entry['originalid'].lower():
+        cectlb_path = os.path.join(add_cect_path, 'labels','Rcc'+entry['originalid'][3:])
+        lb = nib.load(cectlb_path).get_fdata()==1
+    else:
+        cectlb_path = os.path.join(kits_cect_path,'labels', 'case_'+entry['originalid'][5:])
+        lb = nib.load(cectlb_path).get_fdata()==2
+
+    voxel_volume = np.prod(nib.load(cectlb_path).header.get_zooms())
+    max_size= 0
+    for region in regionprops(label(lb)):
+        if region.area > max_size:
+            max_size = region.area
+            entry['size'] = region.area*voxel_volume
+    print(entry)
+    all_labels.append(entry)
+
+sizes_df = pd.DataFrame(all_labels)
+
+posneg_cases = ['ID10','ID20','ID23','ID24','ID27','ID41','ID59','ID62']
+#find sizes for each in posneg
+negneg_cases = ['ID16','ID39','ID42','ID47','ID53','ID75','ID76','ID85']
+
+#find sizes of all cases
+posneg_sizes = sizes_df[sizes_df['studyid'].isin(posneg_cases)]['size'].values
+negneg_sizes = sizes_df[sizes_df['studyid'].isin(negneg_cases)]['size'].values
+
+#pospos is all else not in posneg or negneg
+pospos_sizes = sizes_df[~sizes_df['studyid'].isin(posneg_cases+negneg_cases)]['size'].values
+
+#convert volumes mm^3 to diameter in cm
+posneg_diam = (3*posneg_sizes/(4*np.pi))**(1/3)/5
+negneg_diam = (3*negneg_sizes/(4*np.pi))**(1/3)/5
+pospos_diam = (3*pospos_sizes/(4*np.pi))**(1/3)/5
+
+diams = [posneg_diam,negneg_diam,pospos_diam]
+
+
+
 # plot each in a 3x3 grid - top row is pos neg, with 3 images, lowdose (pred overlay), fulldose (pred overlay), contrast enhanced (label overlay)
 # middle row is neg neg, with 3 images, lowdose (pred overlay), fulldose (pred overlay), contrast enhanced (label overlay)
 # bottom row is pos pos, with 3 images, lowdose (pred overlay), fulldose (pred overlay), contrast enhanced (label overlay)
@@ -113,24 +163,24 @@ for i in range(3):
     fulldose_pred = np.flip(fulldose_ai_preds[i].T)
 
     if (i==0) or (i==2):
-        label = labels[i].T ==1
+        lb = labels[i].T ==1
         low_dose = np.flip(low_dose,axis=2)
         fulldose = np.flip(fulldose,axis=2)
         lowdose_pred = np.flip(lowdose_pred,axis=2)
         # fulldose_pred = np.flip(fulldose_pred,axis=2)
     else:
-        label = labels[i] ==2
+        lb = labels[i] ==2
         contrastenhanced = contrastenhanced_images[i]
 
     if i==0:
-        label_slice = np.argmax(np.sum(label, axis=(1, 2)))-1
+        label_slice = np.argmax(np.sum(lb, axis=(1, 2)))-1
         pred_slice = np.argmax(np.sum(lowdose_pred, axis=(1, 2)))
         upper_left = 270,280
         lower_right = 370,380
     elif i==2:
         upper_left = 110,260
         lower_right = 210,360
-        label_slice = np.argmax(np.sum(label, axis=(1, 2)))
+        label_slice = np.argmax(np.sum(lb, axis=(1, 2)))
         pred_slice = int(low_dose.shape[0]/2) +8
     else:
         upper_left = 115,190
@@ -140,7 +190,7 @@ for i in range(3):
         fulldose = np.flip(np.flip(fulldose,axis=1),2)
         lowdose_pred = np.flip(np.flip(lowdose_pred,axis=1),2)
         # fulldose_pred = np.flip(np.flip(fulldose_pred,axis=1),2)
-        label_slice = np.argmax(np.sum(label, axis=(1, 2)))
+        label_slice = np.argmax(np.sum(lb, axis=(1, 2)))
         pred_slice = int(low_dose.shape[0]/2)-1
 
     #interpolate the fulldose_pred to match the size of the 3D images
@@ -178,18 +228,42 @@ for i in range(3):
         ax[i,j].axis('off')
 
     #overlay label on contrast enhanced as contours
-    ax[i,2].contour(label[label_slice][upper_left[1]:lower_right[1],upper_left[0]:lower_right[0]],colors='green',linewidths=5)
+    ax[i,2].contour(lb[label_slice][upper_left[1]:lower_right[1],upper_left[0]:lower_right[0]],colors='green',linewidths=5)
 
-    #draw pie chart - highlight only ith name and size in the pie chart
-    #set explode to 0.1 for the ith slice
-    #set text to be larger and bold on the ith slice
-    explode = [0.07 if j==i else 0 for j in range(3)]
-    ax[i,3].pie(pie_sizes,labels =pie_names[i],startangle=0,explode = explode,
-                shadow={'ox': -0.04, 'edgecolor': 'grey', 'shade': 0.9},
-                colors=['red' if j==i else 'slategrey' for j in range(3)],
-                textprops={'fontsize': 20, 'fontweight': 'bold'})
+    #draw histogram of sizes
+    counts, bins, patches = ax[i, 3].hist(
+        diams[i],
+        bins=8,
+        range=[1.0, 5.0],
+        color='steelblue',
+        edgecolor='black',
+        alpha=0.7
+    )
+
+    # Set axis limits
+    ax[i, 3].set_ylim(0, 6)
+
+    # Set axis labels with appropriate font sizes
+    if i == 2:
+        ax[i, 3].set_xlabel('Diameter / cm', fontsize=20)
+    ax[i, 3].set_ylabel('Frequency', fontsize=20)
+
+    # Customize tick parameters
+    ax[i, 3].tick_params(axis='both', which='major', labelsize=14)
+
+    # Remove top and right spines
+    ax[i, 3].spines['top'].set_visible(False)
+    ax[i, 3].spines['right'].set_visible(False)
+
+    # Add gridlines for y-axis
+    ax[i, 3].yaxis.grid(True, linestyle='--', which='major', color='grey', alpha=0.7)
+
+    #make histogram square aspect ratio
+    ax[i, 3].set_aspect(0.7)
+
+
 # set small spacing between each column and row
-plt.subplots_adjust(wspace=0.05,hspace=0.05)
+plt.subplots_adjust(wspace=0.1,hspace=0.1)
 plt.tight_layout()
 plt.savefig(os.path.join(save_loc,'lowdose_assessment.png'))
 plt.show(block=True)

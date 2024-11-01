@@ -2,8 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
-home = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions/lowdose_ROC/'
-titlename = 'Waterfall Plot of Confidence and Size of Cancers in Low-Dose Internal Test Set'
+home = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions/fulldose_ROC/'
 observations = home + 'observations.csv'
 observations = pd.read_csv(observations)
 #sort by confidence primarily, then by size if confidence is the same
@@ -66,6 +65,16 @@ ax[0].set_ylabel('Relative Confidence',fontdict={'fontsize':15})
 #increase y tick font size
 ax[0].tick_params(axis='y',labelsize=15)
 
+#find alt_index where confidence is 0
+zero_conf = observations['alt_index'][observations['Confidence']>0].values[0]
+
+#draw a vertical line at this point in both subplots
+ax[0].axvline(x=zero_conf,color='black',linestyle='--')
+ax[1].axvline(x=zero_conf,color='black',linestyle='--')
+
+#label line with 'Decision Boundary'
+ax[1].annotate('Decision Boundary',xy=(zero_conf,5),xytext=(zero_conf-5,5),rotation=90,fontsize=10)
+
 #reduce padding between subplots
 plt.subplots_adjust(hspace=0.01)
 
@@ -123,11 +132,12 @@ for a in ax:
     a.grid(which='major',axis='both',linestyle='-',linewidth=1)
 
 #reduce padding between subplots and figure title
-plt.tight_layout(rect=[0,0,1,0.95])
+plt.tight_layout()
 
 # add figure-wide title
-fig.suptitle(titlename,fontsize=15)
+# fig.suptitle(titlename,fontsize=15)
 plt.savefig(home+'waterfall.png')
+plt.savefig('/Users/mcgoug01/Cambridge University Dropbox/William McGough/nat_paper/waterfall_fulldose.png')
 
 plt.show()
 

@@ -8,6 +8,8 @@ conf_intervals_fp = '/Users/mcgoug01/Downloads/bootstrap/conf_ROC.csv'
 large = pd.read_csv(sizes_fp)['size'].values > ((15**3)*np.pi*4/3)
 conf_per_patient = np.load(conf_per_patient_fp)
 conf_intervals = pd.read_csv(conf_intervals_fp)['Confidence'].values
+conf_sens = pd.read_csv(conf_intervals_fp)['Sensitivity'].values
+conf_spec = pd.read_csv(conf_intervals_fp)['Specificity'].values
 
 samples_per_bootstrap = 294
 number_samples = 10000
@@ -66,24 +68,46 @@ spec_std = np.concatenate(([0],spec_std,[0]))
 AUC = np.trapz(sens, spec)
 
 import matplotlib.pyplot as plt
+from matplotlib import gridspec
+
 plt.switch_backend('TkAgg')
-fig = plt.figure(figsize=(10,10))
-plt.plot(1-spec, sens, c = 'b', label='ROC curve')
+# subplot of two figures in one row - one with width 7, other with width 3, makign a cumulative
+# width of 10. both with height 8
+fig = plt.figure(figsize=(12,8))
+
+
+# create grid for different subplots
+gridspec = gridspec.GridSpec(ncols=2, nrows=1,
+                         width_ratios=[8, 3], wspace=0.2,
+                         )
+
+ax = fig.add_subplot(gridspec[0])
+#plot original conf_sens and conf_spec
+ax.plot(conf_spec*100, conf_sens*100, c='b', label='Non-bootstrapped ROC curve (AUC {:.3f})'.format(np.trapz(conf_sens, conf_spec)),
+         linewidth=2, linestyle='--')
+
+ax.plot(spec*100, sens*100, c = 'black', label='Bootstrapped ROC curve (AUC {:.3f})'.format(AUC), linewidth=3)
 #plot semi-transparent error line with fill between
-plt.fill_between(1-spec, sens-1.96*sens_std, sens+1.96*sens_std, alpha=0.2, color='b', label='95% Confidence Interval')
-plt.xlabel('1-Specificity')
-plt.ylabel('Sensitivity')
+ax.fill_between(spec*100, (sens-1.96*sens_std)*100, (sens+1.96*sens_std)*100, alpha=0.2, color='black', label='Bootstrapped 95% confidence interval')
+ax.set_xlabel('Specificity / %', fontsize=18)
+ax.set_ylabel('Sensitivity / %', fontsize=18)
 #plot minor and major grid lines
-plt.grid(which='both')
-plt.minorticks_on()
+ax.grid(which='both')
+ax.minorticks_on()
 #make minor gridlines more faint and appear every 0.05
-plt.grid(which='minor', alpha=0.2)
-plt.grid(which='major', alpha=0.5)
+ax.grid(which='minor', alpha=0.2)
+ax.grid(which='major', alpha=0.5)
+
+#increase tick font size
+ax.tick_params(axis='both', which='major', labelsize=14)
+ax.tick_params(axis='both', which='minor', labelsize=14)
+
+#xlim and ylim -2 to 102
+ax.set_xlim(-2,102)
+ax.set_ylim(-2,102)
 
 #plot diagonal line
-plt.plot([0,1],[0,1], 'k--')
-
-
+ax.plot([100,0],[0,100], 'k--')
 
 # interpolate ROC curve and standard deviations to fit between 1000 points between 0 and 1
 interp = np.linspace(0,1,1000)
@@ -125,9 +149,6 @@ highsens_spec = interp[index]
 highsens_conf = interp_conf[index]
 
 
-
-
-
 if take_average:
     # make confidence the average of the two previous two
     conf = (interp_conf[index] + interp_conf[np.argmin(np.abs(interp-high_spec))])/2
@@ -152,16 +173,37 @@ highdist_spec = interp[index]
 highdist_conf = interp_conf[index]
 
 # plot these operating points on the curve
-plt.plot([1-highspec_spec,1-highdist_spec, 1-highsens_spec], [highspec_sens, highdist_sens, highsens_sens], 'ro',
-            label='Operating Points')
+ax.plot(np.array([highspec_spec,highdist_spec, highsens_spec])*100,
+         np.array([highspec_sens, highdist_sens, highsens_sens])*100,
+         'ro', label='Selected operating points')
+ax.grid(which='both')
+ax.minorticks_on()
+ax.grid(which='minor',axis='both',linestyle='--',linewidth=0.5)
+ax.grid(which='major',axis='both',linestyle='-',linewidth=1)
 
 #plot legend
-plt.legend()
+ax.legend(fontsize=14, loc='lower left')
 print(AUC)
 #save
-plt.savefig('/Users/mcgoug01/Downloads/bootstrap/ROC.png')
+# plt.savefig('/Users/mcgoug01/Downloads/bootstrap/ROC.png')
 
 # include op point confidences to 4 dp in titles
-plt.title('Receiver Operating Characteristic, AUC = {:.4f}'.format(AUC))
+# ax.title('Receiver Operating Characteristic, AUC = {:.4f}'.format(AUC), fontsize=20)
+
+# in second plot, the ratio of large to small tumours
+fraction_large = np.sum(large)/len(large)
+fraction_small = 1-fraction_large
+
+ax1 = fig.add_subplot(gridspec[1])
+#diffentiate bars by texturing and pastel colours
+ax1.bar(['Large', 'Small'], [fraction_large*100, fraction_small*100],color=['palegoldenrod', 'lightsteelblue'], hatch=['\\', '/'])
+#place text of percentages on top of bars
+for i, v in enumerate([fraction_large*100, fraction_small*100]):
+    ax1.text(i, v + 1, str(round(v, 2))+'%', color='black', ha='center', fontsize=16)
+
+ax1.set_ylabel('Percentage of tumours in ' +r"$\mathbf{Finetune}$"+" dataset", fontsize=16)
+ax1.set_xlabel('Tumour size', fontsize=16)
+plt.tight_layout()
+#change width of ax[1] to 3
+plt.savefig('/Users/mcgoug01/Cambridge University Dropbox/William McGough/nat_paper/cvROC.png')
 plt.show()
-plt.close()

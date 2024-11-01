@@ -12,6 +12,7 @@ subfolders = [folder for folder in os.listdir(home) if os.path.isdir(os.path.joi
 cancers_sensspec = []
 masses_sensspec = []
 alls_sensspec = []
+fig = plt.figure(figsize=(8,7))
 for folder in subfolders:
     #cancers in cnacers_ROC.csv, all solid tumors in masses_ROC.csv, all potential malignancies in all_ROC.csv
     # open csvs as dataframes, append
@@ -58,28 +59,36 @@ for name,data,c in zip(['Cancers\n','Solid Masses\n','Potential Malignancies\n']
                        [cancers_sensspec, masses_sensspec, alls_sensspec],
                        colors):
     auc = np.abs(np.trapz(data[:,0], data[:,1]))
-    plt.plot(data[:,1]*100, data[:,0]*100, label=name+'(AUC = %.3f)' % auc, color=c)
-plt.xlabel('1 - Specificity / %',fontdict={'fontsize': 15})
-plt.ylabel('Sensitivity / %',fontdict={'fontsize': 15})
+    plt.plot(data[:,1]*100, data[:,0]*100, label=name+'(AUC = %.3f)' % auc, color=c, linewidth=2)
+plt.xlabel('Specificity / %',fontdict={'fontsize': 16})
+plt.ylabel('Sensitivity / %',fontdict={'fontsize': 16})
 # add minor and major gridlines
 plt.grid(which='both', axis='both')
 plt.minorticks_on()
 plt.grid(which='minor', axis='both', linestyle='-', linewidth=0.2)
 
+#change tick font size
+plt.tick_params(axis='both', which='major', labelsize=14)
+plt.tick_params(axis='both', which='minor', labelsize=14)
+
 # find the point in alls_sensspec where sensitivity is 1.0 and specificity is maximised
 max_spec = np.max(alls_sensspec[:,1][alls_sensspec[:,0]==1.0])
 #drop a vertical line from this point to the x-axis between 0 and 100
-plt.plot([max_spec*100,max_spec*100],[0,100],color='gray',linestyle='--',linewidth=1)
+plt.plot([max_spec*100,max_spec*100],[-2,100],color='gray',linestyle='--',linewidth=2)
 # annotate this vertical line with ' Potential Screening Workload Reduction'
 plt.text(max_spec*100 - 4, 50, 'Up to {:.1f}% Screening Workload Reduction'.format(max_spec*100), rotation=90, verticalalignment='center')
 
 # do the same for the cancers_sensspec
 max_spec = np.max(cancers_sensspec[:,1][cancers_sensspec[:,0]==1.0])
-plt.plot([max_spec*100,max_spec*100],[0,100],color='gray',linestyle='--',linewidth=1)
+plt.plot([max_spec*100,max_spec*100],[-2,100],color='gray',linestyle='--',linewidth=2)
 # annotate this vertical line with 'High-Risk Cancer Prioritisation'
 plt.text(max_spec*100 - 4, 40, 'High-Risk Cancer Prioritisation', rotation=90, verticalalignment='center')
-plt.ylim([0,102])
-plt.xlim([0,102])
+plt.ylim([-2,102])
+plt.xlim([-2,102])
+plt.grid(which='both')
+plt.minorticks_on()
+plt.grid(which='minor',axis='both',linestyle='--',linewidth=0.5)
+plt.grid(which='major',axis='both',linestyle='-',linewidth=1)
 
 radiologist_cancer_sensspec = [100,100*(4019-(155-13))/4019]
 radiologist_mass_sensspec = [100*(24/25),100*(4019-155+25)/4019]
@@ -91,11 +100,13 @@ radiologist_all_sensspec = [100*(36/42),100*(4019-155+42)/4019]
 #             markersize=5)
 # plt.plot(radiologist_all_sensspec[1],radiologist_all_sensspec[0],'go',label='Radiologist All',
 #             markersize=5)
-plt.title('ROC Curves for External Test: YKST',fontdict={'fontsize': 15})
-plt.legend()
+# plt.title('ROC Curves for External Test: YKST',fontdict={'fontsize': 15})
+plt.legend(fontsize=14)
+plt.tight_layout()
 plt.savefig(os.path.join(save_loc,'YKST_ROC.png'))
 plt.show()
 
+print(cancers_sensspec)
 # # loop through the meta dataframes, plot ROC curves
 # for df in zip(['Cancers','All Solid Masses','All Potential Malginancies'],[meta_cancers, meta_masses, meta_alls]):
 #     tpr = df

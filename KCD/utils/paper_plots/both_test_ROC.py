@@ -17,8 +17,9 @@ names_sub_folders = sorted(names)
 truth_csv_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/Bill/FD/internaltest_metadata.csv'
 iztok_predfulldose_csv_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/iztokFD.csv'
 hania_predfulldose_csv_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/haniaFD.csv'
-folders = [iztok_predfulldose_csv_fp, hania_predfulldose_csv_fp] + folders
-names_sub_folders = ['Iztok','Hania'] + names_sub_folders
+cathal_predfulldose_csv_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/cathalFD.csv'
+folders = [iztok_predfulldose_csv_fp, hania_predfulldose_csv_fp,cathal_predfulldose_csv_fp] + folders
+names_sub_folders = ['Iztok','Hania','Cathal'] + names_sub_folders
 fulldose_ai_results = [[100,0]]
 for name,pred_csv_fp in zip(names_sub_folders,folders):
     print(name)
@@ -84,12 +85,10 @@ for name,pred_csv_fp in zip(names_sub_folders,folders):
 
 fulldose_ai_results.append([0,100])
 
-
 fulldose_ai_results = np.array(fulldose_ai_results)
 # sort by ascending first column and descending second column - merge sort by second column first
 fulldose_ai_results = fulldose_ai_results[fulldose_ai_results[:,1].argsort(kind='mergesort')[::-1]]
 fulldose_ai_results = fulldose_ai_results[fulldose_ai_results[:,0].argsort(kind='mergesort')]
-
 
 #calculate AUC for ai_results
 fd_auc = np.abs(np.trapz(fulldose_ai_results[:,0],fulldose_ai_results[:,1])/10000)
@@ -184,7 +183,7 @@ marker = '*'
 # also, plot the operating points for the AI models (high sensitivity, high accuracy, high specificity)
 import matplotlib.pyplot as plt
 plt.switch_backend('TkAgg')
-fig, ax  = plt.subplots(figsize=(8,6))
+fig, ax  = plt.subplots(figsize=(8,7))
 fd, = ax.plot(fulldose_ai_results[:,1],fulldose_ai_results[:,0],label='Full-Dose AI\n(AUC = {:.3f})'.format(fd_auc),c='k',zorder=1)
 ld, = ax.plot(lowdose_ai_results[:,1],lowdose_ai_results[:,0],label='Low-Dose AI\n(AUC = {:.3f})'.format(ld_auc),c='k',zorder=1,
          linestyle='--')
@@ -199,14 +198,14 @@ ldcr = ax.scatter([iztok_low[1]],[iztok_low[0]],label='CR Low Dose',marker='.',s
 
 # plt.scatter([cathal_full[1],hania_full[1]],[cathal_full[0],hania_full[0]],label='Trainee Radiologists Full Dose',c='r',marker='.')
 ax.scatter([iztok_full[1]],[iztok_full[0]],label='CR Full Dose',c='r',marker='.',s=100,zorder=2)
-ax.scatter([hania_full[1]],[hania_full[0]],label='TR Full Dose',c='b',marker='.',s=100,
-              zorder=2)
+ax.scatter([hania_full[1],cathal_full[1]],[hania_full[0],cathal_full[0]],label='TR Full Dose',c='b',marker='.',s=100,
+                zorder=2)
 #plot dotted line between dose points
 fdcr = ax.plot([iztok_full[1],iztok_low[1]+0.3],[iztok_full[0],iztok_low[0]+0.3],c='r',linestyle=':',zorder=2,linewidth=2)
 
 #plot dotted line for hania
 plt.plot([hania_full[1],hania_low[1]+0.3],[hania_full[0],hania_low[0]+0.3],c='b',linestyle=':',zorder=2,linewidth=2)
-
+plt.plot([cathal_full[1],cathal_low[1]-0.1],[cathal_full[0],cathal_low[0]+0.3],c='b',linestyle=':',zorder=2,linewidth=2)
 # ax
 # .title('ROC Curve: AI Model Detecting RCC in NCCT'.format(fd_auc),fontdict={'fontsize':12})
 
@@ -219,9 +218,13 @@ ax.grid(which='both')
 ax.minorticks_on()
 ax.grid(which='minor',axis='both',linestyle='--',linewidth=0.5)
 ax.grid(which='major',axis='both',linestyle='-',linewidth=1)
-ax.set_xlabel('Specificity / %',fontdict={'fontsize':18})
-ax.set_ylabel('Sensitivity / %',fontdict={'fontsize':18})
+plt.tick_params(axis='both', which='major', labelsize=14)
+plt.tick_params(axis='both', which='minor', labelsize=14)
+ax.set_xlabel('Specificity / %',fontdict={'fontsize':16})
+ax.set_ylabel('Sensitivity / %',fontdict={'fontsize':16})
 # ax.legend(fontsize=14)
+
+
 
 axin = ax.inset_axes([0.2, 0.4, 0.3, 0.5])
 axin.plot(fulldose_ai_results[:,1],fulldose_ai_results[:,0],label='Full-Dose\n(AUC = {:.3f})'.format(fd_auc),c='k',zorder=1)
@@ -233,12 +236,14 @@ axin.scatter([iztok_low[1]],[iztok_low[0]],label='CR Low Dose',marker='.',s=150,
 
 #plot full dose radiologists
 axin.scatter([iztok_full[1]],[iztok_full[0]],label='CR Full Dose',c='r',marker='.',s=150,zorder=2)
-axin.scatter([hania_full[1]],[hania_full[0]],label='TR Full Dose',c='b',marker='.',s=150,zorder=2)
+axin.scatter([cathal_full[1],hania_full[1]],[cathal_full[0],hania_full[0]],label='TR Full Dose',c='b',marker='.',s=150,
+                zorder=2)
 
 #plot dotted line between dose points
 axin.plot([iztok_full[1],iztok_low[1]+0.1],[iztok_full[0],iztok_low[0]+0.3],c='r',linestyle=':',zorder=2,linewidth=2)
 
 #plot dotted line for hania
+axin.plot([cathal_full[1],cathal_low[1]-0.1],[cathal_full[0],cathal_low[0]+0.3],c='b',linestyle=':',zorder=2,linewidth=2)
 axin.plot([hania_full[1],hania_low[1]+0.1],[hania_full[0],hania_low[0]+0.3],c='b',linestyle=':',zorder=2,linewidth=2)
 
 # set x range and y range to 80-100 and 60-100
@@ -264,6 +269,20 @@ axin.spines[['top','right','bottom','left']].set_linewidth(5)
 # on original axes, plot the zoomed in area with a coloured rectangle
 ax.indicate_inset_zoom(axin, edgecolor='yellowgreen',linewidth=3,alpha=1)
 
-plt.legend(fontsize=14,ncol=2)
+plt.legend(fontsize=16,ncol=2,loc='lower left')
+ax.set_ylim([-2,102])
+ax.set_xlim([-2,102])
+plt.tight_layout()
 plt.savefig(os.path.join(save_loc,'internaltest_ROC.png'),dpi=300)
 plt.show()
+
+print(fd_high_sens,fd_high_acc,fd_high_spec)
+print(ld_high_sens,ld_high_acc,ld_high_spec)
+
+#print all radiologist results
+print(iztok_full)
+print(hania_full)
+print(cathal_full)
+print(iztok_low)
+print(hania_low)
+print(cathal_low)
