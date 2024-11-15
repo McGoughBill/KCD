@@ -1239,22 +1239,23 @@ if __name__ == '__main__':
 
     patch = 64
     kernel_sizes = [3 for _ in range(6)]
-    net_3d =UNet_ClassHead_MaxPool_featureoutput(1, 2, kernel_sizes,
+    net_3d =UNet_ClassHead_PowerPool_featureoutput(1, 2, kernel_sizes,
                                                  False, filters_max=1024, filters=32 )
 
     wrapper = UNet_regressivehead_wrapper(net_3d,6)
+    print(wrapper)
     xb_3d = torch.randn((2, 1, patch, patch, patch), device=gpu)
     print('3d')
     with torch.no_grad():
-        logs_list, out, feature_list, out_class_latents, regressive = wrapper(xb_3d)
+        logs_list, out_class_latents, regressive = wrapper(xb_3d)
     print('Output shapes seg:')
     for log in logs_list:
         print(log.shape)
 
     print('Output shapes features:')
-    for log in feature_list:
+    for log in out_class_latents:
         print(log.shape)
 
     print('Output shapes cls_features:',out_class_latents.shape)
     print('Output shapes reg:',regressive.shape)
-    print('Output classification:',out)
+    print('Output classification:',logs_list)

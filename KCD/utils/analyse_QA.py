@@ -119,8 +119,8 @@ overall_cm_90 = (cm_90_h + cm_90_i + cm_90_c)/(3*88)
 #     for j in range(2):
 #         ax[i,j].set_xlabel('Predicted')
 #         ax[i,j].set_ylabel('True')
-#         ax[i,j].set_xticklabels(['Full Dose', 'Synthetic Low Dose', 'Real Low Dose'])
-#         ax[i,j].set_yticklabels(['Full Dose', 'Synthetic Low Dose', 'Real Low Dose'])
+#         ax[i,j].set_xticklabels(['Normal Dose', 'Synthetic Low Dose', 'Real Low Dose'])
+#         ax[i,j].set_yticklabels(['Normal Dose', 'Synthetic Low Dose', 'Real Low Dose'])
 
 #plot overall confusion matrix
 fig, ax = plt.subplots(1, 2, figsize=(16, 6))
@@ -131,11 +131,11 @@ ax[1].set_title('Normalised Confusion Matrix for 90pc_sldct')
 for i in range(2):
     ax[i].set_xlabel('Predicted')
     ax[i].set_ylabel('True')
-    ax[i].set_xticklabels(['Full Dose', 'Synthetic Low Dose', 'Real Low Dose'])
-    ax[i].set_yticklabels(['Full Dose', 'Synthetic Low Dose', 'Real Low Dose'])
+    ax[i].set_xticklabels(['Normal Dose', 'Synthetic Low Dose', 'Real Low Dose'])
+    ax[i].set_yticklabels(['Normal Dose', 'Synthetic Low Dose', 'Real Low Dose'])
 
 # plot whisker plot of quality scores for each of: full dose, 80pc_sldct, 90pc_sldct, real low dose
-df['label_class_q'] = df['label'].apply(lambda x: 'full' if '/nc/' in x else ('80' if '80pc_sldct' in x else ('90' if '90pc_sldct' in x else 'real low')))
+df['label_class_q'] = df['label'].apply(lambda x: 'Normal' if '/nc/' in x else ('80' if '80pc_sldct' in x else ('90' if '90pc_sldct' in x else 'real low')))
 
 #print df label_class_q and quality and mean and average quality scores for each of the 4 types of images
 df['quality_hania'] = df['quality_hania'].astype(float)
@@ -148,7 +148,6 @@ print(df.groupby('label_class_q')['quality_hania'].std())
 
 plt.savefig(os.path.join(save_loc, 'confusion_matrix.png'))
 
-
 #plot average quality scores
 #check for statistical significance
 import scipy.stats as stats
@@ -160,22 +159,28 @@ from statannot import add_stat_annotation
 sns.boxplot(x='label_class_q', y='average_quality', data=df, ax=ax[0])
 #add stats cluster and significance
 
+#change x axis labels
+ax[0].set_xticklabels(['Normal Dose', '90% Synthetic Low Dose','80% Synthetic Low Dose', 'Real Low Dose'])
+
 #print average quality scores for each of the 4 types of images
 print(df.groupby('label_class_q')['average_quality'].mean())
 
-# add_stat_annotation(ax, data=df, x='label_class_q', y='average_quality', box_pairs=[('full', '90'), ('80', '90'), ('80', 'real low'), ('90', 'real low')],
+# add_stat_annotation(ax, data=df, x='label_class_q', y='average_quality', box_pairs=[('Normal', '90'), ('80', '90'), ('80', 'real low'), ('90', 'real low')],
 #                     test='t-test_ind', text_format='star', loc='inside', verbose=2,comparisons_correction='bonferroni')
 #
 
 
 
 
-# ax.set_xticklabels(['Full Dose', '80% Synthetic Low Dose','90% Synthetic Low Dose', 'Real Low Dose'])
+# ax.set_xticklabels(['Normal Dose', '80% Synthetic Low Dose','90% Synthetic Low Dose', 'Real Low Dose'])
 ax[0].set_xlabel('Type of Image')
 ax[0].set_ylabel('Average Quality Score')
 ax[0].set_title('Qualitative Quality Scores for Hania, Cathal, and Iztok')
 #change x axis labels
-ax[0].set_xticklabels(['Full Dose', '80% Synthetic Low Dose','90% Synthetic Low Dose', 'Real Low Dose'])
+ax[0].set_xticklabels(['Normal Dose', '90% Synthetic Low Dose','80% Synthetic Low Dose', 'Real Low Dose'])
+
+
+
 #remove x axis label
 ax[0].set_xlabel('')
 #plot box plots with clusters and significance
@@ -185,34 +190,27 @@ sns.boxplot(x='label_class_q', y='stddev', data=df, ax=ax[1])
 #print average quality scores for each of the 4 types of images
 print(df.groupby('label_class_q')['stddev'].mean())
 
-# add_stat_annotation(ax, data=df, x='label_class_q', y='average_quality', box_pairs=[('full', '90'), ('80', '90'), ('80', 'real low'), ('90', 'real low')],
-#                     test='t-test_ind', text_format='star', loc='inside', verbose=2,comparisons_correction='bonferroni')
-#
 
-
-
-
-# ax.set_xticklabels(['Full Dose', '80% Synthetic Low Dose','90% Synthetic Low Dose', 'Real Low Dose'])
+# ax.set_xticklabels(['Normal Dose', '80% Synthetic Low Dose','90% Synthetic Low Dose', 'Real Low Dose'])
 ax[1].set_xlabel('Type of Image')
 ax[1].set_ylabel('Standard Deviation / HU')
 ax[1].set_title('Quantitative Quality Scores for Hania, Cathal, and Iztok')
-ax[1].set_xticklabels(['Full Dose', '80% Synthetic Low Dose','90% Synthetic Low Dose', 'Real Low Dose'])
-
+ax[1].set_xticklabels(['Normal Dose', '90% Synthetic Low Dose','80% Synthetic Low Dose', 'Real Low Dose'])
 # set padding between subplots
 fig.subplots_adjust(wspace=0.1, hspace=0.4)
 
 # add horizontal grid lines for both subplots
 means = []
-for type in ['full', '80', '90', 'real low']:
+for type in ['Normal', '80', '90', 'real low']:
     means.append(df[df['label_class_q'] == type]['z_spacing'].mean())
 
 # plot another for z_spacing - a bar chart
-sns.barplot(x = ['full', '80', '90', 'real low'], y = means, ax=ax[2])
+sns.barplot(x = ['Normal', '80', '90', 'real low'], y = means, ax=ax[2])
 
 ax[2].set_ylabel('Mean Z-Spacing / mm')
 ax[2].set_title('Z Spacing for each type of image')
-ax[2].set_xticklabels(['Full Dose', '80% Synthetic Low Dose','90% Synthetic Low Dose', 'Real Low Dose'])
-
+ax[2].set_xticklabels(['Normal Dose', '90% Synthetic Low Dose','80% Synthetic Low Dose', 'Real Low Dose'])
+ax[2].set_xlabel('Type of Image')
 # print correlation between z_spacing, quality, and stddev
 print(df[['z_spacing', 'average_quality', 'stddev']].corr())
 # set y extent

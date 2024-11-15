@@ -55,8 +55,8 @@ alls_sensspec = alls_sensspec[np.argsort(alls_sensspec[:,1])[::-1]]
 colors = ['r','b','g']
 #plot the ROC curves
 
-for name,data,c in zip(['Cancers\n','Solid Masses\n','Potential Malignancies\n'],
-                       [cancers_sensspec, masses_sensspec, alls_sensspec],
+for name,data,c in zip(['Cancers\n','All Solid Masses\n'],
+                       [cancers_sensspec, masses_sensspec,],
                        colors):
     auc = np.abs(np.trapz(data[:,0], data[:,1]))
     plt.plot(data[:,1]*100, data[:,0]*100, label=name+'(AUC = %.3f)' % auc, color=c, linewidth=2)
