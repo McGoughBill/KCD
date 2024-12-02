@@ -9,80 +9,22 @@ import torch
 import torch.nn as nn
 from scipy import stats
 import sys
-from KCD.Detection.Preprocessing.AxialSlices import array_manipulation_utils as amu
+from KCD.Segmentation.Inference.endtoend import masking
 
-nii_label_loc = str(sys.argv[1]) # '/Users/mcgoug01/Downloads/inferences/[4 4 4]mm'
-nii_image_loc = str(sys.argv[2]) # '/Users/mcgoug01/Library/CloudStorage/OneDrive-CRUKCambridgeInstitute/SecondYear/Segmentation/seg_data/raw_data/coreg_ncct/images'
-save_loc =  str(sys.argv[3]) # '/Users/mcgoug01/Downloads/masked_coreg_ncct/images'
+os.environ['OV_DATA_BASE'] = '/bask/projects/p/phwq4930-renal-canc/data/seg_data'
+
+# nii_label_loc = str(sys.argv[1]) # '/Users/mcgoug01/Downloads/inferences/[4 4 4]mm'
+nii_label_loc = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/predictions_nii/coreg_v3_noised/_[4 4 4]mm'
+# nii_image_loc = str(sys.argv[2]) # '/Users/mcgoug01/Library/CloudStorage/OneDrive-CRUKCambridgeInstitute/SecondYear/Segmentation/seg_data/raw_data/coreg_ncct/images'
+nii_image_loc = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/raw_data/coreg_v3_noised/images'
+# save_loc =  str(sys.argv[3]) # '/Users/mcgoug01/Downloads/masked_coreg_ncct/images'
+save_loc = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/raw_data/masked_coreg_v3_noised/images'
 npy_label_list = os.listdir(nii_label_loc)
 nii_image_list = os.listdir(nii_image_loc)
 
 if not os.path.exists(save_loc):
     os.makedirs(save_loc)
 
-#we want to dilate label 40x40x40mm, so 10x10x10 voxels
-for nii_label in npy_label_list:
-# for nii_label in nii_image_list:
-    print(nii_label)
-    if '.DS_Store' in nii_label:
-        continue
+masking.mask_dataset(nii_image_loc, nii_label_loc, save_loc)
 
-    if nii_label=='KiTS-00101.nii.gz':
-        continue
-    try:
-        image = nib.load(os.path.join(nii_image_loc, nii_label))
-        label = nib.load(os.path.join(nii_label_loc, nii_label))
-    except Exception as e:
-        print('Error loading image or label for {}'.format(nii_label))
-        print(e)
-        continue
-    label_data = amu.nifti_2_correctarr(label)
-    label_spacing = np.abs(image.header['pixdim'][1:4])
-    #find mode of label shape
-    shape_mode, _ = stats.mode(np.array(label_data.shape), axis=0)
-    spacing_mode, _ = stats.mode(np.array(label_spacing), axis=0)
-    non_modal_spacing = label_spacing[np.array(label_spacing) != spacing_mode]
-    non_modal_shape = np.array(label_data.shape)[np.array(label_data.shape) != shape_mode]
-    print(label_data.shape)
-    #compute scale_factor to resize label to 4x4x4mm voxels based on the shape of the label
-    scale_factors = np.array([float(spacing_mode / 4) if shape == shape_mode else float(non_modal_spacing[0] / 4) for shape in label_data.shape])
-
-    #resize voxels to 4x4x4mm and dilate label by 10x10x10 voxels
-    label_4 = \
-    nn.functional.interpolate(torch.unsqueeze(torch.unsqueeze(torch.Tensor(label_data), dim=0), dim=0),
-                              mode='nearest', scale_factor = tuple(scale_factors)).numpy()[0, 0]
-    dilated_label = binary_dilation(label_4, iterations=10)
-
-    #return label to original shape
-    dilated_label = \
-    nn.functional.interpolate(torch.unsqueeze(torch.unsqueeze(torch.Tensor(dilated_label), dim=0), dim=0),
-                                mode='nearest', size=label_data.shape).numpy()[0, 0]
-
-    image_data = amu.nifti_2_correctarr(image)
-    masked_image = np.where(dilated_label == 0, -500, image_data)
-    spacing_vector = scale_factors * np.array([4,4,4])
-
-    # rearrange so that the non-modal axes are at the end of the array - use modal and non-modal of label calculated earlier
-    while masked_image.shape[-1] == shape_mode:
-        if masked_image.shape[0] != shape_mode:
-            masked_image = np.transpose(masked_image, (2,1,0))
-            spacing_vector = spacing_vector[[2,1,0]]
-        elif masked_image.shape[1] != shape_mode:
-            masked_image = np.transpose(masked_image, (0,2,1))
-            spacing_vector = spacing_vector[[0,2,1]]
-
-    #generate new affine matrix
-    affine = np.eye(4)*np.append(spacing_vector,1)
-
-    # create masked nifti image and save
-    masked_nifti = nib.Nifti1Image(
-        np.flip(
-            np.flip(
-                np.rot90(
-                masked_image,3),0),2),
-        affine=affine)
-
-    #reshape back into original shape
-    masked_nifti = nib.as_closest_canonical(masked_nifti)
-    print(masked_nifti.shape)
-    nib.save(masked_nifti, os.path.join(save_loc, nii_label))
+nib.save(masked_nifti, os.path.join(save_loc, nii_label))

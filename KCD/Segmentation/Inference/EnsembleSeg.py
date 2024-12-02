@@ -13,7 +13,7 @@ import torch.nn as nn
 from torch.nn.functional import softmax
 from os import *
 if __name__ == "__main__":
-    environ['OV_DATA_BASE'] = '/media/mcgoug01/nvme/2stage_replica/'
+    environ['OV_DATA_BASE'] = '/bask/projects/p/phwq4930-renal-canc/data/seg_data'
 
 from os.path import *
 import gc
@@ -481,13 +481,13 @@ class Ensemble_Seg(nn.Module):
 
 
 if __name__ == "__main__":
-    data_name = 'masked_test_set'
-    seg_fp = join(environ['OV_DATA_BASE'], 'trained_models', 'masked_coreg_ncct',
-                  '2mm_binary', '6,3x3x3,32_finetune_fromkits23no_detection')
-    spacing = np.array([2,2,2])
-    do_prep = False
+    data_name = 'coreg_v3_noised'
+    seg_fp = join(environ['OV_DATA_BASE'], 'trained_models', 'coreg_v3_noised',
+                  '4mm_kidneybinary_customPP', '6_finetune_trained')
+    spacing = np.array([4,4,4])
+    do_prep = True
     do_infer = True
     is_cect = False
-    cont = True
+    cont = False
     Ensemble_Seg(data_name=data_name, seg_fp=seg_fp, spacing=spacing, do_prep=do_prep, do_infer=do_infer,
                  is_cect=is_cect, cont=cont)

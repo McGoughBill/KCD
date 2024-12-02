@@ -78,8 +78,8 @@ def detection(home, pred_path, op_point,dataset, name):
 
 
 
-def EndToEnd(dataset, stage1_path, stage_2path, op_points = [0.01,0.02,0.03,0.04,0.05,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,0.95,0.96,0.97,0.98,0.99],
-             op_point_names = [0.01,0.02,0.03,0.04,0.05,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,0.95,0.96,0.97,0.98,0.99],cont_multiplier=1e5):
+def EndToEnd(dataset, stage1_path, stage_2path, op_points = [0.001,0.01,0.02,0.03,0.04,0.0442,0.05,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.7017,0.8,0.9,0.95,0.96,0.97,0.98,0.99,0.9999],
+             op_point_names = [0.001,0.01,0.02,0.03,0.04,'high_sens',0.05,0.1,0.2,0.3,0.4,0.5,0.6,0.7,'high_acc',0.8,0.9,0.95,0.96,0.97,0.98,0.99,'high_spec'],cont_multiplier=1e5):
 
     print('Running EndToEnd')
     print('\n' * 5)
@@ -88,12 +88,12 @@ def EndToEnd(dataset, stage1_path, stage_2path, op_points = [0.01,0.02,0.03,0.04
     print(f'Begin at {time.ctime()}')
     print('\n'*5)
 
-    # s1 = EnsembleSeg.Ensemble_Seg(dataset,name='s1',
-    #                         seg_fp=stage1_path,
-    #                         spacing=np.array([4] * 3),
-    #                         do_prep=True, do_infer=True,
-    #                         is_cect=False, cont=False,overlap=0.5,
-    #                         batch_size=16, patch_size=64)
+    s1 = EnsembleSeg.Ensemble_Seg(dataset,name='s1',
+                            seg_fp=stage1_path,
+                            spacing=np.array([4] * 3),
+                            do_prep=True, do_infer=True,
+                            is_cect=False, cont=False,overlap=0.5,
+                            batch_size=16, patch_size=64)
 
     print('Finished first stage segmentation at', time.ctime())
     print('\n'*5)
@@ -103,16 +103,16 @@ def EndToEnd(dataset, stage1_path, stage_2path, op_points = [0.01,0.02,0.03,0.04
     masked_dataset_path = os.path.join(os.environ['OV_DATA_BASE'], 'raw_data', 'masked_' + dataset, 'images')
     pred_path = os.path.join(os.environ['OV_DATA_BASE'], 'predictions_nii', dataset, 's1_[4 4 4]mm')
 
-    # masking.mask_dataset(dataset_path, pred_path, masked_dataset_path)
+    masking.mask_dataset(dataset_path, pred_path, masked_dataset_path)
 
     print('Finished masking dataset at', time.ctime())
-    #
-    # s2 = EnsembleSeg.Ensemble_Seg('masked_' + dataset,name='s2',
-    #                         seg_fp=stage_2path,
-    #                         spacing=np.array([2] * 3),
-    #                         do_prep=True, do_infer=True,
-    #                         is_cect=False, cont=True,overlap=0.5,
-    #                         batch_size=16, patch_size=64, cont_multiplier=cont_multiplier)
+
+    s2 = EnsembleSeg.Ensemble_Seg('masked_' + dataset,name='s2',
+                            seg_fp=stage_2path,
+                            spacing=np.array([2] * 3),
+                            do_prep=True, do_infer=True,
+                            is_cect=False, cont=True,overlap=0.5,
+                            batch_size=16, patch_size=64, cont_multiplier=cont_multiplier)
 
     print('Finished second stage segmentation at', time.ctime())
 
@@ -132,8 +132,8 @@ def EndToEnd(dataset, stage1_path, stage_2path, op_points = [0.01,0.02,0.03,0.04
 
 
 if __name__ == '__main__':
-    dataset = 'fulldose_test'
     s1_path = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/trained_models/coreg_v2_noised/4mm_kidneybinary_customPP/6_finetune_trained'
-    s2_path = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/trained_models/masked_coreg_v2_noised/2mm_cancerbinary_customPP/6_finetune_l2-1e-05_cce1.0_cos1.0_2e-05lr_0.999997lg_16bs_2000ep_4gpus_efr_dfr100_seg_lr0.0001'
+    s2_path = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/trained_models/masked_coregncctv2_kits/2mm_cancerbinary_customPP/6_finetune_l2-1e-05_cce1.0_cos1.0_2e-05lr_0.999997lg_16bs_2000ep_4gpus_efr_dfr100_seg'
 
-    EndToEnd(dataset, s1_path, s2_path)
+    EndToEnd('lowdose_test', s1_path, s2_path)
+    EndToEnd('fulldose_test', s1_path, s2_path)
