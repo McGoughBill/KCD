@@ -11,14 +11,14 @@ from scipy import stats
 import sys
 from KCD.Segmentation.Inference.endtoend import masking
 
-os.environ['OV_DATA_BASE'] = '/bask/projects/p/phwq4930-renal-canc/data/seg_data'
+os.environ['OV_DATA_BASE'] = "/home/wcm23/rds/hpc-work/FineTuningKITS23"
 
 # nii_label_loc = str(sys.argv[1]) # '/Users/mcgoug01/Downloads/inferences/[4 4 4]mm'
-nii_label_loc = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/predictions_nii/coreg_v3_noised/_[4 4 4]mm'
+nii_label_loc = '/home/wcm23/rds/hpc-work/FineTuningKITS23/predictions_nii/coreg_v4_noised/_[4 4 4]mm'
 # nii_image_loc = str(sys.argv[2]) # '/Users/mcgoug01/Library/CloudStorage/OneDrive-CRUKCambridgeInstitute/SecondYear/Segmentation/seg_data/raw_data/coreg_ncct/images'
-nii_image_loc = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/raw_data/coreg_v3_noised/images'
+nii_image_loc = '/home/wcm23/rds/hpc-work/FineTuningKITS23/raw_data/coreg_v4_noised/images'
 # save_loc =  str(sys.argv[3]) # '/Users/mcgoug01/Downloads/masked_coreg_ncct/images'
-save_loc = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/raw_data/masked_coreg_v3_noised/images'
+save_loc = '/home/wcm23/rds/hpc-work/FineTuningKITS23/raw_data/masked_coreg_v4_noised/images'
 npy_label_list = os.listdir(nii_label_loc)
 nii_image_list = os.listdir(nii_image_loc)
 

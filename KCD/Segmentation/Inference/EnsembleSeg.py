@@ -13,7 +13,7 @@ import torch.nn as nn
 from torch.nn.functional import softmax
 from os import *
 if __name__ == "__main__":
-    environ['OV_DATA_BASE'] = '/bask/projects/p/phwq4930-renal-canc/data/seg_data'
+    environ['OV_DATA_BASE'] = "/home/wcm23/rds/hpc-work/FineTuningKITS23"
 
 from os.path import *
 import gc
@@ -481,8 +481,8 @@ class Ensemble_Seg(nn.Module):
 
 
 if __name__ == "__main__":
-    data_name = 'coreg_v3_noised'
-    seg_fp = join(environ['OV_DATA_BASE'], 'trained_models', 'coreg_v3_noised',
+    data_name = 'coreg_v4_noised'
+    seg_fp = join(environ['OV_DATA_BASE'], 'trained_models', 'coreg_v4_noised',
                   '4mm_kidneybinary_customPP', '6_finetune_trained')
     spacing = np.array([4,4,4])
     do_prep = True
