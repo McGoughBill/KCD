@@ -4,12 +4,14 @@ import os
 
 sizes_fp = '/Users/mcgoug01/Downloads/bootstrap/sizes.csv'
 conf_per_patient_fp = '/Users/mcgoug01/Downloads/bootstrap/conf_per_patient.npy'
-conf_intervals_fp = '/Users/mcgoug01/Downloads/bootstrap/conf_ROC.csv'
 large = pd.read_csv(sizes_fp)['size'].values > ((15**3)*np.pi*4/3)
 conf_per_patient = np.load(conf_per_patient_fp)
-conf_intervals = pd.read_csv(conf_intervals_fp)['Confidence'].values
-conf_sens = pd.read_csv(conf_intervals_fp)['Sensitivity'].values
-conf_spec = pd.read_csv(conf_intervals_fp)['Specificity'].values
+
+
+confidence_thresholds = np.append(np.arange(0,0.1,0.01),np.arange(0.1, 0.9, 0.05))
+confidence_thresholds = np.append(confidence_thresholds,np.arange(0.9,0.98,0.02))
+confidence_thresholds = np.append(confidence_thresholds,np.arange(0.98,1.005,0.005))
+conf_intervals = confidence_thresholds
 
 samples_per_bootstrap = 294
 number_samples = 10000
@@ -82,9 +84,6 @@ gridspec = gridspec.GridSpec(ncols=2, nrows=1,
                          )
 
 ax = fig.add_subplot(gridspec[0])
-#plot original conf_sens and conf_spec
-ax.plot(conf_spec*100, conf_sens*100, c='b', label='Non-bootstrapped ROC curve (AUC {:.3f})'.format(np.trapz(conf_sens, conf_spec)),
-         linewidth=2, linestyle='--')
 
 ax.plot(spec*100, sens*100, c = 'black', label='Bootstrapped ROC curve (AUC {:.3f})'.format(AUC), linewidth=3)
 #plot semi-transparent error line with fill between

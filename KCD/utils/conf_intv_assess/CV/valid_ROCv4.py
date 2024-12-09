@@ -12,19 +12,20 @@ from skimage.segmentation import watershed
 # and the optimum size threshold for determining the presence of a cancerous region
 # we will do this by finding the threshold that maximises the dice score on a dataset
 
-path = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/raw_data/masked_coreg_v4_noised'
-cancer_infp = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/predictions/masked_coreg_v4_noised/2mm_cancerbinary_customPP/6_finetune_l2-1e-05_cce1.0_cos1.0_2e-05lr_0.999997lg_16bs_2000ep_4gpus_efr_dfr100_seg/cross_validation_continuous'
-cancer_gt = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/raw_data/masked_coreg_v4_noised/labels'
+path = '/Users/mcgoug01/Downloads/valid_v4'
+cancer_infp = '/Users/mcgoug01/Downloads/valid_v4/cross_validation_continuous'
+cancer_gt = '/Users/mcgoug01/Downloads/valid_v4/labels'
 print(path)
 
 confidence_thresholds = np.append(np.arange(0,0.1,0.01),np.arange(0.1, 0.9, 0.05))
 confidence_thresholds = np.append(confidence_thresholds,np.arange(0.9,0.98,0.02))
 confidence_thresholds = np.append(confidence_thresholds,np.arange(0.98,1.005,0.005))
-vol = 500
+vol = 500/8
 print(confidence_thresholds)
 
 results =[]
 percase_results =[]
+sizes = []
 
 #only load files that end in .nii.gz
 for conf in confidence_thresholds:
@@ -32,24 +33,31 @@ for conf in confidence_thresholds:
     tp, fp, fn, tn = 0, 0, 0, 0
     for file in [path for path in os.listdir(cancer_infp) if path.endswith('.nii.gz')]:
         patient_results = [0,0,0,0] #tp, fp, fn, tn
-        try:
-            cancer_inf = nib.load(os.path.join(cancer_infp, file))
-            cancer_label = nib.load(os.path.join(cancer_gt, file))
-        except:
-            continue
+        cancer_inf = nib.load(os.path.join(cancer_infp, file))
+        cancer_label = nib.load(os.path.join(cancer_gt, file))
+
         # assert all images have same shape
         assert cancer_inf.shape == cancer_label.shape
         #find spacing
         spacing = cancer_inf.header['pixdim'][1:4]
+        print(file)
 
-        #resize all to 2mm spacing using torch
-        try:
-            cancer_inf = torch.from_numpy(cancer_inf.get_fdata()).unsqueeze(0).unsqueeze(0)
-            cancer_label = torch.from_numpy(cancer_label.get_fdata()).unsqueeze(0).unsqueeze(0)
-        except:
-            continue
+        cancer_inf = torch.from_numpy(cancer_inf.get_fdata()).unsqueeze(0).unsqueeze(0)
+        cancer_label = torch.from_numpy(cancer_label.get_fdata()).unsqueeze(0).unsqueeze(0)
         cancer_inf = torch.nn.functional.interpolate(cancer_inf, scale_factor=tuple(spacing/2), mode='trilinear')
         cancer_label = torch.nn.functional.interpolate(cancer_label, scale_factor=tuple(spacing/2), mode='trilinear', align_corners=False)
+
+
+        # # find largest connected component in cancer_label
+        # print(cancer_label.squeeze().shape)
+        # lb_regs = regionprops(spim.label(cancer_label.squeeze().numpy()==2)[0]) #find all regions
+        # if len(lb_regs) == 0:
+        #     sizes.append(0)
+        #     continue
+        # else:
+        #     max_reg = max(lb_regs, key=lambda x: x.area) #find largest region
+        #     sizes.append(max_reg.area)
+        #     continue
 
         #find cancerous voxels
         cancer_voxels = cancer_inf > conf
@@ -109,6 +117,10 @@ for conf in confidence_thresholds:
                 fp+=1
                 patient_results[1] += 1
         conf_results.append(patient_results)
+    # sizes = np.array(sizes)
+    # np.save(os.path.join(path, 'sizes.npy'), sizes)
+    # assert False
+
     percase_results.append(conf_results)
     entry = {'confidence_threshold': conf, 'tp': tp, 'fp': fp, 'fn': fn, 'tn': tn}
     sensitivity = tp/(tp+fn+1e-6)
