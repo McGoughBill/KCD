@@ -2,9 +2,9 @@ import numpy as np
 import pandas as pd
 import os
 
-sizes_fp = '/Users/mcgoug01/Downloads/valid_v3/sizes.npy'
-conf_per_patient_fp = '/Users/mcgoug01/Downloads/valid_v3/results_confwise.npy'
-sizes = np.load(sizes_fp)
+sizes_fp = '/Users/mcgoug01/Downloads/valid_v4/sizes.csv'
+conf_per_patient_fp = '/Users/mcgoug01/Downloads/valid_v4/results_confwise.npy'
+sizes = np.genfromtxt(sizes_fp, delimiter=',')
 large = sizes > ((15**3)*np.pi*4/3)
 conf_per_patient = np.load(conf_per_patient_fp)
 print(conf_per_patient.shape, sizes.shape)
@@ -15,13 +15,14 @@ confidence_thresholds = np.append(confidence_thresholds,np.arange(0.9,0.98,0.02)
 confidence_thresholds = np.append(confidence_thresholds,np.arange(0.98,1.005,0.005))
 conf_intervals = confidence_thresholds
 
-samples_per_bootstrap = 276
-number_samples = 100
+samples_per_bootstrap = 468
+number_samples = 100000
 num_conf_intervals = len(conf_intervals)
 high_spec = 0.98
-low_spec = 0.5
+low_spec = 0.5**0.5
 take_average = False
 
+healthy_ratio = 0.5
 small_ratio = 19/43
 # small_ratio = 1
 # https://link.springer.com/article/10.1007/s00261-017-1376-0
@@ -33,16 +34,19 @@ for conf in range(num_conf_intervals):
     for sample in range(number_samples):
         relevant_interval = conf_per_patient[conf,:]
 
-        small_tumours = relevant_interval[~large]
+        small_tumours = relevant_interval[~large & (sizes > 0)]
         large_tumours = relevant_interval[large]
+        healthy_tumours = relevant_interval[sizes == 0]
 
-        small_indices = np.random.randint(0,len(small_tumours), size=int(samples_per_bootstrap*small_ratio))
-        large_indices = np.random.randint(0,len(large_tumours), size=int(samples_per_bootstrap*(1-small_ratio)))
+        healthy_indices = np.random.randint(0,len(healthy_tumours), size=int(samples_per_bootstrap*healthy_ratio))
+        small_indices = np.random.randint(0,len(small_tumours), size=int(samples_per_bootstrap*small_ratio*(1-healthy_ratio)))
+        large_indices = np.random.randint(0,len(large_tumours), size=int(samples_per_bootstrap*(1-small_ratio)*(1-healthy_ratio)))
 
+        healthy_sample = healthy_tumours[healthy_indices]
         small_sample = small_tumours[small_indices]
         large_sample = large_tumours[large_indices]
 
-        sample = np.concatenate((small_sample, large_sample))
+        sample = np.concatenate((healthy_sample, small_sample, large_sample))
 
         tp, fp, fn, tn = sample.sum(axis=0)
         sens = tp/(tp+fn)
@@ -201,20 +205,21 @@ print(AUC)
 # include op point confidences to 4 dp in titles
 # ax.title('Receiver Operating Characteristic, AUC = {:.4f}'.format(AUC), fontsize=20)
 
-# in second plot, the ratio of large to small tumours
-fraction_large = np.sum(large)/len(large)
-fraction_small = 1-fraction_large
+# in second plot, the ratio of large to small tumours, excluding healthy cases where size = 0
+fraction_large = np.sum(large& (sizes>0))/len(sizes)
+fraction_small = np.sum((sizes>0) & ~large) / len(sizes)
+fraction_health = np.sum(sizes == 0) / len(sizes)
 
 ax1 = fig.add_subplot(gridspec[1])
 #diffentiate bars by texturing and pastel colours
-ax1.bar(['Large', 'Small'], [fraction_large*100, fraction_small*100],color=['palegoldenrod', 'lightsteelblue'], hatch=['\\', '/'])
+ax1.bar(['Large', 'Small', 'None'], [fraction_large*100, fraction_small*100, fraction_health*100],color=['palegoldenrod', 'lightsteelblue', 'lightcoral'], hatch=['\\', '/', ''])
 #place text of percentages on top of bars
-for i, v in enumerate([fraction_large*100, fraction_small*100]):
+for i, v in enumerate([fraction_large*100, fraction_small*100, fraction_health*100]):
     ax1.text(i, v + 1, str(round(v, 2))+'%', color='black', ha='center', fontsize=16)
 
 ax1.set_ylabel('Percentage of tumours in ' +r"$\mathbf{Finetune}$"+" dataset", fontsize=16)
 ax1.set_xlabel('Tumour size', fontsize=16)
 plt.tight_layout()
 #change width of ax[1] to 3
-plt.savefig('/Users/mcgoug01/Cambridge University Dropbox/William McGough/nat_paper/cvROC.png')
+plt.savefig('/Users/mcgoug01/Cambridge University Dropbox/William McGough/nat_paper/cvROCv4.png')
 plt.show()

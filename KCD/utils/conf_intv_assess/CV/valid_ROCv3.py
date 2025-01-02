@@ -13,8 +13,8 @@ from skimage.segmentation import watershed
 # we will do this by finding the threshold that maximises the dice score on a dataset
 
 path = '/Users/mcgoug01/Downloads/valid_v3'
-cancer_infp = '/Users/mcgoug01/Downloads/valid_v3/cross_validation_continuous'
-cancer_gt = '/Users/mcgoug01/Downloads/valid_v3/labels'
+cancer_infp = '/Users/mcgoug01/Downloads/valid_v3/trained_cect_cont/'
+cancer_gt = '/Users/mcgoug01/Downloads/valid_v3/labels_cect'
 print(path)
 
 confidence_thresholds = np.append(np.arange(0,0.1,0.01),np.arange(0.1, 0.9, 0.05))
@@ -40,7 +40,7 @@ for conf in confidence_thresholds:
         assert cancer_inf.shape == cancer_label.shape
         #find spacing
         spacing = cancer_inf.header['pixdim'][1:4]
-        print(file)
+        # print(file)
         #resize all to 2mm spacing using torch
         cancer_inf = torch.from_numpy(cancer_inf.get_fdata()).unsqueeze(0).unsqueeze(0)
         cancer_label = torch.from_numpy(cancer_label.get_fdata()).unsqueeze(0).unsqueeze(0)
@@ -57,6 +57,8 @@ for conf in confidence_thresholds:
         #     max_reg = max(lb_regs, key=lambda x: x.area) #find largest region
         #     sizes.append(max_reg.area)
         #     continue
+        #
+
 
         #find cancerous voxels
         cancer_voxels = cancer_inf > conf
@@ -116,8 +118,10 @@ for conf in confidence_thresholds:
                 fp+=1
                 patient_results[1] += 1
         conf_results.append(patient_results)
-    # sizes = np.array(sizes)
-    # np.save(os.path.join(path, 'sizes.npy'), sizes)
+    # print(sizes)
+    # sizes = np.array(sizes)*8
+    # #save sizes as csv
+    # np.savetxt(os.path.join(path,"sizes.csv"), sizes, delimiter=",")
     # assert False
     percase_results.append(conf_results)
     entry = {'confidence_threshold': conf, 'tp': tp, 'fp': fp, 'fn': fn, 'tn': tn}
@@ -136,15 +140,15 @@ for conf in confidence_thresholds:
 
 percase_results = np.array(percase_results)
 # save results to npy
-np.save(os.path.join(path, 'results_confwise.npy'), percase_results)
+np.save(os.path.join(path, 'results_confwise_cect.npy'), percase_results)
 
 import pandas as pd
 import matplotlib.pyplot as plt
 plt.switch_backend('TkAgg')
 df = pd.DataFrame(results)
-df.to_csv(os.path.join(path, 'results_all_validation.csv'))
+df.to_csv(os.path.join(path, 'results_all_validation_cect.csv'))
 
-path_to_results = os.path.join(path, 'results_all_validation.csv')
+path_to_results = os.path.join(path, 'results_all_validation_cect.csv')
 df = pd.read_csv(path_to_results)
 plt.figure()
 
@@ -164,5 +168,5 @@ plt.ylabel('Sensitivity (%)')
 plt.xlabel('1 - Specificity (%)')
 plt.title('2-Stage Segmentation-based Detection Validation ROC')
 plt.legend(loc="lower right")
-plt.savefig(os.path.join(path, 'roc_validation.png'))
+plt.savefig(os.path.join(path, 'roc_validation_cect.png'))
 plt.show()

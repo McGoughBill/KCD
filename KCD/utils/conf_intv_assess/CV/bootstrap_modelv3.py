@@ -2,9 +2,9 @@ import numpy as np
 import pandas as pd
 import os
 
-sizes_fp = '/Users/mcgoug01/Downloads/valid_v3/sizes.npy'
+sizes_fp = '/Users/mcgoug01/Downloads/valid_v3/sizes.csv'
 conf_per_patient_fp = '/Users/mcgoug01/Downloads/valid_v3/results_confwise.npy'
-sizes = np.load(sizes_fp)
+sizes = np.genfromtxt(sizes_fp, delimiter=',')
 large = sizes > ((15**3)*np.pi*4/3)
 conf_per_patient = np.load(conf_per_patient_fp)
 print(conf_per_patient.shape, sizes.shape)
@@ -15,12 +15,11 @@ confidence_thresholds = np.append(confidence_thresholds,np.arange(0.9,0.98,0.02)
 confidence_thresholds = np.append(confidence_thresholds,np.arange(0.98,1.005,0.005))
 conf_intervals = confidence_thresholds
 
-samples_per_bootstrap = 276
-number_samples = 100
+samples_per_bootstrap = len(sizes)
+number_samples = 10000
 num_conf_intervals = len(conf_intervals)
 high_spec = 0.98
-low_spec = 0.5
-take_average = False
+low_spec = 0.5**0.5
 
 small_ratio = 19/43
 # small_ratio = 1
@@ -159,10 +158,10 @@ print()
 index = np.argmin(np.abs(interp-low_spec))
 index_plus = np.argmin(np.abs(interp-low_spec+1.96*interp_sens_std[index]))
 index_minus = np.argmin(np.abs(interp-low_spec-1.96*interp_sens_std[index]))
-print('Index of 95% sensitivity: {}'.format(index))
-print('Specificity at 95% sensitivity: {:.5f}+-{:.5f}'.format(interp[index], np.abs(interp[index_plus]-interp[index_minus])/2))
-print('Sensitive at 95% sensitivity: {:.5f}+-{:.5f}'.format(interp_sens[index], interp_sens_std[index]*1.96))
-print('Confidence at 95% sensitivity: {:.5f}+-{:.5f}'.format(interp_conf[index], np.abs(interp_conf[index_plus]-interp_conf[index_minus])/2))
+print('Index of 50% specificity: {}'.format(index))
+print('Specificity at 50% specificity: {:.5f}+-{:.5f}'.format(interp[index], np.abs(interp[index_plus]-interp[index_minus])/2))
+print('Sensitive at 50% specificity: {:.5f}+-{:.5f}'.format(interp_sens[index], interp_sens_std[index]*1.96))
+print('Confidence at 50% specificity: {:.5f}+-{:.5f}'.format(interp_conf[index], np.abs(interp_conf[index_plus]-interp_conf[index_minus])/2))
 print()
 
 highsens_sens = interp_sens[index]
@@ -216,5 +215,5 @@ ax1.set_ylabel('Percentage of tumours in ' +r"$\mathbf{Finetune}$"+" dataset", f
 ax1.set_xlabel('Tumour size', fontsize=16)
 plt.tight_layout()
 #change width of ax[1] to 3
-plt.savefig('/Users/mcgoug01/Cambridge University Dropbox/William McGough/nat_paper/cvROC.png')
+plt.savefig('/Users/mcgoug01/Cambridge University Dropbox/William McGough/nat_paper/cvROCv3.png')
 plt.show()
