@@ -152,6 +152,12 @@ for name,pred_csv_fp in zip(names_ld_folders,ld_sub_folders):
     sens = 100*tp/(tp+fn)
     spec = 100*tn/(tn+fp)
 
+    print(f'{name}:')
+    #print sens and spec to 2dp
+    print(f'Sensitivity: {sens:.2f}%')
+    print(f'Specificity: {spec:.2f}%')
+    print()
+
     if name == 'Iztok' and name != 'Cathal':
         iztok_low = [sens,spec]
     elif name == 'Cathal':

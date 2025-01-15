@@ -47,7 +47,7 @@ for conf in confidence_thresholds:
         cancer_inf = torch.nn.functional.interpolate(cancer_inf, scale_factor=tuple(spacing/2), mode='trilinear')
         cancer_label = torch.nn.functional.interpolate(cancer_label, scale_factor=tuple(spacing/2), mode='trilinear', align_corners=False)
 
-        # # find largest connected component in cancer_label
+        # find largest connected component in cancer_label
         # print(cancer_label.squeeze().shape)
         # lb_regs = regionprops(spim.label(cancer_label.squeeze().numpy()==2)[0]) #find all regions
         # if len(lb_regs) == 0:
@@ -57,7 +57,7 @@ for conf in confidence_thresholds:
         #     max_reg = max(lb_regs, key=lambda x: x.area) #find largest region
         #     sizes.append(max_reg.area)
         #     continue
-        #
+
 
 
         #find cancerous voxels
@@ -121,7 +121,7 @@ for conf in confidence_thresholds:
     # print(sizes)
     # sizes = np.array(sizes)*8
     # #save sizes as csv
-    # np.savetxt(os.path.join(path,"sizes.csv"), sizes, delimiter=",")
+    # np.savetxt(os.path.join(path,"sizes_cect.csv"), sizes, delimiter=",")
     # assert False
     percase_results.append(conf_results)
     entry = {'confidence_threshold': conf, 'tp': tp, 'fp': fp, 'fn': fn, 'tn': tn}
