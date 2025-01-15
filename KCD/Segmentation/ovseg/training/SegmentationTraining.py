@@ -2,7 +2,7 @@ import sys
 
 from KCD.Segmentation.ovseg.training.NetworkTraining import NetworkTraining
 from KCD.Segmentation.ovseg.training.loss_functions_combined import CE_dice_pyramid_loss, to_one_hot_encoding, \
-    weighted_combined_pyramid_loss
+    weighted_combined_pyramid_loss, MSE_pyramid_loss
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -46,10 +46,8 @@ class SegmentationTraining(NetworkTraining):
         else:
             self.prg_trn_process_batch = nn.Identity()
 
-    def initialise_loss(self,include_voxsim=False):
-        self.loss_fctn = CE_dice_pyramid_loss(**self.loss_params)
-        if include_voxsim:
-            self.is_voxsim = True
+    def initialise_loss(self):
+        self.loss_fctn = CE_dice_pyramid_loss(**self.loss_params).to('cuda' if torch.cuda.is_available() else 'cpu')
 
     def compute_batch_loss(self, batch,epochs_done=-1):
 
@@ -339,10 +337,8 @@ class resize(nn.Module):
         return batch
 
 class SegmentationTrainingV2(SegmentationTraining):
-    def initialise_loss(self,include_voxsim=False):
-        self.loss_fctn = CE_dice_pyramid_loss(**self.loss_params)
-        if include_voxsim:
-            self.is_voxsim = True
+    def initialise_loss(self):
+        self.loss_fctn = CE_dice_pyramid_loss(**self.loss_params).to('cuda' if torch.cuda.is_available() else 'cpu')
 
 class SegmentationTrainingV2_classhead(SegmentationTraining):
     def __init__(self,class_weight = 0.3, class_seg_label = 1, spacing = [2,2,2], encoder_freeze = 0, decoder_freeze = 0,
@@ -372,10 +368,8 @@ class SegmentationTrainingV2_classhead(SegmentationTraining):
 
         sys.stdout.flush()
 
-    def initialise_loss(self,include_voxsim=False):
+    def initialise_loss(self):
         self.loss_fctn = CE_dice_pyramid_loss(**self.loss_params)
-        if include_voxsim:
-            self.is_voxsim = True
 
 
     def compute_batch_loss(self, batch, epochs_done = -1):
@@ -457,5 +451,101 @@ class SegmentationTrainingV2_classhead(SegmentationTraining):
 
         sys.stdout.flush()
         loss = seg_loss + self.class_weight * cls_loss
+        return loss
+
+
+class SegmentationTrainingV2_regresshead(SegmentationTraining):
+    def __init__(self,regress_weight = 0.05, spacing = [2,2,2], encoder_freeze = 0, decoder_freeze = 0,
+                 patch_size = 64, *args,**kwargs,):
+        super().__init__( *args, **kwargs)
+        self.patch_size = patch_size
+        sys.stdout.write(f'self.spacing: {self.spacing}\n')
+        sys.stdout.flush()
+        self.encoder_freeze = encoder_freeze
+        self.decoder_freeze = decoder_freeze
+        self.encoder_frozen = False
+        self.decoder_frozen = False
+        self.regress_weight = regress_weight
+        print('In SegmentationTrainingV2_regresshead')
+        print('regress_weight:',self.regress_weight)
+        print('regress_keys:',self.regress_keys)
+        print()
+
+        sys.stdout.flush()
+
+    def initialise_loss(self):
+        self.loss_fctn = CE_dice_pyramid_loss(**self.loss_params).to('cuda' if torch.cuda.is_available() else 'cpu')
+        self.regress_loss = MSE_pyramid_loss().to('cuda' if torch.cuda.is_available() else 'cpu')
+
+    def compute_batch_loss(self, batch, epochs_done = -1):
+
+        batch = batch.to(self.dev)
+        batch = self.prg_trn_process_batch(batch)
+
+        if self.augmentation is not None:
+            with torch.no_grad():
+                # in theory we shouldn't need this context, but I had weird memory leaks and
+                # it doesn't hurt
+                if self.dev == torch.device('cpu'):
+                    batch = self.augmentation(batch.to(torch.float32))
+                else:
+                    batch = self.augmentation(batch)
+
+        # now let's get the arrays from the batch
+        # the easiest one:
+        yb = batch[:, -1:]
+        if self.batches_have_masks:
+            # when we have a mask in the batch tensor the channels are orderes as
+            # im_channel[s], mask_channel, label_channel ...
+            xb = batch[:, :-3]
+            assert False
+            mask = batch[:, -2:-1]
+        else:
+            # ... otherwise we have im_channel[s], label_channel
+            xb = batch[:, :-2]
+            regress_label = batch[:,-2:-1]
+            mask = None
+
+        if self.mask_with_bin_pred:
+            # masking with the binary prediction just means multipying the previously acquired mask
+            # with the last channel of the input tensor
+            mask = mask * xb[: -1:]
+
+
+        yb = to_one_hot_encoding(yb, self.network.out_channels)
+
+        if epochs_done != -1:
+            if epochs_done<self.encoder_freeze and not self.encoder_frozen:
+                for block in self.network.blocks_down:
+                    for param in block.parameters():
+                        param.requires_grad = False
+
+                self.encoder_frozen = True
+            elif epochs_done>=self.encoder_freeze and self.encoder_frozen:
+                for block in self.network.blocks_down:
+                    for param in block.parameters():
+                        param.requires_grad = True
+
+                self.encoder_frozen = False
+
+            if epochs_done<self.decoder_freeze and not self.decoder_frozen:
+                for block in self.network.blocks_up:
+                    for param in block.parameters():
+                        param.requires_grad = False
+
+                self.decoder_frozen = True
+            elif epochs_done>=self.decoder_freeze and self.decoder_frozen:
+                for block in self.network.blocks_up:
+                    for param in block.parameters():
+                        param.requires_grad = True
+
+                self.decoder_frozen = False
+
+        out,regress_pred = self.network(xb)
+        seg_loss = self.loss_fctn(out, yb, mask)
+        if not epochs_done == -1:
+            regr_loss = self.regress_loss(regress_pred,regress_label)
+            loss = seg_loss + self.regress_weight * regr_loss
+            #only compute regress loss during training, not validation
         return loss
 

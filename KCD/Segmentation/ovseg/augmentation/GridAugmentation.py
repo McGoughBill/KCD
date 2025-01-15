@@ -106,7 +106,7 @@ class torch_inplane_grid_augmentations(nn.Module):
                 xb[b] = torch.flip(xb[b], dims)
         return xb
 
-    def forward(self, xb):
+    def forward(self, xb,regress=False):
 
         bs, n_ch = xb.shape[0:2]
         img_dims = len(xb.shape) - 2

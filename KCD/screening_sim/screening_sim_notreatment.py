@@ -509,4 +509,4 @@ def run_multiple_simulations_with_sensitivity(n=100):
     print_stats_notreat("Screening (AI) 2 Stage", screen_ai2_stats)
     print_stats_notreat("Screening (AI) 2 Stage Extra Sensitive", screen_ai2_extra_stats)
 
-run_multiple_simulations_with_sensitivity(n=1000)
+run_multiple_simulations_with_sensitivity(n=10)

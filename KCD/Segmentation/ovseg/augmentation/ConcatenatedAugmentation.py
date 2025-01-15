@@ -13,7 +13,8 @@ class ConcatenatedAugmentation(object):
     Performs spatial and gray value augmentations
     '''
 
-    def __init__(self, augmentation_params):
+    def __init__(self, augmentation_params,regress=False):
+        self.regress = regress
 
         if augmentation_params is None:
             self.augmentation_params = {}
@@ -77,16 +78,17 @@ class ConcatenatedAugmentation(object):
 
         # apply each augmentation
         for augmentation in self.augmentations:
-            volume = augmentation.augment_volume(volume, is_inverse)
+            volume = augmentation.augment_volume(volume, is_inverse, self.regress)
         return volume
 
 
 # %%
 class torch_concatenated_augmentation(nn.Module):
 
-    def __init__(self, torch_params={}):
+    def __init__(self, torch_params={},regress='False'):
 
         super().__init__()
+        self.reg = regress
 
         for key in torch_params:
             assert key in ['grid_inplane', 'grayvalue', 'myRandAugment'], \
@@ -97,7 +99,8 @@ class torch_concatenated_augmentation(nn.Module):
             self.aug_list.append(torch_inplane_grid_augmentations(**torch_params['grid_inplane']))
 
         if 'grayvalue' in torch_params:
-            self.aug_list.append(torch_gray_value_augmentation(**torch_params['grayvalue']))
+            self.aug_list.append(torch_gray_value_augmentation(**torch_params['grayvalue'],
+                                                                regress=self.reg))
 
         if len(self.aug_list) > 0:
             self.module = nn.Sequential(*self.aug_list)

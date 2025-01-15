@@ -117,7 +117,7 @@ class SlidingWindowPrediction(object):
 
         return zxy_list
 
-    def _sliding_window(self, volume, ROI=None):
+    def _sliding_window(self, volume, ROI=None,regress=False):
 
         if not torch.is_tensor(volume):
             raise TypeError('Input must be torch tensor')
@@ -171,7 +171,11 @@ class SlidingWindowPrediction(object):
                 # remove z axis if we have 2d prediction
                 batch = batch[:, :, 0] if self.is_2d else batch
                 # remember that the network is outputting a list of predictions for each scale
-                out = self.network(batch.to(self.dev))[0]
+                if regress:
+                    #need to ignore the regression output during inference
+                    out,regr = self.network(batch.to(self.dev))
+                else:
+                    out = self.network(batch.to(self.dev))[0]
 
                 # add z axis again maybe
                 out = out.unsqueeze(2) if self.is_2d else out
@@ -198,7 +202,8 @@ class SlidingWindowPrediction(object):
     
             return pred / ovlp
 
-    def predict_volume(self, volume, ROI=None, mode=None,continuous=False):
+    def predict_volume(self, volume, ROI=None, mode=None,
+                       regress=False):
         # evaluates the siliding window on this volume
         # predictions are returned as soft segmentations
         if mode is None:
@@ -218,9 +223,9 @@ class SlidingWindowPrediction(object):
         volume = maybe_add_channel_dim(volume)
 
         if mode.lower() == 'simple':
-            pred = self._predict_volume_simple(volume, ROI)
+            pred = self._predict_volume_simple(volume, ROI,regress=regress)
         elif mode.lower() == 'flip':
-            pred = self._predict_volume_flip(volume, ROI)
+            pred = self._predict_volume_flip(volume, ROI,regress=regress)
 
         if is_np:
             pred = pred.cpu().numpy()
@@ -230,10 +235,10 @@ class SlidingWindowPrediction(object):
     def __call__(self, volume, ROI=None, mode=None):
         return self.predict_volume(volume, ROI, mode)
 
-    def _predict_volume_simple(self, volume, ROI=None):
-        return self._sliding_window(volume, ROI)
+    def _predict_volume_simple(self, volume, ROI=None,regress=False):
+        return self._sliding_window(volume, ROI,regress=regress)
 
-    def _predict_volume_flip(self, volume, ROI=None):
+    def _predict_volume_flip(self, volume, ROI=None,regress=False):
 
         flip_z_list = [False] if self.is_2d else [False, True]
         
@@ -248,7 +253,7 @@ class SlidingWindowPrediction(object):
                     flip_list.append((fz, fx, fy))
 
         # do the first one outside the loop for initialisation
-        pred = self._sliding_window(volume, ROI=ROI)
+        pred = self._sliding_window(volume, ROI=ROI,regress=regress)
 
         # now some flippings!
         for f in flip_list[1:]:
@@ -257,7 +262,7 @@ class SlidingWindowPrediction(object):
                 ROI = self._flip_volume(ROI, f)
 
             # predict flipped volume
-            pred_flipped = self._sliding_window(volume, ROI)
+            pred_flipped = self._sliding_window(volume, ROI,regress=regress)
 
             # flip back and update
             pred += self._flip_volume(pred_flipped, f)
@@ -380,7 +385,7 @@ class SlidingWindowPrediction_classhead(object):
 
         return zxy_list
 
-    def _sliding_window(self, volume, shape, zxy_list,shape_in):
+    def _sliding_window(self, volume, shape, zxy_list,shape_in,regress=False):
 
 
         # %% reserve storage
@@ -447,7 +452,8 @@ class SlidingWindowPrediction_classhead(object):
 
             return pred / ovlp, np.asarray(cls_preds)
 
-    def predict_volume(self, volume, ROI=None, mode=None, continuous=False):
+    def predict_volume(self, volume, ROI=None, mode=None, continuous=False,
+                       regress=False):
         # evaluates the siliding window on this volume
         # predictions are returned as soft segmentations
         if mode is None:
@@ -467,9 +473,9 @@ class SlidingWindowPrediction_classhead(object):
         volume = maybe_add_channel_dim(volume)
 
         if mode.lower() == 'simple':
-            pred,cls_preds = self._predict_volume_simple(volume, ROI)
+            pred,cls_preds = self._predict_volume_simple(volume, ROI,regress=regress)
         elif mode.lower() == 'flip':
-            pred,cls_preds = self._predict_volume_flip(volume, ROI)
+            pred,cls_preds = self._predict_volume_flip(volume, ROI,regress=regress)
 
         if is_np:
             pred = pred.cpu().numpy()
@@ -477,10 +483,10 @@ class SlidingWindowPrediction_classhead(object):
 
         return pred, cls_preds
 
-    def __call__(self, volume, ROI=None, mode=None):
-        return self.predict_volume(volume, ROI, mode)
+    def __call__(self, volume, ROI=None, mode=None,regress=False):
+        return self.predict_volume(volume, ROI, mode,regress=regress)
 
-    def _predict_volume_simple(self, volume, ROI=None):
+    def _predict_volume_simple(self, volume, ROI=None,regress=False):
         shape_in = np.array(volume.shape)
 
         # %% possible padding of too small volumes
@@ -494,10 +500,10 @@ class SlidingWindowPrediction_classhead(object):
         zxy_list_og = self._get_xyz_list(shape, ROI)
 
         # do the first one outside the loop for initialisation
-        return self._sliding_window(volume, shape, zxy_list_og, shape_in)
+        return self._sliding_window(volume, shape, zxy_list_og, shape_in,regress=regress)
 
 
-    def _predict_volume_flip(self, volume, ROI=None):
+    def _predict_volume_flip(self, volume, ROI=None,regress=False):
 
         flip_z_list = [False] if self.is_2d else [False, True]
 
@@ -532,7 +538,7 @@ class SlidingWindowPrediction_classhead(object):
 
 
         # do the first one outside the loop for initialisation
-        pred,cls_preds = self._sliding_window(volume, shape, zxy_list, shape_in)
+        pred,cls_preds = self._sliding_window(volume, shape, zxy_list, shape_in,regress=regress)
         # now some flippings!
         for f in flip_list[1:]:
             volume = self._flip_volume(volume, f)
@@ -546,7 +552,7 @@ class SlidingWindowPrediction_classhead(object):
                 zxy_list[j] = [shape[i]-self.patch_size[i]-zxy_list[j][i] if f[i] else zxy_list[j][i] for i in range(len(f))]
 
             # predict flipped volume
-            pred_flipped,cls_preds_flipped = self._sliding_window(volume, shape, zxy_list, shape_in)
+            pred_flipped,cls_preds_flipped = self._sliding_window(volume, shape, zxy_list, shape_in,regress=regress)
 
             # flip back and update
             pred += self._flip_volume(pred_flipped, f)

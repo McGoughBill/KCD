@@ -268,7 +268,8 @@ class torch_gray_value_augmentation(torch.nn.Module):
                  mm_contr=[0.65, 1.5],
                  mm_low_res=[1, 2],
                  mm_gamma=[0.7, 1.5],
-                 n_im_channels: int = 1
+                 n_im_channels: int = 1,
+                    regress=False
                  ):
         super().__init__()
         self.p_noise = p_noise
@@ -285,6 +286,7 @@ class torch_gray_value_augmentation(torch.nn.Module):
         self.mm_low_res = mm_low_res
         self.mm_gamma = mm_gamma
         self.n_im_channels = n_im_channels
+        self.regress = regress
 
     def _uniform(self, mm, device='cpu'):
         return (mm[1] - mm[0]) * torch.rand([], device=device) + mm[0]
@@ -363,6 +365,12 @@ class torch_gray_value_augmentation(torch.nn.Module):
         for b in range(xb.shape[0]):
             for op in self._get_ops_list():
                 xb[b:b+1, :c] = op(xb[b:b+1, :c])
+
+            if self.regress:
+                #from the dataloader, the extra channel of data is the og NCCT image, so we find
+                #noise via the difference between the NCCT and the augmented LDCT image
+                xb[b:b+1, c:c+1] = xb[b:b+1, :c]-xb[b:b+1, c:c+1]
+
         return xb
 
     def update_prg_trn(self, param_dict, h, indx=None):
@@ -392,7 +400,8 @@ class np_gray_value_augmentation():
                  mm_contr=[0.65, 1.5],
                  mm_low_res=[1, 2],
                  mm_gamma=[0.7, 1.5],
-                 n_im_channels: int = 1
+                 n_im_channels: int = 1,
+                    regress=False
                  ):
         super().__init__()
         self.p_noise = p_noise
@@ -409,6 +418,7 @@ class np_gray_value_augmentation():
         self.mm_low_res = mm_low_res
         self.mm_gamma = mm_gamma
         self.n_im_channels = n_im_channels
+        self.regress = regress
 
     def _noise(self, img):
         sigma = np.sqrt(np.random.uniform(*self.mm_var_noise))
@@ -501,6 +511,11 @@ class np_gray_value_augmentation():
         for b in range(xb.shape[0]):
             for op in self._get_ops_list():
                 xb[b:b+1, :c] = op(xb[b:b+1, :c])
+
+            if self.regress:
+                #from the dataloader, the extra channel of data is the og NCCT image, so we find
+                #noise via the difference between the NCCT and the augmented LDCT image
+                xb[b:b+1, c:c+1] = xb[b:b+1, :c]-xb[b:b+1, c:c+1]
         return xb
 
     def update_prg_trn(self, param_dict, h, indx=None):

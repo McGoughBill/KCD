@@ -34,6 +34,8 @@ class CE_dice_loss(nn.Module):
         loss = ce + dice
         return loss
 
+
+
 class weighted_combined_loss(nn.Module):
     # arbritray loss functions weighted and summed up
     def __init__(self, loss_names, loss_weights=None, loss_kwargs=None):
@@ -169,6 +171,30 @@ class CE_dice_pyramid_loss(nn.Module):
         for logs, yb, m, w in zip(logs_list, yb_list, mask_list, scale_weights):
             loss += w * self.ce_dice_loss(logs, yb, m)
 
+        return loss
+
+class MSE_pyramid_loss(nn.Module):
+    def __init__(self, pyramid_weight=0.5):
+        super().__init__()
+        self.pyramid_weight = pyramid_weight
+
+    def forward(self, pred_list, yb, mask=None):
+        # compute the weights to be powers of pyramid_weight
+        scale_weights = self.pyramid_weight ** np.arange(len(pred_list))
+        # let them sum to one
+        scale_weights = scale_weights / np.sum(scale_weights)
+        # turn labels into one hot encoding and downsample to same resolutions
+        # as the logits
+        yb_list = downsample_yb(pred_list, yb)
+        if torch.is_tensor(mask):
+            mask_list = downsample_yb(pred_list, mask)
+        else:
+            mask_list = [None] * len(yb_list)
+
+        # now let's compute the loss for each scale
+        loss = 0
+        for logs, yb, m, w in zip(pred_list, yb_list, mask_list, scale_weights):
+            loss += w * F.mse_loss(logs, yb, reduction='mean')
         return loss
 
 

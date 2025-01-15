@@ -15,14 +15,16 @@ from skimage.measure import label
 from KCD.Segmentation.ovseg.model.ModelBase import ModelBase
 from KCD.Segmentation.ovseg.preprocessing.SegmentationPreprocessing import SegmentationPreprocessing
 from KCD.Segmentation.ovseg.augmentation.SegmentationAugmentation import SegmentationAugmentation
-from KCD.Segmentation.ovseg.data.SegmentationData import SegmentationData, SegmentationData_trainontest
+from KCD.Segmentation.ovseg.data.SegmentationData import SegmentationData, SegmentationData_trainontest, SegmentationData_regress
 from KCD.Segmentation.ovseg.data.Dataset import raw_Dataset
 from KCD.Segmentation.ovseg.networks.UNet import UNet
 from KCD.Segmentation.ovseg.networks.UNet_ClassHead import UNet_ClassHead, UNet_ClassHead_MaxPool
+from KCD.Segmentation.ovseg.networks.UNet_RegressHead import UNet_RegressHead
+
 from KCD.Segmentation.ovseg.networks.UNetTransformer import UNetTransformer
 from KCD.Segmentation.ovseg.networks.SwinUnetr import Trans_Unetr
 from KCD.Segmentation.ovseg.networks.nfUNet import nfUNet
-from KCD.Segmentation.ovseg.training.SegmentationTraining import SegmentationTraining, SegmentationTrainingV2, SegmentationTrainingV2_classhead
+from KCD.Segmentation.ovseg.training.SegmentationTraining import SegmentationTraining, SegmentationTrainingV2, SegmentationTrainingV2_classhead, SegmentationTrainingV2_regresshead
 from KCD.Segmentation.ovseg.prediction.SlidingWindowPrediction import SlidingWindowPrediction, SlidingWindowPrediction_classhead
 from KCD.Segmentation.ovseg.postprocessing.SegmentationPostprocessing import SegmentationPostprocessing
 from KCD.Segmentation.ovseg.utils.io import save_nii_from_data_tpl, save_npy_from_data_tpl, load_pkl, read_nii, save_dcmrt_from_data_tpl, is_dcm_path
@@ -150,8 +152,12 @@ class SegmentationModel(ModelBase):
 
         # the augmentation object carries two subobjects, one with the preprocessing
         # happning in numpy on the CPU and on in torch on the GPU
-        if 'augmentation' in self.model_parameters:
-            self.augmentation = SegmentationAugmentation(**self.model_parameters['augmentation'])
+        if self.model_parameters['architecture'].lower() in ['unet_regresshead', 'unetregresshead', 'unet-regresshead']:
+            if 'augmentation' in self.model_parameters:
+                self.augmentation = SegmentationAugmentation(**self.model_parameters['augmentation'],regress=True)
+        else:
+            if 'augmentation' in self.model_parameters:
+                self.augmentation = SegmentationAugmentation(**self.model_parameters['augmentation'],regress=False)
 
     def initialise_network(self):
         if 'network' not in self.model_parameters:
@@ -174,6 +180,8 @@ class SegmentationModel(ModelBase):
             self.network = UNet(**params).to(self.dev)
         elif self.model_parameters['architecture'].lower() in ['unet_classhead','unetclasshead','unet-classhead']:
             self.network = UNet_ClassHead(**params).to(self.dev)
+        elif self.model_parameters['architecture'].lower() in ['unet_regresshead','unetregresshead','unet-regresshead']:
+            self.network = UNet_RegressHead(**params).to(self.dev)
         elif self.model_parameters['architecture'].lower() in ['unet_classhead_maxpool','unetclassheadmaxpool','unet-classhead-maxpool']:
             self.network = UNet_ClassHead_MaxPool(**params).to(self.dev)
         elif self.model_parameters['architecture'].lower() in ['nfunet', 'nf-unet']:
@@ -235,10 +243,18 @@ class SegmentationModel(ModelBase):
             for key in ['trn_dl_params', 'val_dl_params']:
                 params[key]['store_data_in_ram'] = False
                 params[key]['store_coords_in_ram'] = False
-        self.data = SegmentationData(val_fold=self.val_fold,
-                                     preprocessed_path=self.preprocessed_path,
-                                     augmentation= self.augmentation.np_augmentation,
-                                     **params)
+
+        if self.model_parameters['architecture'].lower() in ['unet_regresshead', 'unetregresshead', 'unet-regresshead']:
+            self.data = SegmentationData_regress(val_fold=self.val_fold,
+                                        preprocessed_path=self.preprocessed_path,
+                                        augmentation= self.augmentation.np_augmentation,
+                                                 regress_key = 'noises',
+                                        **params)
+        else:
+            self.data = SegmentationData(val_fold=self.val_fold,
+                                         preprocessed_path=self.preprocessed_path,
+                                         augmentation=self.augmentation.np_augmentation,
+                                         **params)
         print('Data initialised')
 
     def initialise_training(self):
@@ -256,6 +272,18 @@ class SegmentationModel(ModelBase):
             self.training = SegmentationTrainingV2_classhead(network=self.network,
                                                    trn_dl=self.data.trn_dl,
                                                    val_dl=self.data.val_dl,
+                                                   model_path=self.model_path,
+                                                   network_name=self.network_name,
+                                                   augmentation=self.augmentation.torch_augmentation,
+                                                   spacing=prep_params['target_spacing'],
+                                                   encoder_freeze=params['encoder_frozen'],
+                                                   decoder_freeze=params['decoder_frozen'],
+                                                   **params)
+        elif self.model_parameters['architecture'].lower() in ['unet_regresshead', 'unetregresshead', 'unet-regresshead']:
+            self.training = SegmentationTrainingV2_regresshead(network=self.network,
+                                                   trn_dl=self.data.trn_dl,
+                                                   val_dl=self.data.val_dl,
+                                                   regress_keys=prep_params['regress_keys'],
                                                    model_path=self.model_path,
                                                    network_name=self.network_name,
                                                    augmentation=self.augmentation.torch_augmentation,
@@ -330,7 +358,10 @@ class SegmentationModel(ModelBase):
                                                              'unet-classhead-maxpool']:
             pred,cls = self.prediction(im)
         else:
-            pred = self.prediction(im)
+            if self.model_parameters['architecture'].lower() in ['unet_regresshead', 'unetregresshead', 'unet-regresshead']:
+                pred = self.prediction(im,regress=True)
+            else:
+                pred = self.prediction(im)
         data_tpl[self.pred_key] = pred
 
         # inside the postprocessing the result will be attached to the data_tpl
@@ -653,7 +684,10 @@ class SegmentationModel(ModelBase):
         if cases_missing:
             print('Not all validation cases were found in the prediction path '+pred_folder)
             print('Doing the validation prediction now.\n')
-            self.eval_validation_set(save_preds=True, save_plots=False, force_evaluation=True)
+            if self.model_parameters['architecture'].lower() in ['unet_regresshead', 'unetregresshead', 'unet-regresshead']:
+                self.eval_validation_set(save_preds=True, save_plots=False, force_evaluation=True,regress=True)
+            else:
+                self.eval_validation_set(save_preds=True, save_plots=False, force_evaluation=True)
 
         prep_folder_next_stage = join(OV_PREPROCESSED, self.data_name,
                                       prep_name_next_stage)
@@ -965,6 +999,7 @@ class SegmentationModel_trainontest(ModelBase):
 
         # the augmentation object carries two subobjects, one with the preprocessing
         # happning in numpy on the CPU and on in torch on the GPU
+
         if 'augmentation' in self.model_parameters:
             self.augmentation = SegmentationAugmentation(**self.model_parameters['augmentation'])
 
@@ -1152,7 +1187,7 @@ class SegmentationModel_trainontest(ModelBase):
 
         return data_tpl[self.pred_key], cls
 
-    def __callcont__(self, data_tpl, do_postprocessing=True):
+    def __callcont__(self, data_tpl, do_postprocessing=True,regress=False):
         '''
         This function just predict the segmentation for the given data tpl
         There are a lot of differnt ways to do prediction. Some do require direct preprocessing
@@ -1198,10 +1233,10 @@ class SegmentationModel_trainontest(ModelBase):
         if self.model_parameters['architecture'].lower() in ['unet_classhead', 'unetclasshead', 'unet-classhead',
                                                              'unet_classhead_maxpool', 'unetclassheadmaxpool',
                                                              'unet-classhead-maxpool']:
-            pred,cls = self.prediction(im)
+            pred,cls = self.prediction(im,regress=regress)
             pred = np.expand_dims(pred[1], axis=0)
         else:
-            pred = np.expand_dims(self.prediction(im)[1], axis=0)
+            pred = np.expand_dims(self.prediction(im,regress=regress)[1], axis=0)
         # print the median of the prediction
         data_tpl[self.pred_key] = pred
 

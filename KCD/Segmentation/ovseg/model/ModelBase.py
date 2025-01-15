@@ -337,7 +337,7 @@ class ModelBase(object):
 
     def eval_ds(self, ds, ds_name: str, save_preds: bool = True, save_plots: bool = False,
                 force_evaluation: bool = False, merge_to_CV_results: bool = False,
-                save_folder_name=None):
+                save_folder_name=None,regress=False):
         '''
 
         Parameters
@@ -504,7 +504,7 @@ class ModelBase(object):
                 op_points = [0.01,0.1,0.5,0.91,0.99]
                 for op_point in op_points:
                     # predict from this datapoint
-                    pred = self.__callcont__(data_tpl)
+                    pred = self.__callcont__(data_tpl,regress=regress)
 
                     if torch.is_tensor(pred):
                         pred = pred.cpu().numpy()
@@ -553,7 +553,7 @@ class ModelBase(object):
                     sensitivity = tp/(tp+fn+(1e-6))
 
                     op_point_results[op_point] = {'ppv':ppv,'sensitivity':sensitivity}
-                pred = self.__call__(data_tpl)
+                pred = self.__call__(data_tpl,regress=regress)
                 if torch.is_tensor(pred):
                     pred = pred.cpu().numpy()
 
@@ -606,7 +606,7 @@ class ModelBase(object):
 
     def eval_ds_continuous(self, ds, ds_name: str, save_preds: bool = True, save_plots: bool = False,
                 force_evaluation: bool = False, merge_to_CV_results: bool = False,
-                save_folder_name=None):
+                save_folder_name=None,regress=False):
         '''
 
         Parameters
@@ -715,7 +715,7 @@ class ModelBase(object):
                                                                  'unet-classhead-maxpool']:
                 pred, cls = self.__callcont__(data_tpl,do_postprocessing=True)
             else:
-                pred = self.__callcont__(data_tpl,do_postprocessing=True)
+                pred = self.__callcont__(data_tpl,regress=regress,do_postprocessing=True)
 
             if torch.is_tensor(pred):
                 pred = pred.cpu().numpy()
@@ -742,7 +742,7 @@ class ModelBase(object):
                                           ds_name=ds_name+'_CV')
 
     def eval_validation_set(self, save_preds=True, save_plots=False, force_evaluation=False,
-                            continuous=False):
+                            continuous=False,regress=False):
         if not hasattr(self.data, 'val_ds'):
             print('No validation data found! Skipping prediction...')
             return
@@ -751,12 +751,13 @@ class ModelBase(object):
             self.eval_ds_continuous(self.data.val_ds, ds_name='validation_cont',
                          save_preds=save_preds, save_plots=save_plots,
                          force_evaluation=force_evaluation,
-                         merge_to_CV_results=True, save_folder_name='cross_validation_continuous')
+                         merge_to_CV_results=True, save_folder_name='cross_validation_continuous',
+                                    regress=regress)
 
         self.eval_ds(self.data.val_ds, ds_name='validation',
                      save_preds=save_preds, save_plots=save_plots,
                      force_evaluation=force_evaluation,
-                     merge_to_CV_results=True, save_folder_name='cross_validation')
+                     merge_to_CV_results=True, save_folder_name='cross_validation',regress=regress)
 
 
     def eval_training_set(self, save_preds=False, save_plots=False, force_evaluation=False):
