@@ -87,47 +87,29 @@ from matplotlib import gridspec
 plt.switch_backend('TkAgg')
 # subplot of two figures in one row - one with width 7, other with width 3, makign a cumulative
 # width of 10. both with height 8
-fig = plt.figure(figsize=(12,8))
-
-
-# create grid for different subplots
-gridspec = gridspec.GridSpec(ncols=2, nrows=1,
-                         width_ratios=[8, 3], wspace=0.2,
-                         )
-
-ax = fig.add_subplot(gridspec[0])
+fig = plt.figure(figsize=(6,6))
+ax = fig.add_subplot()
 
 #plot the non-bootstrapped ROC curve from nonbootstrapped_results
 nonbs_sens, nonbs_spec = nonbootstrapped_results.T
 nonbs_sens = np.concatenate(([1],nonbs_sens,[0]))
 nonbs_spec = np.concatenate(([0],nonbs_spec,[1]))
-ax.plot(nonbs_spec*100, nonbs_sens*100, c = 'blue', label='Non-bootstrapped ROC curve (AUC {:.3f})'.format(np.trapz(nonbs_sens, nonbs_spec)), linewidth=3,
+ax.plot(nonbs_spec*100, nonbs_sens*100, c = 'blue', label='Non-bootstrapped (AUC {:.3f})'.format(np.trapz(nonbs_sens, nonbs_spec)), linewidth=3,
         linestyle=':')
 
 
 
-ax.plot(spec*100, sens*100, c = 'black', label='Bootstrapped ROC curve (AUC {:.3f})'.format(AUC), linewidth=3)
+ax.plot(spec*100, sens*100, c = 'black', label='Bootstrapped (AUC {:.3f})'.format(AUC), linewidth=2)
 #plot semi-transparent error line with fill between
-ax.fill_between(spec*100, (sens-1.96*sens_std)*100, (sens+1.96*sens_std)*100, alpha=0.2, color='black', label='Bootstrapped 95% confidence interval')
-ax.set_xlabel('Specificity / %', fontsize=18)
-ax.set_ylabel('Sensitivity / %', fontsize=18)
-#plot minor and major grid lines
-ax.grid(which='both')
-ax.minorticks_on()
-#make minor gridlines more faint and appear every 0.05
-ax.grid(which='minor', alpha=0.2)
-ax.grid(which='major', alpha=0.5)
+ax.fill_between(spec*100, (sens-1.96*sens_std)*100, (sens+1.96*sens_std)*100, alpha=0.2, color='black', label='Bootstrapped CI')
+ax.set_xlabel('Specificity / %', fontsize=26,fontdict={'family':'Helvetica'})
+ax.set_ylabel('Sensitivity / %', fontsize=26,fontdict={'family':'Helvetica'})
 
-#increase tick font size
-ax.tick_params(axis='both', which='major', labelsize=14)
-ax.tick_params(axis='both', which='minor', labelsize=14)
 
 #xlim and ylim -2 to 102
-ax.set_xlim(-2,102)
-ax.set_ylim(-2,102)
-
-#plot diagonal line
-ax.plot([100,0],[0,100], 'k--')
+ax.set_xlim(0,100.5)
+ax.set_ylim(0,100.5)
+ax.spines[['right', 'top']].set_visible(False)
 
 # interpolate ROC curve and standard deviations to fit between 1000 points between 0 and 1
 interp = np.linspace(0,1,1000)
@@ -186,13 +168,9 @@ highdist_conf = interp_conf[index]
 ax.plot(np.array([highspec_spec,highdist_spec, highsens_spec])*100,
          np.array([highspec_sens, highdist_sens, highsens_sens])*100,
          'ro', label='Selected operating points')
-ax.grid(which='both')
-ax.minorticks_on()
-ax.grid(which='minor',axis='both',linestyle='--',linewidth=0.5)
-ax.grid(which='major',axis='both',linestyle='-',linewidth=1)
 
 #plot legend
-ax.legend(fontsize=14, loc='lower left')
+ax.legend(fontsize=16, loc='lower left')
 print(AUC)
 #save
 # plt.savefig('/Users/mcgoug01/Downloads/bootstrap/ROC.png')
@@ -204,15 +182,15 @@ print(AUC)
 fraction_large = np.sum(large)/len(large)
 fraction_small = 1-fraction_large
 
-ax1 = fig.add_subplot(gridspec[1])
-#diffentiate bars by texturing and pastel colours
-ax1.bar(['Large', 'Small'], [fraction_large*100, fraction_small*100],color=['palegoldenrod', 'lightsteelblue'], hatch=['\\', '/'])
-#place text of percentages on top of bars
-for i, v in enumerate([fraction_large*100, fraction_small*100]):
-    ax1.text(i, v + 1, str(round(v, 2))+'%', color='black', ha='center', fontsize=16)
-
-ax1.set_ylabel('Percentage of tumours in ' +r"$\mathbf{Finetune}$"+" dataset", fontsize=16)
-ax1.set_xlabel('Tumour size', fontsize=16)
+# ax1 = fig.add_subplot(gridspec[1])
+# #diffentiate bars by texturing and pastel colours
+# ax1.bar(['Large', 'Small'], [fraction_large*100, fraction_small*100],color=['palegoldenrod', 'lightsteelblue'], hatch=['\\', '/'])
+# #place text of percentages on top of bars
+# for i, v in enumerate([fraction_large*100, fraction_small*100]):
+#     ax1.text(i, v + 1, str(round(v, 2))+'%', color='black', ha='center', fontsize=16)
+#
+# ax1.set_ylabel('Percentage of tumours in ' +r"$\mathbf{Finetune}$"+" dataset", fontsize=16)
+# ax1.set_xlabel('Tumour size', fontsize=16)
 plt.tight_layout()
 #change width of ax[1] to 3
 plt.savefig('/Users/mcgoug01/Cambridge University Dropbox/William McGough/nat_paper/cvROCv3.png')

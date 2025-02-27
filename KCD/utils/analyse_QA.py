@@ -45,6 +45,8 @@ stddev['StudyID'] = stddev['StudyID'].astype(str).str[7:]
 labels = pd.read_csv(home + '/metadata.csv')
 #change labels 'study_id' to 'StudyID'
 labels = labels.rename(columns={'study_id': 'StudyID'})
+# remove rows with no StudyID
+labels = labels[~labels['StudyID'].isnull()]
 labels['StudyID'] = labels['StudyID'].astype(int)
 
 # Merge the two dataframes
@@ -175,7 +177,7 @@ print(df.groupby('label_class_q')['average_quality'].mean())
 # ax.set_xticklabels(['Normal Dose', '80% Synthetic Low Dose','90% Synthetic Low Dose', 'Real Low Dose'])
 ax[0].set_xlabel('Type of Image')
 ax[0].set_ylabel('Average Quality Score')
-ax[0].set_title('Qualitative Quality Scores for Hania, Cathal, and Iztok')
+ax[0].set_title('Qualitative quality scores for our radiologists')
 #change x axis labels
 ax[0].set_xticklabels(['Normal Dose', '90% Synthetic Low Dose','80% Synthetic Low Dose', 'Real Low Dose'])
 
@@ -194,7 +196,7 @@ print(df.groupby('label_class_q')['stddev'].mean())
 # ax.set_xticklabels(['Normal Dose', '80% Synthetic Low Dose','90% Synthetic Low Dose', 'Real Low Dose'])
 ax[1].set_xlabel('Type of Image')
 ax[1].set_ylabel('Standard Deviation / HU')
-ax[1].set_title('Quantitative Quality Scores for Hania, Cathal, and Iztok')
+ax[1].set_title('Quantitative quality scores for our radiologists')
 ax[1].set_xticklabels(['Normal Dose', '90% Synthetic Low Dose','80% Synthetic Low Dose', 'Real Low Dose'])
 # set padding between subplots
 fig.subplots_adjust(wspace=0.1, hspace=0.4)

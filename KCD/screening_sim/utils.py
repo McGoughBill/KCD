@@ -167,6 +167,7 @@ def scenario_stats(results):
     m_total_ly, s_total_ly = avg_std_metric(results, 'total_life_years')
 
     m_number_followups, s_number_followups = avg_std_metric(results, 'followups')
+    m_number_screens, s_number_screens = avg_std_metric(results, 'screens')
 
     m_hg_costs, s_hg_costs = avg_std_metric(results, 'hg_costs')
     m_lowgrade_costs, s_lowgrade_costs = avg_std_metric(results, 'lowgrade_costs')
@@ -188,6 +189,7 @@ def scenario_stats(results):
         'cost_screening': (m_cost_screening, s_cost_screening),
         'cost_followup': (m_cost_followup, s_cost_followup),
         'number_followups': (m_number_followups, s_number_followups),
+        'number_screens': (m_number_screens, s_number_screens),
         'cost_detection_noscreen': (m_cost_detection_noscreen, s_cost_detection_noscreen),
         'total_cost': (m_total_cost, s_total_cost),
         'avg_hg_cost': avg_hg_cost,
@@ -196,6 +198,7 @@ def scenario_stats(results):
         # 5-year survival means
         '5yr_survival_lowgrade': (m_5yr_lowgrade, s_5yr_lowgrade),
         '5yr_survival_highgrade': (m_5yr_hg, s_5yr_hg),
+
     }
 
 def scenario_stats_notreat(results):
@@ -203,18 +206,18 @@ def scenario_stats_notreat(results):
     m_highgrade_detected, s_highgrade_detected = avg_std_metric(results, 'highgrade_detected')
     m_cost_screening, s_cost_screening = avg_std_metric(results, 'cost_screening')
     m_cost_followup, s_cost_followup = avg_std_metric(results, 'cost_followup')
-    m_cost_detection_noscreen, s_cost_detection_noscreen = avg_std_metric(results, 'cost_detection_noscreen')
     m_total_cost, s_total_cost = avg_std_metric(results, 'total_cost')
     m_number_followups, s_number_followups = avg_std_metric(results, 'followups')
+    m_number_screens, s_number_screens = avg_std_metric(results, 'screens')
 
     return {
         'lowgrade_detected': (m_lowgrade_detected, s_lowgrade_detected),
         'highgrade_detected': (m_highgrade_detected, s_highgrade_detected),
         'cost_screening': (m_cost_screening, s_cost_screening),
         'cost_followup': (m_cost_followup, s_cost_followup),
-        'cost_detection_noscreen': (m_cost_detection_noscreen, s_cost_detection_noscreen),
         'total_cost': (m_total_cost, s_total_cost),
-        'number_followups': (m_number_followups, s_number_followups),
+        'number_cects': (m_number_followups, s_number_followups),
+        'number_ldcts': (m_number_screens, s_number_screens),
     }
 
 def avg_std_metric(results_list, metric):
@@ -241,7 +244,8 @@ def print_stats(name, stats):
     print(f"  5-year survival (highgrade): {fmt(stats['5yr_survival_highgrade'][0], stats['5yr_survival_highgrade'][1])}")
     print(f"  Average cost of highgrade detection: £{fmt(stats['avg_hg_cost'], 0)}")
     print(f"  Average cost of lowgrade detection: £{fmt(stats['avg_lowgrade_cost'], 0)}")
-    print(f"  Number of follow-ups: {fmt(stats['number_followups'][0], stats['number_followups'][1])}")
+    print(f"  Number of CECTs: {fmt(stats['number_followups'][0], stats['number_followups'][1])}")
+    print(f"  Number of Low-Dose scans: {fmt(stats['number_screens'][0], stats['number_screens'][1])}")
     print(f"  Cost of detection (no screen): £{fmt(stats['cost_detection_noscreen'][0], stats['cost_detection_noscreen'][1])}")
 
 def print_stats_notreat(name, stats):
@@ -251,7 +255,7 @@ def print_stats_notreat(name, stats):
     print(f"  highgrade detected: {fmt(stats['highgrade_detected'][0], stats['highgrade_detected'][1])}")
     print(f"  Cost of screening: £{fmt(stats['cost_screening'][0], stats['cost_screening'][1])}")
     print(f"  Cost of follow-up: £{fmt(stats['cost_followup'][0], stats['cost_followup'][1])}")
-    print(f"  Number of follow-ups: {fmt(stats['number_followups'][0], stats['number_followups'][1])}")
-    print(f"  Cost of detection (no screen): £{fmt(stats['cost_detection_noscreen'][0], stats['cost_detection_noscreen'][1])}")
+    print(f"  Number of CECT scans: {fmt(stats['number_cects'][0], stats['number_cects'][1])}")
+    print(f"  Number of Low-Dose scans: {fmt(stats['number_ldcts'][0], stats['number_ldcts'][1])}")
     print(f"  Progressions Prevented: {stats['Progressions Prevented']:.2f}")
     print(f"  Cost-Effectiveness: £{stats['Cost-Effectiveness']:.2f}")

@@ -55,6 +55,7 @@ for ogid in tr['OriginalID']:
         if np.sum(seg)*vox_vol > 14137:
             # append to large cases
             large_cases.append(studyid)
+            print(ogid)
     else:
         size = 0
 

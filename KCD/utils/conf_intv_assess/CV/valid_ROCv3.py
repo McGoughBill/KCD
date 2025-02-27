@@ -13,8 +13,8 @@ from skimage.segmentation import watershed
 # we will do this by finding the threshold that maximises the dice score on a dataset
 
 path = '/Users/mcgoug01/Downloads/valid_v3'
-cancer_infp = '/Users/mcgoug01/Downloads/valid_v3/trained_cect_cont/'
-cancer_gt = '/Users/mcgoug01/Downloads/valid_v3/labels_cect'
+cancer_infp = '/Users/mcgoug01/Downloads/cross_validation_continuous'
+cancer_gt = '/Users/mcgoug01/Downloads/valid_v3/labels'
 print(path)
 
 confidence_thresholds = np.append(np.arange(0,0.1,0.01),np.arange(0.1, 0.9, 0.05))
@@ -29,7 +29,7 @@ percase_results =[]
 sizes = []
 
 #only load files that end in .nii.gz
-for conf in confidence_thresholds:
+for conf in confidence_thresholds[::-1]:
     conf_results = []
     tp, fp, fn, tn = 0, 0, 0, 0
     for file in [path for path in os.listdir(cancer_infp) if path.endswith('.nii.gz')]:
@@ -168,5 +168,5 @@ plt.ylabel('Sensitivity (%)')
 plt.xlabel('1 - Specificity (%)')
 plt.title('2-Stage Segmentation-based Detection Validation ROC')
 plt.legend(loc="lower right")
-plt.savefig(os.path.join(path, 'roc_validation_cect.png'))
+plt.savefig(os.path.join(path, 'roc_validation_nonradar.png'))
 plt.show()

@@ -12,28 +12,36 @@ subfolders = [folder for folder in os.listdir(home) if os.path.isdir(os.path.joi
 cancers_sensspec = []
 masses_sensspec = []
 alls_sensspec = []
-fig = plt.figure(figsize=(8,7))
-for folder in subfolders:
-    #cancers in cnacers_ROC.csv, all solid tumors in masses_ROC.csv, all potential malignancies in all_ROC.csv
-    # open csvs as dataframes, append
+fig = plt.figure(figsize=(6,6))
+print(subfolders)
+# for folder in subfolders:
+#     #cancers in cnacers_ROC.csv, all solid tumors in masses_ROC.csv, all potential malignancies in all_ROC.csv
+#     # open csvs as dataframes, append
 
-    cancers = pd.read_csv(os.path.join(home, folder, 'cancers_ROC.csv'))
-    masses = pd.read_csv(os.path.join(home, folder, 'masses_ROC.csv'))
-    alls = pd.read_csv(os.path.join(home, folder, 'all_ROC.csv'))
+cancers = pd.read_csv(os.path.join(home, 'cancers_ROC.csv'))
+masses = pd.read_csv(os.path.join(home, 'masses_ROC.csv'))
+alls = pd.read_csv(os.path.join(home, 'all_ROC.csv'))
 
-    # append to list of dataframes
-    cancers_sens_spec = cancers[['Sensitivity','Specificity']].values
-    masses_sens_spec = masses[['Sensitivity','Specificity']].values
-    alls_sens_spec = alls[['Sensitivity','Specificity']].values
+# append to list of dataframes
+cancers_sens_spec = cancers[['Sensitivity','Specificity']].values
+masses_sens_spec = masses[['Sensitivity','Specificity']].values
+alls_sens_spec = alls[['Sensitivity','Specificity']].values
 
-    cancers_sensspec.append(cancers_sens_spec)
-    masses_sensspec.append(masses_sens_spec)
-    alls_sensspec.append(alls_sens_spec)
+cancers_sensspec.append(cancers_sens_spec)
+masses_sensspec.append(masses_sens_spec)
+alls_sensspec.append(alls_sens_spec)
 
 # concat the results into a single array per mass type
 cancers_sensspec = np.concatenate(cancers_sensspec)
 masses_sensspec = np.concatenate(masses_sensspec)
 alls_sensspec = np.concatenate(alls_sensspec)
+
+
+
+#add 0,100 and 100,0 to the start and end of the arrays
+cancers_sensspec = np.vstack((np.array([0,1]),cancers_sensspec,np.array([1,0])))
+masses_sensspec = np.vstack((np.array([0,1]),masses_sensspec,np.array([1,0])))
+alls_sensspec = np.vstack((np.array([0,1]),alls_sensspec,np.array([1,0])))
 
 # drop duplicates in the arrays
 cancers_sensspec = np.unique(cancers_sensspec, axis=0)
@@ -52,7 +60,7 @@ alls_sensspec = alls_sensspec[np.argsort(alls_sensspec[:,0])]
 alls_sensspec = alls_sensspec[np.argsort(alls_sensspec[:,1])[::-1]]
 
 #use aestheically pleasing colors for the ROC curves
-colors = ['r','b','g']
+colors = ['k','orange']
 #plot the ROC curves
 
 for name,data,c in zip(['Cancers\n','All Solid Masses\n'],
@@ -60,35 +68,23 @@ for name,data,c in zip(['Cancers\n','All Solid Masses\n'],
                        colors):
     auc = np.abs(np.trapz(data[:,0], data[:,1]))
     plt.plot(data[:,1]*100, data[:,0]*100, label=name+'(AUC = %.3f)' % auc, color=c, linewidth=2)
-plt.xlabel('Specificity / %',fontdict={'fontsize': 16})
-plt.ylabel('Sensitivity / %',fontdict={'fontsize': 16})
-# add minor and major gridlines
-plt.grid(which='both', axis='both')
-plt.minorticks_on()
-plt.grid(which='minor', axis='both', linestyle='-', linewidth=0.2)
+plt.xlabel('Specificity / %',fontdict={'fontsize': 26,'family':'Helvetica'})
+plt.ylabel('Sensitivity / %',fontdict={'fontsize': 26,'family':'Helvetica'})
 
-#change tick font size
-plt.tick_params(axis='both', which='major', labelsize=14)
-plt.tick_params(axis='both', which='minor', labelsize=14)
 
-# find the point in alls_sensspec where sensitivity is 1.0 and specificity is maximised
-max_spec = np.max(alls_sensspec[:,1][alls_sensspec[:,0]==1.0])
-#drop a vertical line from this point to the x-axis between 0 and 100
-plt.plot([max_spec*100,max_spec*100],[-2,100],color='gray',linestyle='--',linewidth=2)
-# annotate this vertical line with ' Potential Screening Workload Reduction'
-plt.text(max_spec*100 - 4, 50, 'Up to {:.1f}% Screening Workload Reduction'.format(max_spec*100), rotation=90, verticalalignment='center')
 
 # do the same for the cancers_sensspec
 max_spec = np.max(cancers_sensspec[:,1][cancers_sensspec[:,0]==1.0])
-plt.plot([max_spec*100,max_spec*100],[-2,100],color='gray',linestyle='--',linewidth=2)
-# annotate this vertical line with 'High-Risk Cancer Prioritisation'
-plt.text(max_spec*100 - 4, 40, 'High-Risk Cancer Prioritisation', rotation=90, verticalalignment='center')
-plt.ylim([-2,102])
-plt.xlim([-2,102])
-plt.grid(which='both')
-plt.minorticks_on()
-plt.grid(which='minor',axis='both',linestyle='--',linewidth=0.5)
-plt.grid(which='major',axis='both',linestyle='-',linewidth=1)
+# plt.plot([max_spec*100,max_spec*100],[-2,100],color='gray',linestyle='--',linewidth=2)
+# # annotate this vertical line with 'High-Risk Cancer Prioritisation'
+# plt.text(max_spec*100 - 3, 40, 'High-Risk Cancer Prioritisation', rotation=90, verticalalignment='center',
+#             horizontalalignment='center', fontsize=20)
+plt.ylim([0,100.5])
+plt.xlim([0,100.5])
+# set spine on top and right to be invisible
+plt.gca().spines['right'].set_visible(False)
+plt.gca().spines['top'].set_visible(False)
+
 
 radiologist_cancer_sensspec = [100,100*(4019-(155-13))/4019]
 radiologist_mass_sensspec = [100*(24/25),100*(4019-155+25)/4019]
@@ -101,7 +97,7 @@ radiologist_all_sensspec = [100*(36/42),100*(4019-155+42)/4019]
 # plt.plot(radiologist_all_sensspec[1],radiologist_all_sensspec[0],'go',label='Radiologist All',
 #             markersize=5)
 # plt.title('ROC Curves for External Test: YKST',fontdict={'fontsize': 15})
-plt.legend(fontsize=14)
+plt.legend(fontsize=16)
 plt.tight_layout()
 plt.savefig(os.path.join(save_loc,'YKST_ROC.png'))
 plt.show()

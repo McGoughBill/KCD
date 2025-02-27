@@ -18,12 +18,30 @@ save_fp = os.path.join(save_loc,save_name)
 sub_folders = [x for _,x in sorted(zip(names_sub_folders,sub_folders))]
 names_sub_folders = sorted(names_sub_folders)
 
+
 truth_csv_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/Bill/FD/internaltest_metadata_cect.csv'
+iztok_predfulldose_csv_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/iztokFD.csv'
+hania_predfulldose_csv_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/haniaFD.csv'
+cathal_predfulldose_csv_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/cathalFD.csv'
+
+folders = [iztok_predfulldose_csv_fp, hania_predfulldose_csv_fp,cathal_predfulldose_csv_fp] + sub_folders
+names = ['Iztok','Hania','Cathal'] + names_sub_folders
+humans = ['Iztok','Hania','Cathal']
 
 high_acc_lowdose_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions_v3/lowdose_test_ROCv3/0.550/predictions.csv'
 low_dose_predictions = pd.read_csv(high_acc_lowdose_fp)
 high_acc_fulldose_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions_v3/fulldose_test_ROCv3/0.550/predictions.csv'
 full_dose_predictions = pd.read_csv(high_acc_fulldose_fp)
+
+# using full_dose_predictions, make a key of StudyID to OriginalID - dictionary
+ID_key = full_dose_predictions[['StudyID','OriginalID']].copy()
+
+ID_key['OriginalID'] = ID_key['OriginalID'].str.replace('RCC_','Rcc_')
+ID_key['OriginalID'] = ID_key['OriginalID'].str.replace('KiTS-','case_')
+ID_key = ID_key.drop_duplicates()
+ID_key = ID_key.set_index('StudyID')
+ID_key = ID_key.to_dict()['OriginalID']
+print(ID_key)
 
 # for low_dose and full_dose predictions, remove StudyID column, rename OriginalID if starts with 'KiTS-' to 'case_',
 low_dose_predictions = low_dose_predictions.drop(columns=['StudyID'])
@@ -42,15 +60,12 @@ full_dose_predictions = full_dose_predictions[~full_dose_predictions['OriginalID
 #sort both by OriginalID
 low_dose_predictions = low_dose_predictions.sort_values(by='OriginalID', ascending=True)
 full_dose_predictions = full_dose_predictions.sort_values(by='OriginalID', ascending=True)
-
-
-names = names_sub_folders
-folders = sub_folders
 tr = pd.read_csv(truth_csv_fp)
 sizes_dictlist = []
-
-plt.figure(figsize=(15,15))
 plt.switch_backend('TkAgg')
+
+fig = plt.figure(figsize=(6,6))
+
 
 for high_acc_conditioning  in [False, True]:
     ai_results = [[100, 0]]
@@ -102,13 +117,16 @@ for high_acc_conditioning  in [False, True]:
         #calc sens and spec
         pred = pd.read_csv(pred_csv_fp)
         truth = pd.read_csv(truth_csv_fp)
+        truth = truth.sort_values(by='OriginalID', ascending=True)
+
+        #sort by OriginalID and ID
+        if name in humans:
+            # create an ID column for humans using ID_key
+            pred['ID'] = pred['StudyID'].apply(lambda x: ID_key[x] if x in ID_key else x)
+            pred = pred[pred['ID'].isin(truth['OriginalID'])]
 
         #sort by OriginalID and ID
         pred = pred.sort_values(by='ID', ascending=True)
-        truth = truth.sort_values(by='OriginalID', ascending=True)
-
-        print(pred)
-        print(low_dose_predictions)
 
         #remove all rows in pred and truth where the StudyID is in large_cases
         if small:
@@ -160,8 +178,6 @@ for high_acc_conditioning  in [False, True]:
         fp = fp_right + fp_left
         fn = fn_right + fn_left
 
-        print(tp,tn,fp,fn)
-
         sens = 100*tp/(tp+fn)
         spec = 100*tn/(tn+fp)
         print(f'{name}:')
@@ -170,15 +186,24 @@ for high_acc_conditioning  in [False, True]:
         print(f'Specificity: {spec:.2f}%')
         print()
 
-        if name == 0.0089:
-            high_sens = [sens,spec]
-        elif name == 0.150:
-            high_acc = [sens,spec]
-        elif name == 0.365:
-            high_spec = [sens,spec]
-        elif name == 0.3:
-            non_inferior = [sens,spec]
-        ai_results.append([sens,spec])
+        if name in humans:
+            if name == 'Iztok':
+                iztok = [sens,spec]
+                print('Iztok',sens,spec)
+            elif name == 'Hania':
+                hania = [sens,spec]
+            elif name == 'Cathal':
+                cathal = [sens,spec]
+        else:
+            if name == 0.0089:
+                high_sens = [sens,spec]
+            elif name == 0.150:
+                high_acc = [sens,spec]
+            elif name == 0.365:
+                high_spec = [sens,spec]
+            elif name == 0.3:
+                non_inferior = [sens,spec]
+            ai_results.append([sens,spec])
 
     ai_results.append([0,100])
 
@@ -200,24 +225,20 @@ for high_acc_conditioning  in [False, True]:
     #plot ROC curve, and plot the point for Iztok and Cathal
     # also, plot the operating points for the AI models (high sensitivity, high accuracy, high specificity
     if high_acc_conditioning:
-        label = 'Conditioned CECT Model (AUC = {:.3f})'.format(auc)
+        label = 'Conditioned CECT (AUC = {:.3f})'.format(auc)
         linestyle = '-.'
     else:
-        label = 'CECT Model (AUC = {:.3f})'.format(auc)
+        label = 'CECT (AUC = {:.3f})'.format(auc)
         linestyle = 'solid'
     plt.plot(ai_results[:,1],ai_results[:,0],label=label,c='k', linewidth=2, linestyle=linestyle)
 
-plt.xlabel('Specificity (%)',fontdict={'fontsize':15})
-plt.ylabel('Sensitivity (%)',fontdict={'fontsize':15})
-
-plt.legend(fontsize=15)
-#set minor and major grid lines
-plt.grid(which='both')
-plt.minorticks_on()
-plt.grid(which='minor',axis='both',linestyle='--',linewidth=0.5)
-plt.grid(which='major',axis='both',linestyle='-',linewidth=1)
-plt.xlim([0,102])
-plt.ylim([0,102])
+plt.xlabel('Specificity (%)',fontdict={'fontsize':26})
+plt.ylabel('Sensitivity (%)',fontdict={'fontsize':26})
+plt.gca().spines['right'].set_visible(False)
+plt.gca().spines['top'].set_visible(False)
+plt.legend(fontsize=16)
+plt.xlim([0,100.5])
+plt.ylim([0,100.5])
 plt.tight_layout()
 
 print(high_sens)

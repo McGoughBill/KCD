@@ -36,7 +36,9 @@ colors = plt.cm.OrRd(np.linspace(0, 1, len(types)))
 type_colors = dict(zip(types, colors))
 
 # Create the plot
-fig, ax = plt.subplots(figsize=(12, 6))
+fig, ax = plt.subplots(figsize=(8,5))
+ax.spines[['right', 'top']].set_visible(False)
+
 
 diameter_bins = pivot_table.index.values
 bar_width = bin_width
@@ -52,8 +54,8 @@ for (type_value, detected_value), counts in pivot_table.items():
            align='edge', color=color, hatch=hatch, edgecolor='black')
     bottom += counts.values
 
-ax.set_xlabel('Diameter / mm',fontdict={'fontsize': 20})
-ax.set_ylabel('Count',fontdict={'fontsize': 20})
+ax.set_xlabel('Diameter / mm',fontdict={'fontsize': 26})
+ax.set_ylabel('Count',fontdict={'fontsize': 26})
 
 # Set x-axis limits and ticks
 ax.set_xlim(0, max_diameter)
@@ -101,5 +103,34 @@ for label in ax.get_xticklabels():
 plt.tight_layout()
 plt.savefig('/Users/mcgoug01/Cambridge University Dropbox/William McGough/YKST/ykst_mass_size.png')
 plt.show()
+
+#make cmap from hex colour values
+import matplotlib.colors as mcolors
+import matplotlib.patches as mpatches
+cmap = mcolors.ListedColormap(['#332288', '#88CCEE'])
+
+# if df['Exo/Meso/Endo'] == Exo, set to 2, if Meso, set to 1, if Endo, set to 0
+df['exo_bin'] = df['Exo/Meso/Endo'].map({'Exo': 1, 'Meso': 0.5, 'Endo': 0})
+
+# plot diameter vs exo_bin, with color representing 'Detected'
+fig, ax = plt.subplots(figsize=(6,6))
+scatter = ax.scatter(df['diameter'], df['exo_bin'], c=df['Detected'], cmap=cmap,s=40)
+#rename y ticks to Exo, Meso, Endo
+ax.set_yticks([0,0.5,1])
+ax.set_yticklabels(['Endo','Meso','Exo'])
+ax.set_xlabel('Diameter / mm',fontdict={'fontsize': 26,'family':'Helvetica'})
+ax.set_ylabel('Exophyticness',fontdict={'fontsize': 26,'family':'Helvetica'})
+ax.legend(*scatter.legend_elements(), title='Detected',loc='lower right')
+detected = mpatches.Patch(color='#332288',label='Not Detected')
+not_detected = mpatches.Patch(color='#88CCEE',label='Detected')
+plt.legend(handles=[detected,not_detected],loc = 'lower right',fontsize=16,framealpha=0.9)
+plt.gca().spines['right'].set_visible(False)
+plt.gca().spines['top'].set_visible(False)
+plt.tight_layout()
+plt.savefig('/Users/mcgoug01/Cambridge University Dropbox/William McGough/YKST/ykst_mass_size2.png')
+plt.show()
+
+
+
 
 
