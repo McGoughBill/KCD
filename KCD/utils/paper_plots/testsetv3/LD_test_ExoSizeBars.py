@@ -69,11 +69,11 @@ for i,column in enumerate(['large_exo','small_exo','large_endo','small_endo']):
     results = []
     for name,pred_csv_fp in zip(names_sub_folders,folders):
         if name == 0.120:
-            op = 'High Sensitivity'
+            op = 'High Sens.'
         elif name == 0.550:
-            op = 'High Accuracy'
+            op = 'High Acc.'
         elif name == 0.994:
-            op = 'High Specificity'
+            op = 'High Spec.'
         else:
             continue
         print(name)
@@ -146,12 +146,27 @@ for i,column in enumerate(['large_exo','small_exo','large_endo','small_endo']):
     ax.set_ylim([0,100])
     # set font to helvetica
     ax.set_xlabel('Operating Point',fontsize=20,fontname='Helvetica')
-    ax.set_ylabel('Percentage',fontsize=20,fontname='Helvetica')
+    ax.set_ylabel('Accuracy / %',fontsize=20,fontname='Helvetica')
     ax.set_aspect("auto")
+    #change tick font size
+    ax.tick_params(axis='both', which='major', labelsize=16)
+    ax.tick_params(axis='both', which='minor', labelsize=16)
 
 #all subplots have the same legend - make this appear once, outside of the subplots
 fig.legend(['Sensitivity','Specificity'],loc='upper right',fontsize=16,framealpha=0.9)
-plt.savefig(os.path.join(save_loc,'exo_endo_sens_spec.png'))
+
+# #change all fonts to helvetica and 16 in legend
+# lt = fig.legend(loc='upper right', fontsize=16)
+# for text in lt.get_texts():
+#     text.set_fontname('Helvetica')
+#     text.set_fontsize(16)
+
+#set x and y ticks to be helvetica and 20
+
+# plt.tight_layout()
+# tight light with a bit of padding
+plt.tight_layout(rect=[0, 0.03, 1, 0.9])
+plt.savefig(os.path.join(save_loc,'exo_endo_sens_spec.png'),dpi=300)
 plt.show()
 
 high_acc_pred_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions_v3/lowdose_test_ROCv3/0.550/predictions.csv'
@@ -208,9 +223,18 @@ plt.gca().spines['top'].set_visible(False)
 #plot legend to show detected / not detected
 detected = mpatches.Patch(color='#332288',label='Not Detected')
 not_detected = mpatches.Patch(color='#88CCEE',label='Detected')
-plt.legend(handles=[detected,not_detected],loc = 'lower right',fontsize=16,framealpha=0.9)
+lt = plt.legend(handles=[detected,not_detected],loc = 'lower right',fontsize=16,framealpha=0.9)
+
+#make all legend fonts and sizes helvetica and 16
+for text in lt.get_texts():
+    text.set_fontname('Helvetica')
+    text.set_fontsize(16)
+
+#set x and y ticks to be helvetica and 16
+plt.xticks(fontsize=20,fontname='Helvetica')
+plt.yticks(fontsize=20,fontname='Helvetica')
 plt.tight_layout()
-plt.savefig(os.path.join(save_loc,'size_vs_exo_frac.png'))
+plt.savefig(os.path.join(save_loc,'size_vs_exo_frac.png'),dpi=300)
 
 plt.show()
 

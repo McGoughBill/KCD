@@ -1,32 +1,137 @@
 import sys
+
+import numpy as np
+
 from utils import *
 import csv
 # -----------------------
 # Base Global Parameters
 # -----------------------
 
-mort_other_dict = {0: 0.00586, 1: 0.00042, 2: 0.000272, 3: 0.000225, 4: 0.000184, 5: 0.000157, 6: 0.00014,
-                   7: 0.000128, 8: 0.000122, 9: 0.000123, 10: 0.000129, 11: 0.000138, 12: 0.000164,
-                   13: 0.00022, 14: 0.00031, 15: 0.000446, 16: 0.000637, 17: 0.000868, 18: 0.0011,
-                   19: 0.00127, 20: 0.001373, 21: 0.001488, 22: 0.001605, 23: 0.001714, 24: 0.001835,
-                   25: 0.001963, 26: 0.002082, 27: 0.002202, 28: 0.00233, 29: 0.002457, 30: 0.002574,
-                   31: 0.002683, 32: 0.00279587, 33: 0.002881, 34: 0.002974, 35: 0.003074, 36: 0.003175,
-                   37: 0.003295, 38: 0.003444, 39: 0.003608, 40: 0.00378, 41: 0.003958, 42: 0.004144,
-                   43: 0.004337, 44: 0.00454, 45: 0.004774, 46: 0.005064, 47: 0.005399, 48: 0.005796,
-                   49: 0.006214, 50: 0.006671, 51: 0.007167, 52: 0.007736, 53: 0.008351, 54: 0.009035,
-                   55: 0.00977, 56: 0.010567, 57: 0.011398, 58: 0.012291, 59: 0.013224, 60: 0.014267,
-                   61: 0.015353, 62: 0.016484, 63: 0.017617, 64: 0.018759, 65: 0.019914, 66: 0.021104,
-                   67: 0.022423, 68: 0.023847, 69: 0.025357, 70: 0.02705, 71: 0.02897, 72: 0.031188,
-                   73: 0.033754, 74: 0.036747, 75: 0.040563, 76: 0.044308, 77: 0.048498, 78: 0.053229,
-                   79: 0.058778, 80: 0.064617, 81: 0.070947, 82: 0.077834, 83: 0.085686, 84: 0.094809,
-                   85: 0.10509, 86: 0.116592, 87: 0.129306, 88: 0.142732, 89: 0.157638, 90: 0.174458,
-                   91: 0.193027, 92: 0.21293, 93: 0.232657, 94: 0.251826, 95: 0.270943, 96: 0.289756,
-                   97: 0.307998, 98: 0.325393, 99: 0.341662, 100: 0.358746, 101: 0.376683, 102: 0.395517,
-                   103: 0.415293, 104: 0.436058, 105: 0.45786, 106: 0.480753, 107: 0.504791, 108: 0.530031,
-                   109: 0.556532, 110: 0.584359, 111: 0.613577, 112: 0.644256, 113: 0.676468,
-                   114: 0.710292, 115: 0.745806, 116: 0.783097, 117: 0.822251, 118: 0.863364,
-                   119: 0.906532, 120: 1.0, 121: 1.0, 122: 1.0, 123: 1.0, 124: 1.0,
-                   125: 1.0}  # age-standardised rate of death: https://www.ssa.gov/oact/STATS/table4c6.html#fn1
+# 0	0.0040645
+# 1	0.0002335
+# 2	0.0001575
+# 3	0.000102
+# 4	0.000076
+# 5	0.0000785
+# 6	0.0000705
+# 7	0.0000655
+# 8	0.000071
+# 9	0.0000675
+# 10	0.000063
+# 11	0.000084
+# 12	0.000085
+# 13	0.0001075
+# 14	0.000112
+# 15	0.000157
+# 16	0.000173
+# 17	0.000236
+# 18	0.0003045
+# 19	0.0003465
+# 20	0.000345
+# 21	0.0003535
+# 22	0.0003555
+# 23	0.0003955
+# 24	0.000377
+# 25	0.0003775
+# 26	0.000446
+# 27	0.0004505
+# 28	0.0004805
+# 29	0.0005315
+# 30	0.0005375
+# 31	0.0006125
+# 32	0.00065
+# 33	0.0007075
+# 34	0.00075
+# 35	0.000838
+# 36	0.00087
+# 37	0.000983
+# 38	0.0010935
+# 39	0.00121
+# 40	0.0012865
+# 41	0.0014055
+# 42	0.0015005
+# 43	0.001584
+# 44	0.0017405
+# 45	0.001889
+# 46	0.00204
+# 47	0.002316
+# 48	0.0024875
+# 49	0.0027175
+# 50	0.0029745
+# 51	0.0031805
+# 52	0.003435
+# 53	0.0037055
+# 54	0.00398
+# 55	0.0043125
+# 56	0.004698
+# 57	0.00512
+# 58	0.005497
+# 59	0.0058765
+# 60	0.0065125
+# 61	0.007114
+# 62	0.0078255
+# 63	0.0085385
+# 64	0.0094005
+# 65	0.010182
+# 66	0.011246
+# 67	0.012341
+# 68	0.013627
+# 69	0.0146985
+# 70	0.016238
+# 71	0.017641
+# 72	0.019433
+# 73	0.021059
+# 74	0.0229095
+# 75	0.0256765
+# 76	0.0288005
+# 77	0.0324395
+# 78	0.0364115
+# 79	0.040597
+# 80	0.046667
+# 81	0.0523075
+# 82	0.059117
+# 83	0.0654345
+# 84	0.073535
+# 85	0.0827835
+# 86	0.0938435
+# 87	0.105431
+# 88	0.1201465
+# 89	0.134145
+# 90	0.151925
+# 91	0.1696015
+# 92	0.1898345
+# 93	0.209864
+# 94	0.23207
+# 95	0.2513495
+# 96	0.274501
+# 97	0.302701
+# 98	0.3204345
+# 99	0.3496805
+# 100	0.3782555
+# 101	0.395511222
+# 102	0.418864789
+# 103	0.442218356
+# 104	0.465571922
+# 105	0.488925489
+# 106	0.512279056
+# 107	0.535632622
+# 108	0.558986189
+# 109	0.582339756
+# 110	0.605693322
+# 111	0.629046889
+# 112	0.652400456
+# 113	0.675754022
+# 114	0.699107589
+# 115	0.722461156
+# 116	0.745814722
+# 117	0.769168289
+# 118	0.792521856
+# 119	0.815875422
+
+mort_other_dict = {0:0.004065, 1:0.000234, 2:0.000158, 3:0.000102, 4:0.000076, 5:0.000079, 6:0.000071, 7:0.000066, 8:0.000071, 9:0.000068, 10:0.000063, 11:0.000084, 12:0.000085, 13:0.000108, 14:0.000112, 15:0.000157, 16:0.000173, 17:0.000236, 18:0.000305, 19:0.000347, 20:0.000345, 21:0.000354, 22:0.000356, 23:0.000396, 24:0.000377, 25:0.000378, 26:0.000446, 27:0.000451, 28:0.000481, 29:0.000532, 30:0.000538, 31:0.000613, 32:0.00065, 33:0.000708, 34:0.00075, 35:0.000838, 36:0.00087, 37:0.000983, 38:0.001094, 39:0.00121, 40:0.001287, 41:0.001406, 42:0.001501, 43:0.001584, 44:0.001741, 45:0.001889, 46:0.00204, 47:0.002316, 48:0.002488, 49:0.002718, 50:0.002975, 51:0.003181, 52:0.003435, 53:0.003706, 54:0.00398, 55:0.004313, 56:0.004698, 57:0.00512, 58:0.005497, 59:0.005877, 60:0.006513, 61:0.007114, 62:0.007826, 63:0.008539,
+                     64:0.009401, 65:0.010182, 66:0.011246, 67:0.012341, 68:0.013627, 69:0.014698, 70:0.016238, 71:0.017641, 72:0.019433, 73:0.021059, 74:0.02291, 75:0.025677, 76:0.028801, 77:0.03244, 78:0.036412, 79:0.040597, 80:0.046667, 81:0.052308, 82:0.059117, 83:0.065435, 84:0.073535, 85:0.082784, 86:0.093844, 87:0.105431, 88:0.120147, 89:0.134145, 90:0.151925, 91:0.169602, 92:0.189835, 93:0.209864, 94:0.23207, 95:0.25135, 96:0.274501, 97:0.302701, 98:0.320435, 99:0.349681, 100:0.378256, 101:0.395511, 102:0.418865, 103:0.442218, 104:0.465572, 105:0.488925, 106:0.512279, 107:0.535633, 108:0.558986, 109:0.58234, 110:0.605693, 111:0.629047, 112:0.6524, 113:0.675754, 114:0.699108, 115:0.722461, 116:0.745815, 117:0.769168, 118:0.792522, 119:0.815875,
+                   120:1,121:1,122:1,123:1,124:1}  # age-standardised rate of death: https://www.ons.gov.uk/peoplepopulationandcommunity/birthsdeathsandmarriages/lifeexpectancies/datasets/mortalityratesqxbysingleyearofage
 
 # high-level sanity checks:
 #   12-14k new cases/year, 4-5k deaths/year: https://www.cancerresearchuk.org/health-professional/cancer-statistics/statistics-by-cancer-type/kidney-cancer
@@ -36,14 +141,14 @@ BASE_PARAMS = {
     # Population and simulation (no variation)
     "N": 100_000,  # 20 million people between 45-74
     "years": 20,
-    "screen_interval": 2,
+    "screen_interval": 4,
     "yearly_print": False,
 
     # Disease model parameters (no variation)
     "annual_incidence": 14000/27000000,
     # roughly 14k new cases per year https://www.cancerresearchuk.org/health-professional/cancer-statistics/statistics-by-cancer-type/kidney-cancer
     # roughly 27 million people aged 45-80 in the UK #https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/populationestimates/articles/ukpopulationpyramidinteractive/2020-01-08
-    "initial_prevalence": 0.003,  # 0.3% tumour prevalence on first screen - taken from YKST (0.25%) and increased 20% to account for missed cases by radiologists
+    "initial_prevalence": 0.005,  # 0.3% tumour prevalence on first screen - taken from YKST (0.25%) and increased 20% to account for missed cases by radiologists
     "pct_large": 0.57,  # fraction of initial cancers that are large
 
     #starting distribution (allowed to vary)
@@ -527,13 +632,19 @@ def run_simulation(params, screening_on, screening_AI, ai_stages=2,
     initial_cancer_indices = np.where((ages >= start_screening_age) & (np.random.rand(N) < initial_prevalence))[0]
     num_initial_cancers = len(initial_cancer_indices)
     if num_initial_cancers > 0:
-        initial_sizes = np.random.normal(loc=mean_size, scale=std_size, size=num_initial_cancers)
-        sorted_indices = np.argsort(initial_sizes)
-        num_large = int(np.round(pct_large * num_initial_cancers))
-        large_indices = sorted_indices[-num_large:]
-        small_indices = sorted_indices[:-num_large]
-        tumor_size[initial_cancer_indices[large_indices]] = initial_sizes[large_indices]
-        tumor_size[initial_cancer_indices[small_indices]] = initial_sizes[small_indices]
+        initial_sizes = np.random.normal(loc=mean_size, scale=std_size, size=num_initial_cancers*5)
+        # large is where volume exceeds threshold_3cm
+        is_large = initial_sizes > threshold_3cm
+        # resample initial_sizes until we have  57% large and 43% small. do this with replacement
+        large_cancers = int(pct_large*num_initial_cancers)
+        small_cancers = num_initial_cancers - large_cancers
+        large_indices = np.random.choice(np.where(is_large)[0], large_cancers, replace=True)
+        small_indices = np.random.choice(np.where(~is_large)[0], small_cancers, replace=True)
+        initial_sizes = np.concatenate([initial_sizes[large_indices], initial_sizes[small_indices]])
+
+        # assign the initial sizes to the initial cancers
+        tumor_size[initial_cancer_indices] = initial_sizes
+
         has_cancer[initial_cancer_indices] = True
         tumour_growth_factor = assign_exponential_growth(initial_cancer_indices, doubling_time_mean, doubling_time_sd,
                                                          tumour_growth_factor)
@@ -752,7 +863,8 @@ def run_simulation(params, screening_on, screening_AI, ai_stages=2,
     return results
 
 
-def run_multiple_simulations_with_sensitivity(n=100,csv_save_path=None):
+def run_multiple_simulations_with_sensitivity(n=100,csv_save_path=None, screen_interval=2,
+                                              initial_prevalence=0.003):
     no_screen_results = []
     screen_no_ai_results = []
     screen_ai_results = []
@@ -773,6 +885,8 @@ def run_multiple_simulations_with_sensitivity(n=100,csv_save_path=None):
     for i in range(n):
         print(f"Running simulation {i + 1}/{n}")
         varied_params = vary_all_params(BASE_PARAMS, NO_VARIATION_KEYS)
+        varied_params['screen_interval'] = screen_interval
+        varied_params['initial_prevalence'] = initial_prevalence
         seed = i
 
         #CONFIG INFO:
@@ -932,13 +1046,31 @@ def run_multiple_simulations_with_sensitivity(n=100,csv_save_path=None):
     screen_ai_1stage_skiptriage_radfu_extraspecific_stats['Mean Dose'] = (4*screen_ai_1stage_skiptriage_radfu_extraspecific_stats['number_ldcts'][0] + 10*screen_ai_1stage_skiptriage_radfu_extraspecific_stats['number_cects'][0])/1e5
     screen_ai_2stage_withskip_triage_extraspec_extrasens_stats['Mean Dose'] = (4*screen_ai_2stage_withskip_triage_extraspec_extrasens_stats['number_ldcts'][0] + 10*screen_ai_2stage_withskip_triage_extraspec_extrasens_stats['number_cects'][0])/1e5
 
+
+    no_screen_stats['small_table'] = True
+    screen_no_ai_stats['small_table'] = True
+    screen_ai_stats['small_table'] = False
+    screen_ai2_stats['small_table'] = False
+    screen_ai2_extra_stats['small_table'] = False
+    screen_ai2_withskip_stats['small_table'] = False
+    screen_ai2_extra_withskip_stats['small_table'] = False
+    screen_ai_radfu_stats['small_table'] = False
+    screen_ai_triage_stats['small_table'] = False
+    screen_ai_triage_radfu_stats['small_table'] = True
+    screen_ai_triage_radfu_extrasens_stats['small_table'] = False
+    screen_ai_2stage_triage_extrasens_stats['small_table'] = False
+    screen_ai_2stage_withskip_triage_stats['small_table'] = True
+    screen_ai_2stage_withskip_triage_extraspec_stats['small_table'] = False
+    screen_ai_1stage_skiptriage_radfu_extraspecific_stats['small_table'] = False
+    screen_ai_2stage_withskip_triage_extraspec_extrasens_stats['small_table'] = True
+
     # save these results as rows in a csv file
     if csv_save_path:
         with open(csv_save_path, 'w', newline='') as csvfile:
             fieldnames = ['Scenario', 'total_cost',
                           'number_cects', 'number_ldcts',
                           'highgrade_detected', 'lowgrade_detected', 'cost_screening', 'cost_followup',
-                          'Progressions Prevented', 'Cost-Effectiveness', 'Mean Dose']
+                          'Progressions Prevented', 'Cost-Effectiveness', 'Mean Dose','small_table']
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             writer.writeheader()
             writer.writerow({'Scenario': 'No Screening', **no_screen_stats})
@@ -978,4 +1110,13 @@ def run_multiple_simulations_with_sensitivity(n=100,csv_save_path=None):
 
 
 
-run_multiple_simulations_with_sensitivity(n=10,csv_save_path='/Users/mcgoug01/Cambridge University Dropbox/William McGough/nat_paper/internal_distribution/supplementary_materials/microsimulation_result.csv')
+# params = [[2,0.003],
+#           [2,0.005],
+#           [4,0.003],
+params = [   [2,0.005],      [4,0.005]]
+
+for intv,prev in params:
+    print(f"Running simulation with interval {intv} and prevalence {prev}")
+    run_multiple_simulations_with_sensitivity(n=1000, screen_interval=intv, initial_prevalence=prev,
+                                              csv_save_path=f'/Users/mcgoug01/Cambridge University Dropbox/William McGough/nat_paper/internal_distribution/supplementary_materials/microsimulation_result_{intv}_{prev}.csv')
+    print()

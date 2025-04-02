@@ -12,7 +12,7 @@ subfolders = [folder for folder in os.listdir(home) if os.path.isdir(os.path.joi
 cancers_sensspec = []
 masses_sensspec = []
 alls_sensspec = []
-fig = plt.figure(figsize=(5,4))
+fig = plt.figure(figsize=(4,3.5))
 print(subfolders)
 # for folder in subfolders:
 #     #cancers in cnacers_ROC.csv, all solid tumors in masses_ROC.csv, all potential malignancies in all_ROC.csv
@@ -90,8 +90,14 @@ radiologist_all_sensspec = [100*(36/42),100*(4019-155+42)/4019]
 #             markersize=5)
 # plt.title('ROC Curves for External Test: YKST',fontdict={'fontsize': 15})
 plt.legend(fontsize=14)
+#remove top and right spines
+plt.gca().spines['right'].set_visible(False)
+plt.gca().spines['top'].set_visible(False)
+
+# make x ticks appear every 20
+plt.xticks(np.arange(0,101,20))
 plt.tight_layout()
-plt.savefig(os.path.join(save_loc,'YKST_ROC_icon.png'))
+plt.savefig(os.path.join(save_loc,'YKST_ROC_icon.png'), dpi=300)
 plt.show()
 
 print(cancers_sensspec)

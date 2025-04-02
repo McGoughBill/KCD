@@ -202,22 +202,32 @@ def scenario_stats(results):
     }
 
 def scenario_stats_notreat(results):
-    m_lowgrade_detected, s_lowgrade_detected = avg_std_metric(results, 'lowgrade_detected')
-    m_highgrade_detected, s_highgrade_detected = avg_std_metric(results, 'highgrade_detected')
+    m_gt7_detected, s_gt7_detected = avg_std_metric(results, 'gt7_detected')
+    m_bt4_7_detected, s_bt4_7_detected = avg_std_metric(results, 'bt4_7_detected')
+    m_lt4_detected, s_lt4_detected = avg_std_metric(results, 'lt4_detected')
     m_cost_screening, s_cost_screening = avg_std_metric(results, 'cost_screening')
     m_cost_followup, s_cost_followup = avg_std_metric(results, 'cost_followup')
     m_total_cost, s_total_cost = avg_std_metric(results, 'total_cost')
     m_number_followups, s_number_followups = avg_std_metric(results, 'followups')
     m_number_screens, s_number_screens = avg_std_metric(results, 'screens')
+    m_total_lifeyears_following_screening, s_total_lifeyears_following_screening = avg_std_metric(results, 'total_lifeyears_following_screening')
+    m_undetected_lt4, s_undetected_lt4 = avg_std_metric(results, 'undetected_lt4')
+    m_undetected_bt4_7, s_undetected_bt4_7 = avg_std_metric(results, 'undetected_bt4_7')
+    m_undetected_gt7, s_undetected_gt7 = avg_std_metric(results, 'undetected_gt7')
 
     return {
-        'lowgrade_detected': (m_lowgrade_detected, s_lowgrade_detected),
-        'highgrade_detected': (m_highgrade_detected, s_highgrade_detected),
+        'gt7_detected': (m_gt7_detected, s_gt7_detected),
+        'bt4_7_detected': (m_bt4_7_detected, s_bt4_7_detected),
+        'lt4_detected': (m_lt4_detected, s_lt4_detected),
         'cost_screening': (m_cost_screening, s_cost_screening),
         'cost_followup': (m_cost_followup, s_cost_followup),
         'total_cost': (m_total_cost, s_total_cost),
         'number_cects': (m_number_followups, s_number_followups),
         'number_ldcts': (m_number_screens, s_number_screens),
+        'total_lifeyears_following_screening': (m_total_lifeyears_following_screening, s_total_lifeyears_following_screening),
+        'undetected_lt4': (m_undetected_lt4, s_undetected_lt4),
+        'undetected_bt4_7': (m_undetected_bt4_7, s_undetected_bt4_7),
+        'undetected_gt7': (m_undetected_gt7, s_undetected_gt7),
     }
 
 def avg_std_metric(results_list, metric):
@@ -251,11 +261,16 @@ def print_stats(name, stats):
 def print_stats_notreat(name, stats):
     print(f"{name} results:")
     print(f"  Total cost: £{fmt(stats['total_cost'][0], stats['total_cost'][1])}")
-    print(f"  lowgrade detected: {fmt(stats['lowgrade_detected'][0], stats['lowgrade_detected'][1])}")
-    print(f"  highgrade detected: {fmt(stats['highgrade_detected'][0], stats['highgrade_detected'][1])}")
+    print(f"  Greater than 7cm detected: {fmt(stats['gt7_detected'][0], stats['gt7_detected'][1])}")
+    print(f"  Between 4-7cm detected: {fmt(stats['bt4_7_detected'][0], stats['bt4_7_detected'][1])}")
+    print(f"  Less than 4cm detected: {fmt(stats['lt4_detected'][0], stats['lt4_detected'][1])}")
     print(f"  Cost of screening: £{fmt(stats['cost_screening'][0], stats['cost_screening'][1])}")
     print(f"  Cost of follow-up: £{fmt(stats['cost_followup'][0], stats['cost_followup'][1])}")
     print(f"  Number of CECT scans: {fmt(stats['number_cects'][0], stats['number_cects'][1])}")
     print(f"  Number of Low-Dose scans: {fmt(stats['number_ldcts'][0], stats['number_ldcts'][1])}")
-    print(f"  Progressions Prevented: {stats['Progressions Prevented']:.2f}")
-    print(f"  Cost-Effectiveness: £{stats['Cost-Effectiveness']:.2f}")
+    print(f"  Total life years following screening: {fmt(stats['total_lifeyears_following_screening'][0], stats['total_lifeyears_following_screening'][1])}")
+    print(f"  Undetected less than 4cm: {fmt(stats['undetected_lt4'][0], stats['undetected_lt4'][1])}")
+    print(f"  Undetected between 4-7cm: {fmt(stats['undetected_bt4_7'][0], stats['undetected_bt4_7'][1])}")
+    print(f"  Undetected greater than 7cm: {fmt(stats['undetected_gt7'][0], stats['undetected_gt7'][1])}")
+    # print(f"  Progressions Prevented: {stats['Progressions Prevented']:.2f}")
+    # print(f"  Cost-Effectiveness: £{stats['Cost-Effectiveness']:.2f}")

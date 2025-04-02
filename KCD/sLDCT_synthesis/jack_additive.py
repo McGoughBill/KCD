@@ -8,6 +8,7 @@ Development and Validation of a Practical Lower-Dose-Simulation Tool for Optimiz
 Journal of Computer Assisted Tomography: July/August 2012 - Volume 36 - Issue 4 - p 477-487
 doi: 10.1097/RCT.0b013e318258e891
 '''
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pydicom.pixel_data_handlers.util

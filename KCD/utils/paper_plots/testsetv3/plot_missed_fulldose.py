@@ -28,9 +28,11 @@ fd_continuous_home = '/Users/mcgoug01/Cambridge University Dropbox/William McGou
 ld_continuous_home = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions_v3/low_dose_continuous'
 highacc_ld_pred_home = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions_v3/lowdose_test_ROCv3/0.550'
 lowdose_image_path = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/Bill/LD/anon_noised/'
-fulldose_image_path = '/Users/mcgoug01/Library/CloudStorage/OneDrive-CRUKCambridgeInstitute/SecondYear/Segmentation/seg_data/raw_data/test_set_v2/images/'
-add_cect_path = '/Users/mcgoug01/Library/CloudStorage/OneDrive-CRUKCambridgeInstitute/SecondYear/Segmentation/seg_data/raw_data/add'
-kits_cect_path = '/Users/mcgoug01/Library/CloudStorage/OneDrive-CRUKCambridgeInstitute/SecondYear/Segmentation/seg_data/raw_data/kits23/'
+fulldose_image_path = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/data/test_set_v2/images/'
+
+add_cect_path = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/data/all_add'
+add_label_path = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/data/all_add/manual_labels/'
+kits_cect_path = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/data/kits23/'
 # find the StudyID where cancer was missed by each radiologist that were found by the AI
 
 
@@ -99,6 +101,7 @@ for id,ai,studyid in zip(original_ids,['pos','neg','pos','neg'],ids):
 # get labels for ALL images
 all_labels = []
 for i,row in highacc_pred.iterrows():
+    print(i)
     entry = {}
     entry['studyid'] = row['StudyID']
     entry['originalid'] = truth[truth['StudyID'] == row['StudyID']]['OriginalID'].values[0]
@@ -107,7 +110,7 @@ for i,row in highacc_pred.iterrows():
         continue
 
     if 'rcc' in entry['originalid'].lower():
-        cectlb_path = os.path.join(add_cect_path, 'labels','Rcc'+entry['originalid'][3:])
+        cectlb_path = os.path.join(add_label_path,'Rcc'+entry['originalid'][3:])
         lb = nib.load(cectlb_path).get_fdata()==1
     else:
         cectlb_path = os.path.join(kits_cect_path,'labels', 'case_'+entry['originalid'][5:])
@@ -334,20 +337,34 @@ for i in range(4):
     ax[i, 3].set_aspect(0.7*(20/26))
 
     #convert last histogram tick to >5.5
-    if i==2:
-        ax[i, 3].set_xticks([1,2,3,4,5,5.75],['1', '2', '3', '4', '5', '>5.5'])
-        ax[i, 3].text(bins[9], 8.2, str(counts[9]), fontsize=11)
+    if i == 2:
+        ax[i, 3].set_xticks([1, 2, 3, 4, 5, 5.75], ['1', '2', '3', '4', '5', '>5.5'])
+        ax[i, 3].text(bins[9], 8.2, str(counts[9]), fontsize=14)
         patches[9].set_facecolor('red')
+    else:
+        ax[i, 3].set_xticks([1, 2, 3, 4, 5, 6], ['1', '2', '3', '4', '5', '6'])
+        # ax[i, 3].text(bins[9], 7.2, str(counts[9]), fontsize=14)
 
-    #convert last bar chart in i==2 to red, and text-label the height of the bar
-
-
-
+# set all tick labels to be helvetica and fontsize 16
+for i in range(4):
+    for j in range(3):
+        ax[i, j].tick_params(axis='both', which='major', labelsize=20)
+        ax[i, j].tick_params(axis='both', which='minor', labelsize=20)
+        for text in ax[i, j].get_xticklabels():
+            text.set_fontname('Helvetica')
+        for text in ax[i, j].get_yticklabels():
+            text.set_fontname('Helvetica')
+    ax[i, 3].tick_params(axis='both', which='major', labelsize=20)
+    ax[i, 3].tick_params(axis='both', which='minor', labelsize=20)
+    for text in ax[i, 3].get_xticklabels():
+        text.set_fontname('Helvetica')
+    for text in ax[i, 3].get_yticklabels():
+        text.set_fontname('Helvetica')
 
 
 # set small spacing between each column and row
 plt.subplots_adjust(wspace=0.1,hspace=0.1)
 plt.tight_layout()
-plt.savefig(os.path.join(save_loc,'fulldose_assessment.png'))
+plt.savefig(os.path.join(save_loc,'fulldose_assessment.png'),dpi=300)
 plt.show(block=True)
 print(original_ids)
