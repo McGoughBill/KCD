@@ -140,7 +140,7 @@ BASE_PARAMS = {
 
     # Population and simulation (no variation)
     "N": 100_000,  # 20 million people between 45-74
-    "years": 20,
+    "years": 1,
     "screen_interval": 2,
     "yearly_print": False,
 
@@ -1019,65 +1019,65 @@ def run_multiple_simulations_with_sensitivity(n=100,csv_save_path=None, screen_i
 
         no_screen = run_simulation(varied_params, screening_on=False, screening_AI=False, seed=seed)
         screen_no_ai = run_simulation(varied_params, screening_on=True, screening_AI=False, seed=seed)
-        screen_ai = run_simulation(varied_params, screening_on=True, screening_AI=True, ai_stages=1, seed=seed)
-        screen_ai2 = run_simulation(varied_params, screening_on=True, screening_AI=True, ai_stages=2, seed=seed)
-        screen_ai2_withskip = run_simulation(varied_params, screening_on=True, screening_AI=True, ai_stages=2, extrasens=False, with_skip=True, seed=seed)
-        screen_ai_radfu = run_simulation(varied_params, screening_on=True, screening_AI=True, ai_stages=1, rad_followup=True, seed=seed)
-        screen_ai_triage = run_simulation(varied_params, screening_on=True, screening_AI=True, ai_stages=1,
-                                         rad_followup=False, seed=seed,triage_skip=True)
-        screen_ai_triage_radfu = run_simulation(varied_params, screening_on=True, screening_AI=True, ai_stages=1,
-                                         rad_followup=True, seed=seed,triage_skip=True)
-        screen_ai_2stage_withskip_triage = run_simulation(varied_params, screening_on=True, screening_AI=True, ai_stages=2,
-                                            rad_followup=False, seed=seed,triage_skip=True,extrasens=False,with_skip=True)
-        screen_ai_2stage_withskip_triaging_extraspecific_extrasens = run_simulation(varied_params, screening_on=True, screening_AI=True, ai_stages=2,
-                                            rad_followup=False, seed=seed,triage_skip=True,extrasens=True,with_skip=True,extraspec=True)
-        print()
+        # screen_ai = run_simulation(varied_params, screening_on=True, screening_AI=True, ai_stages=1, seed=seed)
+        # screen_ai2 = run_simulation(varied_params, screening_on=True, screening_AI=True, ai_stages=2, seed=seed)
+        # screen_ai2_withskip = run_simulation(varied_params, screening_on=True, screening_AI=True, ai_stages=2, extrasens=False, with_skip=True, seed=seed)
+        # screen_ai_radfu = run_simulation(varied_params, screening_on=True, screening_AI=True, ai_stages=1, rad_followup=True, seed=seed)
+        # screen_ai_triage = run_simulation(varied_params, screening_on=True, screening_AI=True, ai_stages=1,
+        #                                  rad_followup=False, seed=seed,triage_skip=True)
+        # screen_ai_triage_radfu = run_simulation(varied_params, screening_on=True, screening_AI=True, ai_stages=1,
+        #                                  rad_followup=True, seed=seed,triage_skip=True)
+        # screen_ai_2stage_withskip_triage = run_simulation(varied_params, screening_on=True, screening_AI=True, ai_stages=2,
+        #                                     rad_followup=False, seed=seed,triage_skip=True,extrasens=False,with_skip=True)
+        # screen_ai_2stage_withskip_triaging_extraspecific_extrasens = run_simulation(varied_params, screening_on=True, screening_AI=True, ai_stages=2,
+        #                                     rad_followup=False, seed=seed,triage_skip=True,extrasens=True,with_skip=True,extraspec=True)
+        # print()
 
         no_screen_results.append(no_screen)
         screen_no_ai_results.append(screen_no_ai)
-        screen_ai_results.append(screen_ai)
-        screen_ai2_results.append(screen_ai2)
-        screen_ai2_withskip_results.append(screen_ai2_withskip)
-        screen_ai_radfu_results.append(screen_ai_radfu)
-        screen_ai_triage_results.append(screen_ai_triage)
-        screen_ai_triage_radfu_results.append(screen_ai_triage_radfu)
-        screen_ai_2stage_withskip_triaging_results.append(screen_ai_2stage_withskip_triage)
-        screen_ai_2stage_withskip_triaging_extraspecific_extrasens_results.append(screen_ai_2stage_withskip_triaging_extraspecific_extrasens)
-
+        # screen_ai_results.append(screen_ai)
+        # screen_ai2_results.append(screen_ai2)
+        # screen_ai2_withskip_results.append(screen_ai2_withskip)
+        # screen_ai_radfu_results.append(screen_ai_radfu)
+        # screen_ai_triage_results.append(screen_ai_triage)
+        # screen_ai_triage_radfu_results.append(screen_ai_triage_radfu)
+        # screen_ai_2stage_withskip_triaging_results.append(screen_ai_2stage_withskip_triage)
+        # screen_ai_2stage_withskip_triaging_extraspecific_extrasens_results.append(screen_ai_2stage_withskip_triaging_extraspecific_extrasens)
+        #
 
     no_screen_stats = scenario_stats_notreat(no_screen_results)
     screen_no_ai_stats = scenario_stats_notreat(screen_no_ai_results)
-    screen_ai_stats = scenario_stats_notreat(screen_ai_results)
-    screen_ai2_stats = scenario_stats_notreat(screen_ai2_results)
-    screen_ai2_withskip_stats = scenario_stats_notreat(screen_ai2_withskip_results)
-    screen_ai_radfu_stats = scenario_stats_notreat(screen_ai_radfu_results)
-    screen_ai_triage_stats = scenario_stats_notreat(screen_ai_triage_results)
-    screen_ai_triage_radfu_stats = scenario_stats_notreat(screen_ai_triage_radfu_results)
-    screen_ai_2stage_withskip_triage_stats = scenario_stats_notreat(screen_ai_2stage_withskip_triaging_results)
-    screen_ai_2stage_withskip_triage_extraspec_extrasens_stats = scenario_stats_notreat(screen_ai_2stage_withskip_triaging_extraspecific_extrasens_results)
+    # screen_ai_stats = scenario_stats_notreat(screen_ai_results)
+    # screen_ai2_stats = scenario_stats_notreat(screen_ai2_results)
+    # screen_ai2_withskip_stats = scenario_stats_notreat(screen_ai2_withskip_results)
+    # screen_ai_radfu_stats = scenario_stats_notreat(screen_ai_radfu_results)
+    # screen_ai_triage_stats = scenario_stats_notreat(screen_ai_triage_results)
+    # screen_ai_triage_radfu_stats = scenario_stats_notreat(screen_ai_triage_radfu_results)
+    # screen_ai_2stage_withskip_triage_stats = scenario_stats_notreat(screen_ai_2stage_withskip_triaging_results)
+    # screen_ai_2stage_withskip_triage_extraspec_extrasens_stats = scenario_stats_notreat(screen_ai_2stage_withskip_triaging_extraspecific_extrasens_results)
 
     no_screen_stats['Mean Dose'] = (4*no_screen_stats['number_ldcts'][0] + 10*no_screen_stats['number_cects'][0])/1e5
     screen_no_ai_stats['Mean Dose'] = (4*screen_no_ai_stats['number_ldcts'][0] + 10*screen_no_ai_stats['number_cects'][0])/1e5
-    screen_ai_stats['Mean Dose'] = (4*screen_ai_stats['number_ldcts'][0] + 10*screen_ai_stats['number_cects'][0])/1e5
-    screen_ai2_stats['Mean Dose'] = (4*screen_ai2_stats['number_ldcts'][0] + 10*screen_ai2_stats['number_cects'][0])/1e5
-    screen_ai2_withskip_stats['Mean Dose'] = (4*screen_ai2_withskip_stats['number_ldcts'][0] + 10*screen_ai2_withskip_stats['number_cects'][0])/1e5
-    screen_ai_radfu_stats['Mean Dose'] = (4*screen_ai_radfu_stats['number_ldcts'][0] + 10*screen_ai_radfu_stats['number_cects'][0])/1e5
-    screen_ai_triage_stats['Mean Dose'] = (4*screen_ai_triage_stats['number_ldcts'][0] + 10*screen_ai_triage_stats['number_cects'][0])/1e5
-    screen_ai_triage_radfu_stats['Mean Dose'] = (4*screen_ai_triage_radfu_stats['number_ldcts'][0] + 10*screen_ai_triage_radfu_stats['number_cects'][0])/1e5
-    screen_ai_2stage_withskip_triage_stats['Mean Dose'] = (4*screen_ai_2stage_withskip_triage_stats['number_ldcts'][0] + 10*screen_ai_2stage_withskip_triage_stats['number_cects'][0])/1e5
-    screen_ai_2stage_withskip_triage_extraspec_extrasens_stats['Mean Dose'] = (4*screen_ai_2stage_withskip_triage_extraspec_extrasens_stats['number_ldcts'][0] + 10*screen_ai_2stage_withskip_triage_extraspec_extrasens_stats['number_cects'][0])/1e5
+    # screen_ai_stats['Mean Dose'] = (4*screen_ai_stats['number_ldcts'][0] + 10*screen_ai_stats['number_cects'][0])/1e5
+    # screen_ai2_stats['Mean Dose'] = (4*screen_ai2_stats['number_ldcts'][0] + 10*screen_ai2_stats['number_cects'][0])/1e5
+    # screen_ai2_withskip_stats['Mean Dose'] = (4*screen_ai2_withskip_stats['number_ldcts'][0] + 10*screen_ai2_withskip_stats['number_cects'][0])/1e5
+    # screen_ai_radfu_stats['Mean Dose'] = (4*screen_ai_radfu_stats['number_ldcts'][0] + 10*screen_ai_radfu_stats['number_cects'][0])/1e5
+    # screen_ai_triage_stats['Mean Dose'] = (4*screen_ai_triage_stats['number_ldcts'][0] + 10*screen_ai_triage_stats['number_cects'][0])/1e5
+    # screen_ai_triage_radfu_stats['Mean Dose'] = (4*screen_ai_triage_radfu_stats['number_ldcts'][0] + 10*screen_ai_triage_radfu_stats['number_cects'][0])/1e5
+    # screen_ai_2stage_withskip_triage_stats['Mean Dose'] = (4*screen_ai_2stage_withskip_triage_stats['number_ldcts'][0] + 10*screen_ai_2stage_withskip_triage_stats['number_cects'][0])/1e5
+    # screen_ai_2stage_withskip_triage_extraspec_extrasens_stats['Mean Dose'] = (4*screen_ai_2stage_withskip_triage_extraspec_extrasens_stats['number_ldcts'][0] + 10*screen_ai_2stage_withskip_triage_extraspec_extrasens_stats['number_cects'][0])/1e5
 
 
     no_screen_stats['small_table'] = True
     screen_no_ai_stats['small_table'] = True
-    screen_ai_stats['small_table'] = False
-    screen_ai2_stats['small_table'] = False
-    screen_ai2_withskip_stats['small_table'] = False
-    screen_ai_radfu_stats['small_table'] = False
-    screen_ai_triage_stats['small_table'] = False
-    screen_ai_triage_radfu_stats['small_table'] = True
-    screen_ai_2stage_withskip_triage_stats['small_table'] = True
-    screen_ai_2stage_withskip_triage_extraspec_extrasens_stats['small_table'] = True
+    # screen_ai_stats['small_table'] = False
+    # screen_ai2_stats['small_table'] = False
+    # screen_ai2_withskip_stats['small_table'] = False
+    # screen_ai_radfu_stats['small_table'] = False
+    # screen_ai_triage_stats['small_table'] = False
+    # screen_ai_triage_radfu_stats['small_table'] = True
+    # screen_ai_2stage_withskip_triage_stats['small_table'] = True
+    # screen_ai_2stage_withskip_triage_extraspec_extrasens_stats['small_table'] = True
 
     # save these results as rows in a csv file
     if csv_save_path:
@@ -1092,27 +1092,27 @@ def run_multiple_simulations_with_sensitivity(n=100,csv_save_path=None, screen_i
             writer.writeheader()
             writer.writerow({'Scenario': 'No Screening', **no_screen_stats})
             writer.writerow({'Scenario': 'Screening (No AI)', **screen_no_ai_stats})
-            writer.writerow({'Scenario': 'Screening (AI) 1 Stage', **screen_ai_stats})
-            writer.writerow({'Scenario': 'Screening (AI) 2 Stage', **screen_ai2_stats})
-            writer.writerow({'Scenario': 'Screening (AI) 2 Stage with Skip', **screen_ai2_withskip_stats})
-            writer.writerow({'Scenario': 'Screening (AI) 1 Stage with Rad Follow-up', **screen_ai_radfu_stats})
-            writer.writerow({'Scenario': 'Screening (AI) 1 Stage with Triage Skip', **screen_ai_triage_stats})
-            writer.writerow({'Scenario': 'Screening (AI) 1 Stage with Triage Skip and Rad Follow-up', **screen_ai_triage_radfu_stats})
-            writer.writerow({'Scenario': 'Screening (AI) 2 Stage with Skip and Triage', **screen_ai_2stage_withskip_triage_stats})
-            writer.writerow({'Scenario': 'Screening (AI) 2 Stage with Skip Triage, Extra Specificity, Extra Sensitivity', **screen_ai_2stage_withskip_triage_extraspec_extrasens_stats})
+            # writer.writerow({'Scenario': 'Screening (AI) 1 Stage', **screen_ai_stats})
+            # writer.writerow({'Scenario': 'Screening (AI) 2 Stage', **screen_ai2_stats})
+            # writer.writerow({'Scenario': 'Screening (AI) 2 Stage with Skip', **screen_ai2_withskip_stats})
+            # writer.writerow({'Scenario': 'Screening (AI) 1 Stage with Rad Follow-up', **screen_ai_radfu_stats})
+            # writer.writerow({'Scenario': 'Screening (AI) 1 Stage with Triage Skip', **screen_ai_triage_stats})
+            # writer.writerow({'Scenario': 'Screening (AI) 1 Stage with Triage Skip and Rad Follow-up', **screen_ai_triage_radfu_stats})
+            # writer.writerow({'Scenario': 'Screening (AI) 2 Stage with Skip and Triage', **screen_ai_2stage_withskip_triage_stats})
+            # writer.writerow({'Scenario': 'Screening (AI) 2 Stage with Skip Triage, Extra Specificity, Extra Sensitivity', **screen_ai_2stage_withskip_triage_extraspec_extrasens_stats})
 
     print(f"Averaged over {n} simulations with ±20% parameter variation (allowed params only):")
     print_stats_notreat("No Screening", no_screen_stats)
     print_stats_notreat("Screening (No AI)", screen_no_ai_stats)
-    print_stats_notreat("Screening (AI) 1 Stage", screen_ai_stats)
-    print_stats_notreat("Screening (AI) 2 Stage", screen_ai2_stats)
-    print_stats_notreat("Screening (AI) 2 Stage with Skip", screen_ai2_withskip_stats)
-    print_stats_notreat("Screening (AI) 1 Stage with Rad Follow-up", screen_ai_radfu_stats)
-    print_stats_notreat("Screening (AI) 1 Stage with Triage Skip", screen_ai_triage_stats)
-    print_stats_notreat("Screening (AI) 1 Stage with Triage Skip and Rad Follow-up", screen_ai_triage_radfu_stats)
-    print_stats_notreat("Screening (AI) 2 Stage with Skip and Triage", screen_ai_2stage_withskip_triage_stats)
-    print_stats_notreat("Screening (AI) 2 Stage with Skip Triage, Extra Specificity, Extra Sensitivity", screen_ai_2stage_withskip_triage_extraspec_extrasens_stats)
-
+    # print_stats_notreat("Screening (AI) 1 Stage", screen_ai_stats)
+    # print_stats_notreat("Screening (AI) 2 Stage", screen_ai2_stats)
+    # print_stats_notreat("Screening (AI) 2 Stage with Skip", screen_ai2_withskip_stats)
+    # print_stats_notreat("Screening (AI) 1 Stage with Rad Follow-up", screen_ai_radfu_stats)
+    # print_stats_notreat("Screening (AI) 1 Stage with Triage Skip", screen_ai_triage_stats)
+    # print_stats_notreat("Screening (AI) 1 Stage with Triage Skip and Rad Follow-up", screen_ai_triage_radfu_stats)
+    # print_stats_notreat("Screening (AI) 2 Stage with Skip and Triage", screen_ai_2stage_withskip_triage_stats)
+    # print_stats_notreat("Screening (AI) 2 Stage with Skip Triage, Extra Specificity, Extra Sensitivity", screen_ai_2stage_withskip_triage_extraspec_extrasens_stats)
+    #
 
 
 # params = [[2,0.003],
@@ -1122,8 +1122,8 @@ def run_multiple_simulations_with_sensitivity(n=100,csv_save_path=None, screen_i
 #                                           csv_save_path=f'/Users/mcgoug01/Cambridge University Dropbox/William McGough/nat_paper/internal_distribution/supplementary_materials/microsimulation_result_{61}_{0.0005}_noscreenvalid.csv')
 # run_multiple_simulations_with_sensitivity(n=100000, screen_interval=2, initial_prevalence=0.005,
 #                                           csv_save_path=f'/Users/mcgoug01/Cambridge University Dropbox/William McGough/nat_paper/internal_distribution/supplementary_materials/microsimulation_result_{2}_{0.0005}_ykstvalid.csv')
-params = [  [1,0.005], [2,0.005],      [4,0.005],[10,0.005],[21,0.005]]
-# params = [   [1,0.005]]
+# params = [  [1,0.005], [2,0.005],      [4,0.005],[10,0.005],[21,0.005]]
+params = [   [21,0.005]]
 #
 for intv,prev in params:
     print(f"Running simulation with interval {intv} and prevalence {prev}")

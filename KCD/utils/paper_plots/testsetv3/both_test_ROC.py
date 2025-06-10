@@ -200,12 +200,12 @@ ld, = ax.plot(lowdose_ai_results[:,1],lowdose_ai_results[:,0],label='Low-Dose AI
 # plt.scatter([ld_high_sens[1],ld_high_acc[1],ld_high_spec[1]],[ld_high_sens[0],ld_high_acc[0],ld_high_spec[0]],
 #             c='k',marker=marker)
  #plot scatter of trainee in fd and ld
-ldcr = ax.scatter([iztok_low[1]],[iztok_low[0]],label='Low Consultant',marker='.',s=100,linestyle='--',facecolors='none',edgecolors='r',zorder=2)
-ldtr = ax.scatter([cathal_low[1],hania_low[1]],[cathal_low[0],hania_low[0]],label='Low Trainee',marker='.',s=100,linestyle='--',facecolors='none',edgecolors='b',zorder=2)
+ldcr = ax.scatter([iztok_low[1]],[iztok_low[0]],label='Low-Dose Consultant',marker='.',s=100,linestyle='--',facecolors='none',edgecolors='r',zorder=2)
+ldtr = ax.scatter([cathal_low[1],hania_low[1]],[cathal_low[0],hania_low[0]],label='Low-Dose Trainee',marker='.',s=100,linestyle='--',facecolors='none',edgecolors='b',zorder=2)
 
 # plt.scatter([cathal_full[1],hania_full[1]],[cathal_full[0],hania_full[0]],label='Trainee Radiologists Full Dose',c='r',marker='.')
-ax.scatter([iztok_full[1]],[iztok_full[0]],label='Full Consultant',c='r',marker='.',s=100,zorder=2)
-ax.scatter([hania_full[1],cathal_full[1]],[hania_full[0],cathal_full[0]],label='Full Trainee',c='b',marker='.',s=100,
+ax.scatter([iztok_full[1]],[iztok_full[0]],label='Full-dose Consultant',c='r',marker='.',s=100,zorder=2)
+ax.scatter([hania_full[1],cathal_full[1]],[hania_full[0],cathal_full[0]],label='Full-Dose Trainee',c='b',marker='.',s=100,
                 zorder=2)
 #plot dotted line between dose points
 fdcr = ax.plot([iztok_full[1],iztok_low[1]+0.3],[iztok_full[0],iztok_low[0]+0.3],c='r',linestyle=':',zorder=2,linewidth=2)
@@ -266,6 +266,21 @@ for text in lt.get_texts():
     text.set_fontsize(16)
 ax.set_ylim([0,100.5])
 ax.set_xlim([0,100.5])
+#change x and y ticks to helvetica
+for label in ax.get_xticklabels():
+    label.set_fontname('Helvetica')
+    label.set_fontsize(16)
+for label in ax.get_yticklabels():
+    label.set_fontname('Helvetica')
+    label.set_fontsize(16)
+
+ax.set_ylim([-2,102])
+ax.set_xlim([-2,102])
+
+#remove top and right spines
+ax.spines['right'].set_visible(False)
+ax.spines['top'].set_visible(False)
+
 plt.tight_layout()
 plt.savefig(os.path.join(save_loc,'internaltest_ROC.png'),dpi=600)
 plt.show()

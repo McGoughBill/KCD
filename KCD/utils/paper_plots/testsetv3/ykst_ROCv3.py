@@ -70,7 +70,8 @@ for name,data,c in zip(['Cancers\n','All Solid Masses\n'],
     plt.plot(data[:,1]*100, data[:,0]*100, label=name+'(AUC = %.3f)' % auc, color=c, linewidth=2)
 plt.xlabel('Specificity / %',fontdict={'fontsize': 26,'family':'Helvetica'})
 plt.ylabel('Sensitivity / %',fontdict={'fontsize': 26,'family':'Helvetica'})
-
+plt.tick_params(axis='both', which='major', labelsize=20)
+plt.tick_params(axis='both', which='minor', labelsize=20)
 
 
 # do the same for the cancers_sensspec
@@ -90,6 +91,12 @@ radiologist_cancer_sensspec = [100,100*(4019-(155-13))/4019]
 radiologist_mass_sensspec = [100*(24/25),100*(4019-155+25)/4019]
 radiologist_all_sensspec = [100*(36/42),100*(4019-155+42)/4019]
 
+# change all legend font and size to helvetica 16
+lt = plt.legend()
+for text in lt.get_texts():
+    text.set_fontsize('16')
+    text.set_fontname('Helvetica')
+
 # plt.plot(radiologist_cancer_sensspec[1],radiologist_cancer_sensspec[0],'ro',label='Radiologist Cancers',
 #             markersize=5)
 # plt.plot(radiologist_mass_sensspec[1],radiologist_mass_sensspec[0],'bo',label='Radiologist Masses',
@@ -97,7 +104,6 @@ radiologist_all_sensspec = [100*(36/42),100*(4019-155+42)/4019]
 # plt.plot(radiologist_all_sensspec[1],radiologist_all_sensspec[0],'go',label='Radiologist All',
 #             markersize=5)
 # plt.title('ROC Curves for External Test: YKST',fontdict={'fontsize': 15})
-plt.legend(fontsize=16)
 plt.tight_layout()
 plt.savefig(os.path.join(save_loc,'YKST_ROC.png'))
 plt.show()

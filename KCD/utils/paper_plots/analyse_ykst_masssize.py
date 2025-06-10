@@ -75,7 +75,6 @@ detected_labels = detected_status
 # Combine both legends into one
 labels = ['Type']+ type_labels + ['Detected'] +detected_labels
 handles = [Patch(facecolor='none', edgecolor='none',visible=False)] + type_handles + [Patch(facecolor='none', edgecolor='none',visible='False')] + detected_handles
-
 legend = ax.legend(handles=handles, labels=labels, loc='upper right',fontsize='large')
 
 isheader = False
@@ -101,7 +100,21 @@ for label in ax.get_xticklabels():
     label.set_ha('right')
     label.set_fontsize(15)
 plt.tight_layout()
-plt.savefig('/Users/mcgoug01/Cambridge University Dropbox/William McGough/YKST/ykst_mass_size.png')
+
+#set all fonts to helvetica and font size to 20 on xtick and ytick and x label and y label
+for text in ax.get_xticklabels():
+    text.set_fontname('Helvetica')
+    text.set_fontsize(20)
+for text in ax.get_yticklabels():
+    text.set_fontname('Helvetica')
+    text.set_fontsize(20)
+
+#set legend to helvetica and font size to 16
+for text in legend.get_texts():
+    text.set_fontname('Helvetica')
+    text.set_fontsize(16)
+
+plt.savefig('/Users/mcgoug01/Cambridge University Dropbox/William McGough/YKST/ykst_mass_size.png',dpi=300)
 plt.show()
 
 #make cmap from hex colour values
@@ -114,20 +127,34 @@ df['exo_bin'] = df['Exo/Meso/Endo'].map({'Exo': 1, 'Meso': 0.5, 'Endo': 0})
 
 # plot diameter vs exo_bin, with color representing 'Detected'
 fig, ax = plt.subplots(figsize=(6,6))
-scatter = ax.scatter(df['diameter'], df['exo_bin'], c=df['Detected'], cmap=cmap,s=40)
+scatter = ax.scatter(df['diameter'], df['exo_bin'], c=df['Detected'], cmap=cmap,s=100)
 #rename y ticks to Exo, Meso, Endo
 ax.set_yticks([0,0.5,1])
 ax.set_yticklabels(['Endo','Meso','Exo'])
 ax.set_xlabel('Diameter / mm',fontdict={'fontsize': 26,'family':'Helvetica'})
-ax.set_ylabel('Exophyticness',fontdict={'fontsize': 26,'family':'Helvetica'})
+# ax.set_ylabel('Exophyticness',fontdict={'fontsize': 26,'family':'Helvetica'})
 ax.legend(*scatter.legend_elements(), title='Detected',loc='lower right')
 detected = mpatches.Patch(color='#332288',label='Not Detected')
 not_detected = mpatches.Patch(color='#88CCEE',label='Detected')
-plt.legend(handles=[detected,not_detected],loc = 'lower right',fontsize=16,framealpha=0.9)
+legend = plt.legend(handles=[detected,not_detected],loc = 'lower right',fontsize=16,framealpha=0.9)
 plt.gca().spines['right'].set_visible(False)
 plt.gca().spines['top'].set_visible(False)
+
+#set all fonts to helvetica and font size to 20 on xtick and ytick and x label and y label
+for text in ax.get_xticklabels():
+    text.set_fontname('Helvetica')
+    text.set_fontsize(20)
+for text in ax.get_yticklabels():
+    text.set_fontname('Helvetica')
+    text.set_fontsize(20)
+
+#set legend to helvetica and font size to 16
+for text in legend.get_texts():
+    text.set_fontname('Helvetica')
+    text.set_fontsize(16)
+
 plt.tight_layout()
-plt.savefig('/Users/mcgoug01/Cambridge University Dropbox/William McGough/YKST/ykst_mass_size2.png')
+plt.savefig('/Users/mcgoug01/Cambridge University Dropbox/William McGough/YKST/ykst_mass_size2.png',dpi=300)
 plt.show()
 
 

@@ -182,16 +182,20 @@ print(AUC)
 fraction_large = np.sum(large)/len(large)
 fraction_small = 1-fraction_large
 
-# ax1 = fig.add_subplot(gridspec[1])
-# #diffentiate bars by texturing and pastel colours
-# ax1.bar(['Large', 'Small'], [fraction_large*100, fraction_small*100],color=['palegoldenrod', 'lightsteelblue'], hatch=['\\', '/'])
-# #place text of percentages on top of bars
-# for i, v in enumerate([fraction_large*100, fraction_small*100]):
-#     ax1.text(i, v + 1, str(round(v, 2))+'%', color='black', ha='center', fontsize=16)
-#
-# ax1.set_ylabel('Percentage of tumours in ' +r"$\mathbf{Finetune}$"+" dataset", fontsize=16)
-# ax1.set_xlabel('Tumour size', fontsize=16)
+# change all fonts to helvetica
+for text in ax.get_xticklabels():
+    text.set_fontname('Helvetica')
+    text.set_fontsize(20)
+for text in ax.get_yticklabels():
+    text.set_fontname('Helvetica')
+    text.set_fontsize(20)
+
+#make legend font helvetica
+lt = ax.legend(loc='lower left', fontsize=16)
+for text in lt.get_texts():
+    text.set_fontname('Helvetica')
+    text.set_fontsize(16)
 plt.tight_layout()
 #change width of ax[1] to 3
-plt.savefig('/Users/mcgoug01/Cambridge University Dropbox/William McGough/nat_paper/cvROCv3.png')
+plt.savefig('/Users/mcgoug01/Cambridge University Dropbox/William McGough/nat_paper/cvROCv3.png',dpi=300)
 plt.show()

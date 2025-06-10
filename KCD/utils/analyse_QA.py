@@ -125,14 +125,15 @@ overall_cm_90 = (cm_90_h + cm_90_i + cm_90_c)/(3*88)
 #         ax[i,j].set_yticklabels(['Normal Dose', 'Synthetic Low Dose', 'Real Low Dose'])
 
 #plot overall confusion matrix
-fig, ax = plt.subplots(1, 2, figsize=(16, 6))
+fig, ax = plt.subplots(1, 2, figsize=(15, 6))
 sns.heatmap(overall_cm_80, annot=True, ax=ax[0])
-ax[0].set_title('Normalised Confusion Matrix for 80pc_sldct')
+# ax[0].set_title('Normalised Confusion Matrix for 80pc_sldct')
 sns.heatmap(overall_cm_90, annot=True, ax=ax[1])
-ax[1].set_title('Normalised Confusion Matrix for 90pc_sldct')
+# ax[1].set_title('Normalised Confusion Matrix for 90pc_sldct')
+
 for i in range(2):
-    ax[i].set_xlabel('Predicted')
-    ax[i].set_ylabel('True')
+    ax[i].set_xlabel('Predicted',fontdict={'fontsize': 20,'family':'Helvetica'})
+    ax[i].set_ylabel('Label',fontdict={'fontsize': 20,'family':'Helvetica'})
     ax[i].set_xticklabels(['Normal Dose', 'Synthetic Low Dose', 'Real Low Dose'])
     ax[i].set_yticklabels(['Normal Dose', 'Synthetic Low Dose', 'Real Low Dose'])
 
@@ -148,12 +149,27 @@ print(df[['label_class_q', 'quality_hania']])
 print(df.groupby('label_class_q')['quality_hania'].mean())
 print(df.groupby('label_class_q')['quality_hania'].std())
 
+#convert all text to helvetica and font size to 20
+for text in ax[0].get_xticklabels():
+    text.set_fontname('Helvetica')
+    text.set_fontsize(14)
+for text in ax[0].get_yticklabels():
+    text.set_fontname('Helvetica')
+    text.set_fontsize(14)
+for text in ax[1].get_xticklabels():
+    text.set_fontname('Helvetica')
+    text.set_fontsize(14)
+for text in ax[1].get_yticklabels():
+    text.set_fontname('Helvetica')
+    text.set_fontsize(14)
+
+plt.tight_layout()
 plt.savefig(os.path.join(save_loc, 'confusion_matrix.png'))
 
 #plot average quality scores
 #check for statistical significance
 import scipy.stats as stats
-fig, ax = plt.subplots(3, 1, figsize=(12, 12))
+fig, ax = plt.subplots(3, 1, figsize=(10, 8))
 from statannot import add_stat_annotation
 # sns.boxplot(x='label_class_q', y='average_quality', data=df, ax=ax)
 
@@ -176,8 +192,8 @@ print(df.groupby('label_class_q')['average_quality'].mean())
 
 # ax.set_xticklabels(['Normal Dose', '80% Synthetic Low Dose','90% Synthetic Low Dose', 'Real Low Dose'])
 ax[0].set_xlabel('Type of Image')
-ax[0].set_ylabel('Average Quality Score')
-ax[0].set_title('Qualitative quality scores for our radiologists')
+ax[0].set_ylabel('Average Quality Score',fontdict={'fontsize': 16,'family':'Helvetica'})
+# ax[0].set_title('Qualitative quality scores for our radiologists')
 #change x axis labels
 ax[0].set_xticklabels(['Normal Dose', '90% Synthetic Low Dose','80% Synthetic Low Dose', 'Real Low Dose'])
 
@@ -195,8 +211,8 @@ print(df.groupby('label_class_q')['stddev'].mean())
 
 # ax.set_xticklabels(['Normal Dose', '80% Synthetic Low Dose','90% Synthetic Low Dose', 'Real Low Dose'])
 ax[1].set_xlabel('Type of Image')
-ax[1].set_ylabel('Standard Deviation / HU')
-ax[1].set_title('Quantitative quality scores for our radiologists')
+ax[1].set_ylabel('Standard Deviation / HU',fontdict={'fontsize': 16,'family':'Helvetica'})
+# ax[1].set_title('Quantitative quality scores for our radiologists')
 ax[1].set_xticklabels(['Normal Dose', '90% Synthetic Low Dose','80% Synthetic Low Dose', 'Real Low Dose'])
 # set padding between subplots
 fig.subplots_adjust(wspace=0.1, hspace=0.4)
@@ -209,16 +225,40 @@ for type in ['Normal', '80', '90', 'real low']:
 # plot another for z_spacing - a bar chart
 sns.barplot(x = ['Normal', '80', '90', 'real low'], y = means, ax=ax[2])
 
-ax[2].set_ylabel('Mean Z-Spacing / mm')
-ax[2].set_title('Z Spacing for each type of image')
+ax[2].set_ylabel('Mean Z-Spacing / mm',fontdict={'fontsize': 16,'family':'Helvetica'})
+# ax[2].set_title('Z Spacing for each type of image')
 ax[2].set_xticklabels(['Normal Dose', '90% Synthetic Low Dose','80% Synthetic Low Dose', 'Real Low Dose'])
-ax[2].set_xlabel('Type of Image')
+ax[2].set_xlabel('Type of Image',fontdict={'fontsize': 20,'family':'Helvetica'})
 # print correlation between z_spacing, quality, and stddev
 print(df[['z_spacing', 'average_quality', 'stddev']].corr())
 # set y extent
 ax[0].set_xlabel('')
 ax[1].set_xlabel('')
 ax[2].set_xlabel('')
+
+#convert all text to helvetica and font size to 20
+for text in ax[0].get_xticklabels():
+    text.set_fontname('Helvetica')
+    text.set_fontsize(14)
+for text in ax[0].get_yticklabels():
+    text.set_fontname('Helvetica')
+    text.set_fontsize(14)
+for text in ax[1].get_xticklabels():
+    text.set_fontname('Helvetica')
+    text.set_fontsize(14)
+for text in ax[1].get_yticklabels():
+    text.set_fontname('Helvetica')
+    text.set_fontsize(14)
+for text in ax[2].get_xticklabels():
+    text.set_fontname('Helvetica')
+    text.set_fontsize(14)
+for text in ax[2].get_yticklabels():
+    text.set_fontname('Helvetica')
+    text.set_fontsize(14)
+
+# convert all x and y labels to helvetica and font size to 20
+
+plt.tight_layout()
 
 plt.savefig(os.path.join(save_loc, 'quality_scores.png'))
 plt.show()
