@@ -7,20 +7,21 @@ import torch.nn as nn
 import torch
 from scipy import stats
 import file_utils as fu
+import gc
 
 def extract_sliding_windows(arr, patch_size=(32,32,32),overlap=0.1,boundary_z=1,axes=None):
     axial,lr,ud = axes
 
     # in case the volume is smaller than the patch size we pad it
     # and save the input size to crop again before returning
-    volume = torch.unsqueeze(torch.Tensor(arr),dim=0)
+    volume = torch.unsqueeze(torch.Tensor(arr),dim=0).type(torch.float16)
     shape_in = np.array(volume.shape)
     #  possible padding of too small volumes
     pad = [0, patch_size[np.argmax(axes==1)] - shape_in[2], 0, patch_size[np.argmax(axes==2)] - shape_in[3],
            0, patch_size[np.argmax(axes==0)] - shape_in[1]]
     pad = np.maximum(pad, 0).tolist()
 
-    volume = nn.functional.pad(volume, pad).type(torch.float)
+    volume = nn.functional.pad(volume, pad).type(torch.float16)
     shape = volume.shape[1:]
     
     zxy_shape = np.array([shape[axes[0]],shape[axes[1]],shape[axes[2]]])
@@ -36,6 +37,8 @@ def extract_sliding_windows(arr, patch_size=(32,32,32),overlap=0.1,boundary_z=1,
     
     if n_full_batches < len(zxy_list):
         zxy_batched.append(zxy_list[n_full_batches:])
+
+    print('here at line 40')
         
     sliding_windows = torch.stack([volume[:,
                                 pack[0][np.argmax(axes==0)]:pack[0][np.argmax(axes==0)]+patch_size[np.argmax(axes==0)],
@@ -132,9 +135,11 @@ def get_centralised_windows(reshaped_im,reshaped_seg,centroid,axes=None,patch_si
     pad = [0, patch_size[np.argmax(axes==1)] - shape_in[1], 0, patch_size[np.argmax(axes==2)] - shape_in[2],
            0, patch_size[np.argmax(axes==0)] - shape_in[0]]
     pad = np.maximum(pad, 0).tolist()
-    reshaped_im = nn.functional.pad(torch.Tensor(reshaped_im), pad).type(torch.float).numpy()
-    reshaped_seg = nn.functional.pad(torch.Tensor(reshaped_seg), pad).type(torch.float).numpy()
+    reshaped_im = nn.functional.pad(torch.Tensor(reshaped_im), pad).type(torch.float16).numpy()
+    reshaped_seg = nn.functional.pad(torch.Tensor(reshaped_seg), pad).type(torch.float16).numpy()
     shape = reshaped_im.shape
+
+    print('here at line 141')
     
     top_left_x = max(0,int(xc-(patch_size[1]/2)))
     top_left_y = max(0,int(yc-(patch_size[2]/2)))
@@ -312,7 +317,7 @@ def create_labelled_dataset(im_path,save_dir,seg_path,target_spacing,overlap,
                    kidney_thresh_rmm=20):
     
     save_path = fu.create_save_path_structure(im_path,data_name=data_name,save_dir=save_dir)
-    int_list = [file for file in os.listdir(im_path)]
+    int_list = [file for file in os.listdir(im_path)][::-1]
     
     bbox_boundary = int(np.round(bbox_boundary_mm/target_spacing[0]))
     vol_thresh_vox = 1000 / float(np.prod(target_spacing)) # ignore 'kidney' segmentations with a vol less than 100mm cubed
@@ -324,7 +329,7 @@ def create_labelled_dataset(im_path,save_dir,seg_path,target_spacing,overlap,
         if get_int=='KiTS-00151.nii.gz': continue #skip this case - strange label artefact
         if get_int=='.DS_Store': continue
         ct,seg = am.get(get_int,im_path,seg_path)
-        ct_im,seg_im = am.nifti_2_correctarr(ct), am.nifti_2_correctarr(seg)
+        ct_im,seg_im = am.nifti_2_correctarr(ct).astype(np.float16), am.nifti_2_correctarr(seg)
         patch_size= patch_dims.copy()
         spacing=am.get_spacing(ct)  
         spacing_axes = am.find_orientation(spacing,is_axes=False)
@@ -337,8 +342,8 @@ def create_labelled_dataset(im_path,save_dir,seg_path,target_spacing,overlap,
         axes = np.array(axes)
 
         
-        reshaped_im = am.rescale_array(ct_im, correct_spacing, axes, target_spacing = target_spacing)
-        reshaped_seg = am.rescale_array(seg_im, correct_spacing, axes, target_spacing = target_spacing, is_seg = True)
+        reshaped_im = am.rescale_array(ct_im, correct_spacing, axes, target_spacing = target_spacing).astype(np.float32)
+        reshaped_seg = am.rescale_array(seg_im, correct_spacing, axes, target_spacing = target_spacing, is_seg = True).astype(np.uint16)
 
         kidney_data = np.asarray([[mass,centroid] for mass, centroid in get_masses(reshaped_seg>0,vol_thresh_vox)],dtype=object)        
 
@@ -360,15 +365,15 @@ def create_labelled_dataset(im_path,save_dir,seg_path,target_spacing,overlap,
                                                        coords[4]-coords[1],
                                                        coords[5]-coords[2]))
             first_mask = first_mask*(reshaped_seg>0).astype(np.uint8)
-            final_mask = spim.binary_dilation(first_mask, kernel, iterations=bbox_boundary)
+            final_mask = spim.binary_dilation(first_mask, kernel, iterations=bbox_boundary).astype(np.uint16)
             
             seg = first_mask*reshaped_seg
-            ct = final_mask*reshaped_im
+            ct = (final_mask*reshaped_im).astype(np.float16)
             # get rid of zero'd background that confounds training - make bg -200HU, the min possible val in image.
-            ct += np.where(final_mask==0,-200,0)
+            ct += np.where(final_mask==0,-200,0).astype(np.float16)
             
 
-        
+            print('here at line 373')
             sw_im, sw_seg = get_shifted_windows(ct,seg,overlap=overlap,patch_size=patch_size,axes=axes,boundary_z=boundary_z)
             if (sw_seg.shape[-3:]==tuple(patch_dims)) and (sw_im.shape[-3:]==tuple(patch_dims)):
                 save_windows_labelled(sw_im,sw_seg,canc_thresh,kid_thresh,
@@ -387,6 +392,14 @@ def create_labelled_dataset(im_path,save_dir,seg_path,target_spacing,overlap,
                              shuffle=False,save_limit=1e4,centralised=True,
                              depth_z=depth_z,boundary_z=boundary_z,
                              kidthresh=kidney_thresh_rmm,dilate=bbox_boundary_mm,patch_dims=patch_dims)
+
+            del ct, seg, first_mask, final_mask, cent_seg, cent_im, sw_seg, sw_im
+            gc.collect()
+            torch.cuda.empty_cache()
+
+        del reshaped_im, reshaped_seg
+        gc.collect()
+        torch.cuda.empty_cache()
                         
             
 def create_unlabelled_dataset(im_path,save_dir,seg_path,target_spacing,overlap,
@@ -419,8 +432,10 @@ def create_unlabelled_dataset(im_path,save_dir,seg_path,target_spacing,overlap,
         axes = np.array(axes)
 
         
-        reshaped_im = am.rescale_array(ct_im,correct_spacing,axes,target_spacing = target_spacing)
+        reshaped_im = am.rescale_array(ct_im,correct_spacing,axes,target_spacing = target_spacing).astype(np.float32)
         reshaped_seg = am.rescale_array(seg_im,correct_spacing,axes,target_spacing = target_spacing,is_seg=True)
+
+        print('here at line 429')
 
         kidney_data = np.asarray([[mass,centroid] for mass, centroid in get_masses(reshaped_seg>0,vol_thresh_vox)],dtype=object)
 
@@ -433,22 +448,23 @@ def create_unlabelled_dataset(im_path,save_dir,seg_path,target_spacing,overlap,
             coords = np.array(kidney_datum[0].bbox)
 
             centroid = kidney_datum[1]
-            
+            print('start at line 442')
             ### final mask should be generated from a 3 dilation of the masked segmentation.
-            first_mask = np.zeros_like(reshaped_seg)
+            first_mask = np.zeros_like(reshaped_seg).astype(np.uint8)
             first_mask[coords[0]:coords[3],
                        coords[1]:coords[4],
                        coords[2]:coords[5]] = np.ones((coords[3]-coords[0],
                                                        coords[4]-coords[1],
                                                        coords[5]-coords[2]))
             first_mask = first_mask*(reshaped_seg>0).astype(np.uint8)
-            final_mask = spim.binary_dilation(first_mask, kernel, iterations=bbox_boundary)
+            final_mask = spim.binary_dilation(first_mask, kernel, iterations=bbox_boundary).astype(np.uint16)
             
             seg = first_mask*reshaped_seg
-            ct = final_mask*reshaped_im
+            ct = (final_mask*reshaped_im).astype(np.float16)
             # get rid of zero'd background that confounds training - make bg -200HU, the min possible val in image.
-            ct += np.where(final_mask==0,-200,0)
+            ct += np.where(final_mask==0,-200,0).astype(np.float16)
 
+            print('here at line 454')
             cent_im, cent_seg = get_centralised_windows(ct,seg,centroid,patch_size=patch_size,axes=axes,boundary_z=boundary_z) 
             assert(cent_im.shape[-3:]==tuple(patch_dims))
             assert(cent_seg.shape[-2:]==tuple(patch_dims[-2:]))
@@ -459,6 +475,13 @@ def create_unlabelled_dataset(im_path,save_dir,seg_path,target_spacing,overlap,
                          shuffle=False,save_limit=1e4,centralised=True,
                          depth_z=depth_z,boundary_z=boundary_z,
                          kidthresh=kidney_thresh_rmm,dilate=bbox_boundary_mm,patch_dims=patch_dims)
+            del ct, seg, first_mask, final_mask, cent_seg, cent_im
+            gc.collect()
+            torch.cuda.empty_cache()
+
+        del reshaped_im, reshaped_seg
+        gc.collect()
+        torch.cuda.empty_cache()
 
 
 def create_segmentation_labelled_dataset(im_path, save_dir, seg_path, target_spacing, overlap,
@@ -545,3 +568,12 @@ def create_segmentation_labelled_dataset(im_path, save_dir, seg_path, target_spa
                                       shuffle=False, save_limit=1e4, centralised=True,
                                       depth_z=depth_z, boundary_z=boundary_z,
                                       kidthresh=kidney_thresh_rmm, dilate=bbox_boundary_mm, patch_dims=patch_dims)
+
+
+            del ct, seg, first_mask, final_mask, cent_seg, cent_im,sw_seg, sw_im
+            gc.collect()
+            torch.cuda.empty_cache()
+
+        del reshaped_im, reshaped_seg
+        gc.collect()
+        torch.cuda.empty_cache()
