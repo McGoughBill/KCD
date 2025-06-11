@@ -44,8 +44,13 @@ def train_cv_slice_model_2d(home = '/Users/mcgoug01/Downloads/Data/',dataname='c
 
         if os.path.exists(split_fp): fold_split = np.load(split_fp,allow_pickle=True)
         else:
-            fold_split = np.array([(fold,tr_index,ts_index) for fold,(tr_index, ts_index) in enumerate(five_fold_strat.split(cases,is_ncct))])
-            np.save(os.path.join(split_path,split_fp),fold_split)
+            fold_split = np.array(
+                [(fold, tr_index, ts_index)
+                 for fold, (tr_index, ts_index)
+                 in enumerate(five_fold_strat.split(cases, is_ncct))],
+                dtype=object
+            )
+            np.save(split_fp, fold_split, allow_pickle=True)
 
         for fold,train_index, test_index in fold_split:
             if not (fold in train_folds): continue
@@ -59,12 +64,15 @@ def train_cv_slice_model_2d(home = '/Users/mcgoug01/Downloads/Data/',dataname='c
             opt = torch.optim.Adam(model.parameters(),lr=params['lr'])
 
             dl,test_dl = tu.generate_dataloaders(slicedataset,test_slicedataset,cases[train_index],params['batch_size'])
-            model = tu.train_model(dl,dev,params['epochs'],loss_fnc,opt,model)
             model_name = '{}_{}_{}_{}_{}'.format(model_type,params['model_size'],params['epochs'],params['pred_window'],params['lr'])
 
             if not os.path.exists(os.path.join(slice_path,'model')):
                 os.mkdir(os.path.join(slice_path,'model'))
                 os.mkdir(os.path.join(slice_path,'csv'))
+
+            model = tu.train_model(dl,dev,params['epochs'],loss_fnc,opt,model,
+                                   model_name=model_name,doc_path=os.path.join(slice_path,'model'),
+                                   learning_rate=params['lr'])
 
             torch.save(model,os.path.join(slice_path,'model',model_name))
             model.eval()
@@ -73,9 +81,8 @@ def train_cv_slice_model_2d(home = '/Users/mcgoug01/Downloads/Data/',dataname='c
             model_res.to_csv(os.path.join(slice_path,'csv',model_name+'.csv'))
 
 if __name__ == '__main__':
-    import sys
-    epochs = int(sys.argv[1])
-    fold = int(sys.argv[2])
+    epochs = 5
     dataset = 'kits23_nooverlap'
-    home = '/bask/projects/p/phwq4930-renal-canc/KCD_data/Data'
-    train_cv_slice_model_2d(home=home,dataname=dataset,splits=[0],train_folds=[fold],epochs=epochs)
+    home = '/media/bill/Crucial X6/classification_revisited'
+    for fold in range(5):
+        train_cv_slice_model_2d(home=home,dataname=dataset,splits=[0],train_folds=[fold],epochs=epochs)

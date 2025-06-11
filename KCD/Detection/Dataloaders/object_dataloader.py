@@ -12,7 +12,7 @@ from torch.utils.data import Dataset
 from pandas.api.types import is_numeric_dtype
 import pandas as pd
 import numpy as np
-import dgl
+# import dgl
 
 def assign_rowwise_max(df, columns,new_column_name):
     df[new_column_name] = df[columns].max(axis=1)

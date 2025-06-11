@@ -1,4 +1,4 @@
-import KCD.Detection.Dataloaders.object_dataloader as dl_shape
+# import KCD.Detection.Dataloaders.object_dataloader as dl_shape
 import KCD.Detection.Dataloaders.slice_dataloader as dl_slice
 import KCD.Detection.Dataloaders.slice_dataloader_DA as dl_slice_da
 import KCD.Detection.Dataloaders.sliceseg_dataloader as dl_sliceseg
