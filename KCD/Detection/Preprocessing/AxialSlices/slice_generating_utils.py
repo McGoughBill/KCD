@@ -14,14 +14,14 @@ def extract_sliding_windows(arr, patch_size=(32,32,32),overlap=0.1,boundary_z=1,
 
     # in case the volume is smaller than the patch size we pad it
     # and save the input size to crop again before returning
-    volume = torch.unsqueeze(torch.Tensor(arr),dim=0).type(torch.float16)
+    volume = torch.unsqueeze(torch.Tensor(arr),dim=0).type(torch.float32)
     shape_in = np.array(volume.shape)
     #  possible padding of too small volumes
     pad = [0, patch_size[np.argmax(axes==1)] - shape_in[2], 0, patch_size[np.argmax(axes==2)] - shape_in[3],
            0, patch_size[np.argmax(axes==0)] - shape_in[1]]
     pad = np.maximum(pad, 0).tolist()
 
-    volume = nn.functional.pad(volume, pad).type(torch.float16)
+    volume = nn.functional.pad(volume, pad).type(torch.float32)
     shape = volume.shape[1:]
     
     zxy_shape = np.array([shape[axes[0]],shape[axes[1]],shape[axes[2]]])
@@ -135,8 +135,8 @@ def get_centralised_windows(reshaped_im,reshaped_seg,centroid,axes=None,patch_si
     pad = [0, patch_size[np.argmax(axes==1)] - shape_in[1], 0, patch_size[np.argmax(axes==2)] - shape_in[2],
            0, patch_size[np.argmax(axes==0)] - shape_in[0]]
     pad = np.maximum(pad, 0).tolist()
-    reshaped_im = nn.functional.pad(torch.Tensor(reshaped_im), pad).type(torch.float16).numpy()
-    reshaped_seg = nn.functional.pad(torch.Tensor(reshaped_seg), pad).type(torch.float16).numpy()
+    reshaped_im = nn.functional.pad(torch.Tensor(reshaped_im), pad).type(torch.float32).numpy()
+    reshaped_seg = nn.functional.pad(torch.Tensor(reshaped_seg), pad).type(torch.float32).numpy()
     shape = reshaped_im.shape
 
     print('here at line 141')
@@ -329,7 +329,7 @@ def create_labelled_dataset(im_path,save_dir,seg_path,target_spacing,overlap,
         if get_int=='KiTS-00151.nii.gz': continue #skip this case - strange label artefact
         if get_int=='.DS_Store': continue
         ct,seg = am.get(get_int,im_path,seg_path)
-        ct_im,seg_im = am.nifti_2_correctarr(ct).astype(np.float16), am.nifti_2_correctarr(seg)
+        ct_im,seg_im = am.nifti_2_correctarr(ct).astype(np.float32), am.nifti_2_correctarr(seg)
         patch_size= patch_dims.copy()
         spacing=am.get_spacing(ct)  
         spacing_axes = am.find_orientation(spacing,is_axes=False)
@@ -368,9 +368,9 @@ def create_labelled_dataset(im_path,save_dir,seg_path,target_spacing,overlap,
             final_mask = spim.binary_dilation(first_mask, kernel, iterations=bbox_boundary).astype(np.uint16)
             
             seg = first_mask*reshaped_seg
-            ct = (final_mask*reshaped_im).astype(np.float16)
+            ct = (final_mask*reshaped_im).astype(np.float32)
             # get rid of zero'd background that confounds training - make bg -200HU, the min possible val in image.
-            ct += np.where(final_mask==0,-200,0).astype(np.float16)
+            ct += np.where(final_mask==0,-200,0).astype(np.float32)
             
 
             print('here at line 373')
@@ -460,9 +460,9 @@ def create_unlabelled_dataset(im_path,save_dir,seg_path,target_spacing,overlap,
             final_mask = spim.binary_dilation(first_mask, kernel, iterations=bbox_boundary).astype(np.uint16)
             
             seg = first_mask*reshaped_seg
-            ct = (final_mask*reshaped_im).astype(np.float16)
+            ct = (final_mask*reshaped_im).astype(np.float32)
             # get rid of zero'd background that confounds training - make bg -200HU, the min possible val in image.
-            ct += np.where(final_mask==0,-200,0).astype(np.float16)
+            ct += np.where(final_mask==0,-200,0).astype(np.float32)
 
             print('here at line 454')
             cent_im, cent_seg = get_centralised_windows(ct,seg,centroid,patch_size=patch_size,axes=axes,boundary_z=boundary_z) 
