@@ -7,15 +7,31 @@ import scipy.ndimage as spim
 from skimage.measure import regionprops
 from KCD.Detection.Preprocessing.ObjectFiles import object_creation_utils as ocu
 from skimage.segmentation import watershed
+import sys
 
 # we wan to find the optimum confidence threshold for determining the presence of cancerous voxel labels,
 # and the optimum size threshold for determining the presence of a cancerous region
 # we will do this by finding the threshold that maximises the dice score on a dataset
 
-path = '/Users/mcgoug01/Downloads/valid_v4'
-cancer_infp = '/Users/mcgoug01/Downloads/valid_v4/cross_validation_continuous'
-cancer_gt = '/Users/mcgoug01/Downloads/valid_v4/labels'
-print(path)
+cancer_gt = '/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data/raw_data/coreg_v3_noised/labels'
+
+RADAR = bool(int(sys.argv[1]))
+from_scratch = bool(int(sys.argv[2]))
+
+if RADAR:
+    if from_scratch:
+        cancer_infp = '/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data/predictions/masked_coreg_v4_noised/2mm_cancerbinary_customPP/6_finetune_RADAR_efr0_dfr0/cross_validation_continuous'
+        pt_string = 'radarnonfrozen'
+    else:
+        cancer_infp = '/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data/predictions/masked_coreg_v4_noised/2mm_cancerbinary_customPP/6_finetune_RADAR_efr_dfr100/cross_validation_continuous'
+        pt_string = 'radarfrozen'
+else:
+    if from_scratch:
+        cancer_infp = '/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data/predictions/masked_coreg_v4_noised/2mm_cancerbinary_customPP/6_finetune_CECT_efr0_dfr0/cross_validation_continuous'
+        pt_string = 'cectnonfrozen'
+    else:
+        cancer_infp = '/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data/predictions/masked_coreg_v4_noised/2mm_cancerbinary_customPP/6_finetune_CECT_efr_dfr100/cross_validation_continuous'
+        pt_string = 'cectfrozen'
 
 confidence_thresholds = np.append(np.arange(0,0.1,0.01),np.arange(0.1, 0.9, 0.05))
 confidence_thresholds = np.append(confidence_thresholds,np.arange(0.9,0.98,0.02))
@@ -25,39 +41,48 @@ print(confidence_thresholds)
 
 results =[]
 percase_results =[]
+
 sizes = []
 
 #only load files that end in .nii.gz
-for conf in confidence_thresholds:
+for conf in confidence_thresholds[::-1]:
     conf_results = []
     tp, fp, fn, tn = 0, 0, 0, 0
     for file in [path for path in os.listdir(cancer_infp) if path.endswith('.nii.gz')]:
-        print(file)
-        patient_results = [0,0,0,0] #tp, fp, fn, tn
-        # cancer_inf = nib.load(os.path.join(cancer_infp, file))
-        cancer_label = nib.load(os.path.join(cancer_gt, file))
 
+        # check if file in labels directory, if not skip it
+        if not os.path.exists(os.path.join(cancer_gt, file)):
+            continue
+
+        print(file)
+        sys.stdout.flush()
+
+        patient_results = [0,0,0,0] #tp, fp, fn, tn
+        cancer_inf = nib.load(os.path.join(cancer_infp, file))
+        cancer_label = nib.load(os.path.join(cancer_gt, file))
         # assert all images have same shape
-        # assert cancer_inf.shape == cancer_label.shape
+        assert cancer_inf.shape == cancer_label.shape
         #find spacing
-        spacing = cancer_label.header['pixdim'][1:4]
-        sizes = np.genfromtxt(sizes_fp, delimiter=',')
-        # cancer_inf = torch.from_numpy(cancer_inf.get_fdata()).unsqueeze(0).unsqueeze(0)
+        spacing = cancer_inf.header['pixdim'][1:4]
+        # print(file)
+        #resize all to 2mm spacing using torch
+        cancer_inf = torch.from_numpy(cancer_inf.get_fdata()).unsqueeze(0).unsqueeze(0)
         cancer_label = torch.from_numpy(cancer_label.get_fdata()).unsqueeze(0).unsqueeze(0)
-        # cancer_inf = torch.nn.functional.interpolate(cancer_inf, scale_factor=tuple(spacing/2), mode='trilinear')
+        cancer_inf = torch.nn.functional.interpolate(cancer_inf, scale_factor=tuple(spacing/2), mode='trilinear')
         cancer_label = torch.nn.functional.interpolate(cancer_label, scale_factor=tuple(spacing/2), mode='trilinear', align_corners=False)
 
-
         # find largest connected component in cancer_label
-        print(cancer_label.squeeze().shape)
-        lb_regs = regionprops(spim.label(cancer_label.squeeze().numpy()==2)[0]) #find all regions
-        if len(lb_regs) == 0:
-            sizes.append(0)
-            continue
-        else:
-            max_reg = max(lb_regs, key=lambda x: x.area) #find largest region
-            sizes.append(max_reg.area)
-            continue
+        # print(cancer_label.squeeze().shape)
+        # lb_regs = regionprops(spim.label(cancer_label.squeeze().numpy()==2)[0]) #find all regions
+        # if len(lb_regs) == 0:
+        #     sizes.append(0)
+        #     continue
+        # else:
+        #     max_reg = max(lb_regs, key=lambda x: x.area) #find largest region
+        #     sizes.append(max_reg.area)
+        #     continue
+
+
 
         #find cancerous voxels
         cancer_voxels = cancer_inf > conf
@@ -117,12 +142,11 @@ for conf in confidence_thresholds:
                 fp+=1
                 patient_results[1] += 1
         conf_results.append(patient_results)
-    print(sizes)
-    sizes = np.array(sizes)*8
-    #save sizes as csv
-    np.savetxt(os.path.join(path,"sizes.csv"), sizes, delimiter=",")
-    assert False
-
+    # print(sizes)
+    # sizes = np.array(sizes)*8
+    # #save sizes as csv
+    # np.savetxt(os.path.join(path,"sizes_cect.csv"), sizes, delimiter=",")
+    # assert False
     percase_results.append(conf_results)
     entry = {'confidence_threshold': conf, 'tp': tp, 'fp': fp, 'fn': fn, 'tn': tn}
     sensitivity = tp/(tp+fn+1e-6)
@@ -140,15 +164,15 @@ for conf in confidence_thresholds:
 
 percase_results = np.array(percase_results)
 # save results to npy
-np.save(os.path.join(path, 'results_confwise.npy'), percase_results)
+np.save(os.path.join('/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data/raw_data/masked_coreg_v4_noised/results_confwise_{}.npy'.format(pt_string)), percase_results)
 
 import pandas as pd
 import matplotlib.pyplot as plt
 plt.switch_backend('TkAgg')
 df = pd.DataFrame(results)
-df.to_csv(os.path.join(path, 'results_all_validation.csv'))
+df.to_csv(os.path.join('/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data/raw_data/masked_coreg_v4_noised/results_all_validation_{}.csv'.format(pt_string)))
 
-path_to_results = os.path.join(path, 'results_all_validation.csv')
+path_to_results = '/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data/raw_data/masked_coreg_v4_noised/results_all_validation_{}.csv'.format(pt_string)
 df = pd.read_csv(path_to_results)
 plt.figure()
 
@@ -163,10 +187,10 @@ print(AUC)
 #append (0,0) and (100,100) to x and y
 
 # plot ROC curve
-plt.plot(fpr,sens,label='{} (area = {:.3f})'.format(vol,AUC))
+plt.plot(fpr,sens,label='{} (area = {:.3f})'.format(vol*8,AUC))
 plt.ylabel('Sensitivity (%)')
 plt.xlabel('1 - Specificity (%)')
 plt.title('2-Stage Segmentation-based Detection Validation ROC')
 plt.legend(loc="lower right")
-plt.savefig(os.path.join(path, 'roc_validation.png'))
+plt.savefig(os.path.join('/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data/raw_data/masked_coreg_v4_noised/roc_curve_{}.png'.format(pt_string)))
 plt.show()

@@ -1,5 +1,5 @@
 import os
-os.environ['OV_DATA_BASE'] = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/'
+os.environ['OV_DATA_BASE'] = '/home/wcm23/rds/hpc-work/FineTuningKITS23'
 from KCD.Segmentation.Inference.endtoend import EnsembleSeg, masking
 import numpy as np
 from skimage.measure import label
@@ -132,8 +132,7 @@ def EndToEnd(dataset, stage1_path, stage_2path, op_points = [0.001,0.01,0.02,0.0
 
 
 if __name__ == '__main__':
-    s1_path = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/trained_models/coreg_v2_noised/4mm_kidneybinary_customPP/6_finetune_trained'
-    s2_path = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/trained_models/masked_coregncctv2_kits/2mm_cancerbinary_customPP/6_finetune_l2-1e-05_cce1.0_cos1.0_2e-05lr_0.999997lg_16bs_2000ep_4gpus_efr_dfr100_seg'
+    s1_path = '/home/wcm23/rds/hpc-work/FineTuningKITS23/trained_models/coreg_ncct/4mm_binary/6,3x3x3,32_finetune_fromallcect'
+    s2_path = '/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data/trained_models/masked_coreg_ncct/2mm_binary_canceronly/6,3x3x3,32_finetune_fromkits23_cect_long'
 
-    EndToEnd('lowdose_test', s1_path, s2_path)
-    EndToEnd('fulldose_test', s1_path, s2_path)
+    EndToEnd('test_set', s1_path, s2_path)

@@ -90,7 +90,12 @@ def is_sole_kidney_central(kidney_centroids, im,inf, inplane_spac,axes,
     axial,lr_index,ud_index = axes
     
     # Find centre of bone-attenuating tissue - lr is left-to-right on axial, ud is up-down
-    lr_bone,ud_bone = np.array(regionprops((im>250).astype(int))[0].centroid)[axes[1:]]
+    try:
+        lr_bone, ud_bone = np.array(regionprops((im>250).astype(int))[0].centroid)[lr_index,ud_index]
+    except IndexError:
+        # if no bone-attenuating tissue is found, assume bone attenuation centre is in centre of the image.
+        lr_bone = im.shape[lr_index] // 2
+        ud_bone = im.shape[ud_index] // 2
     
     # test 1 - does the centre of the single kidney line up with spine within 25mm? if so - central kidney
     if abs(sole_kidney[lr_index] - lr_bone)*inplane_spac < test1_length:

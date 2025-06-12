@@ -1,3 +1,5 @@
+import sys
+
 import numpy as np
 from os.path import basename, join, exists, isdir, split
 from os import listdir, environ, walk
@@ -96,7 +98,7 @@ class Dataset(object):
 class raw_Dataset(object):
 
     def __init__(self, raw_path, scans=None, image_folder=None, dcm_revers=True,
-                 dcm_names_dict=None, prev_stages=None, additional_channels = 0, 
+                 dcm_names_dict=None, prev_stages=None, additional_channels=0,
                  create_missing_labels_as_zero=False):
 
         assert image_folder in ['images', 'imagesTr', 'imagesTs', None]
@@ -110,7 +112,6 @@ class raw_Dataset(object):
                 self.raw_path = p
             else:
                 raise FileNotFoundError('Could not find {} or {}'.format(p, raw_path))
-            
 
         all_im_folders = [imf for imf in listdir(self.raw_path) if imf.startswith('images')]
         all_lb_folders = [lbf for lbf in listdir(self.raw_path) if lbf.startswith('labels')]
@@ -130,12 +131,12 @@ class raw_Dataset(object):
             for prev_stage in self.prev_stages:
                 for key in ['data_name', 'preprocessed_name', 'model_name']:
                     assert key in prev_stage
-            
-                p =  join(environ['OV_DATA_BASE'],
-                          'predictions',
-                          prev_stage['data_name'],
-                          prev_stage['preprocessed_name'],
-                          prev_stage['model_name'])
+
+                p = join(environ['OV_DATA_BASE'],
+                         'predictions',
+                         prev_stage['data_name'],
+                         prev_stage['preprocessed_name'],
+                         prev_stage['model_name'])
                 key = '_'.join(['prediction',
                                 prev_stage['data_name'],
                                 prev_stage['preprocessed_name'],
@@ -144,7 +145,7 @@ class raw_Dataset(object):
                 fols = [f for f in listdir(p) if f.startswith(raw_data_name)]
                 if len(fols) == 0 and prev_stage['data_name'] == raw_data_name:
                     fols = ['cross_validation']
-                        
+
                 if len(fols) != 1:
                     raise FileNotFoundError('Could not identify nifti folder from previous stage '
                                             'at {}. Found {} folders starting with {}.'
@@ -175,9 +176,11 @@ class raw_Dataset(object):
                 if labelfolder in all_lb_folders:
                     self.scans = [scan[:-7] for scan in listdir(join(self.raw_path,
                                                                      labelfolder)) if scan.endswith('.nii.gz')]
+                    print('Using label folder for scans: ', labelfolder)
                 else:
                     self.scans = [scan[:-7] for scan in listdir(join(self.raw_path,
                                                                      self.image_folder)) if scan.endswith('.nii.gz')]
+                    print('No label folder found, using image folder for scans.')
             else:
                 self.scans = scans
             print('Using scans: ', self.scans)
@@ -216,7 +219,7 @@ class raw_Dataset(object):
         print('Reading scan: ', scan)
 
         if self.is_nifti:
-            data_tpl = read_data_tpl_from_nii(self.raw_path, scan, additional_channels = self.additional_channels)
+            data_tpl = read_data_tpl_from_nii(self.raw_path, scan, additional_channels=self.additional_channels)
         else:
             data_tpl = read_dcms(join(self.raw_path, scan),
                                  reverse=self.dcm_revers,
@@ -232,17 +235,20 @@ class raw_Dataset(object):
                 else:
                     scan = superfolder + '_' + folder
 
+
         if 'label' not in data_tpl and self.create_missing_labels_as_zero:
             data_tpl['label'] = np.zeros(data_tpl['image'].shape[-3:])
 
         if self.is_cascade:
             for path, key in zip(self.pathes_to_previous_stages, self.keys_for_previous_stages):
-                pred_fps, _, _ = read_nii(join(path, scan+'.nii.gz'), additional_channels = self.additional_channels)
+                pred_fps, _, _ = read_nii(join(path, scan + '.nii.gz'), additional_channels=self.additional_channels)
                 data_tpl[key] = pred_fps
 
         data_tpl['dataset'] = basename(self.raw_path)
         data_tpl['scan'] = scan
+
         return data_tpl
+
 
 # %%
 class low_res_ds_wrapper(object):
@@ -255,26 +261,26 @@ class low_res_ds_wrapper(object):
         self.scale = scale
 
         self.ds = raw_Dataset(self.raw_name)
-        
+
     def __len__(self):
         return len(self.ds)
 
     def _resize_volume(self, volume, mode):
-        
+
         dtype = volume.dtype
         is_3d = len(volume.shape) == 3
-        
+
         # add batch (and channel) axes
         if is_3d:
             volume = volume[np.newaxis, np.newaxis]
         else:
             volume = volume[np.newaxis]
-        
+
         # resize using torch
         volume_gpu = torch.from_numpy(volume).cuda().type(torch.float)
         volume_rsz = torch.nn.functional.interpolate(volume_gpu, scale_factor=self.scale,
                                                      mode=mode).cpu().numpy()
-        
+
         # remove batch (and channel) axes and cast
         if is_3d:
             return volume_rsz[0, 0].astype(dtype)
@@ -296,12 +302,13 @@ class low_res_ds_wrapper(object):
         data_tpl['image'] = self._resize_volume(data_tpl['image'], 'trilinear')
         if 'label' in data_tpl:
             data_tpl['label'] = self._resize_volume(data_tpl['label'], 'nearest')
-        
+
         if self.ds.is_cascade:
             for key in self.ds.keys_for_previous_stages:
                 data_tpl[key] = self._resize_volume(data_tpl[key], 'nearest')
-        
+
         return data_tpl
+
 
 # %%
 if __name__ == '__main__':

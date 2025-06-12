@@ -1,27 +1,20 @@
 import os
-os.environ['OV_DATA_BASE'] = "/bask/projects/p/phwq4930-renal-canc/data/seg_data"
+os.environ['OV_DATA_BASE'] = "/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data"
 from KCD.Segmentation.ovseg.preprocessing.SegmentationPreprocessing import SegmentationPreprocessing
-#import dilation stuff
-import numpy as np
-import nibabel as nib
-from scipy.ndimage import binary_dilation
 import sys
+data_name = 'masked_coreg_v4_noised'
+spacing = 2
 
-dose = float(sys.argv[1])
-
-data_name = 'coreg_v2_HLCYG_'+str(dose)
-
-spacing = 4
-preprocessed_name = '{}mm_kidneybinary_customPP'.format(spacing)
-lb_classes = [1,2,3]
+preprocessed_name = '{}mm_cancerbinary_customPP'.format(spacing)
+lb_classes = [2]
 target_spacing=[spacing]*3
-prep = SegmentationPreprocessing(apply_resizing=True,
-                                    apply_pooling=False,
+prep = SegmentationPreprocessing(apply_resizing=True, 
+                                    apply_pooling=False, 
                                     apply_windowing=True,
                                     lb_classes=lb_classes,
                                     target_spacing=target_spacing,
                                     scaling = [100, 0],
-                                    window = [-200,200],
+                                    window = [-200,300],
                                     reduce_lb_to_single_class = True,
                                     pooling_stride=None)
 prep.initialise_preprocessing()

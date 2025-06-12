@@ -218,6 +218,8 @@ class SegmentationPreprocessing(object):
             # raise ValueError('Can\'t clean label from data tpl, none was found!')
 
         lb = data_tpl['label']
+        # round to nearest integer
+        lb = np.rint(lb).astype(np.uint8)
 
         if self.is_preprocessed_data_tpl(data_tpl):
             return lb
@@ -228,6 +230,7 @@ class SegmentationPreprocessing(object):
             lb = (lb > 0).astype(lb.dtype)
 
         if self.lb_min_vol is not None or self.lb_max_vol is not None:
+            print('Removing connected components by volume')
             if len(lb.shape) > 3:
                 lb = remove_connected_components_by_volume_from_batch(lb,
                                                                       self.lb_min_vol,
@@ -246,11 +249,13 @@ class SegmentationPreprocessing(object):
 
     def __call__(self, data_tpl, preprocess_only_im=False, return_np=False):
 
+
         spacing = data_tpl['spacing'] if 'spacing' in data_tpl else None
         if 'image' not in data_tpl:
             raise ValueError('No \'image\' found in data_tpl')
 
         xb = self.get_xb_from_data_tpl(data_tpl, preprocess_only_im)
+
         # now do the preprocessing
         if not torch.cuda.is_available():
             # the preprocessing is also faster in scipy then it is in torch using the CPU
@@ -280,7 +285,6 @@ class SegmentationPreprocessing(object):
 
         # getting the image
         xb = data_tpl['image'].astype(float)
-
         # assuring the array is 4d
         xb = maybe_add_channel_dim(xb)
 
@@ -307,7 +311,6 @@ class SegmentationPreprocessing(object):
 
             assert len(lb.shape) == 3, 'label must be 3d'
             lb = lb[np.newaxis].astype(float)
-            print('get_xb_from_datatpl', lb.shape, lb.max())
             xb = np.concatenate([xb, lb])
 
         # finally add batch axis
@@ -375,6 +378,8 @@ class SegmentationPreprocessing(object):
                 # read files
                 data_tpl = raw_ds[i]
 
+                sys.stdout.flush()
+
                 im, spacing = data_tpl['image'], data_tpl['spacing']
 
                 orig_shape = im.shape[-3:]
@@ -388,6 +393,7 @@ class SegmentationPreprocessing(object):
                 xb = self.__call__(data_tpl, return_np=True)
                 im = xb[:self.n_im_channels].astype(im_dtype)
                 lb = np.rint(xb[self.n_im_channels:]).astype(np.uint8)
+
                 # print(im.shape)
                 # print(lb.shape)
                 if self.is_cascade():
@@ -691,6 +697,7 @@ class torch_preprocessing(torch.nn.Module):
         n_ch = xb.shape[1]
         imb = xb[:, :self.n_im_channels]
         has_lb = n_ch > self.n_im_channels
+
         if has_lb:
             lbb = xb[:, self.n_im_channels:]
 
@@ -797,6 +804,8 @@ class np_preprocessing():
         has_lb = n_ch > self.n_im_channels
         if has_lb:
             lbb = xb[:, self.n_im_channels:]
+
+        sys.stdout.flush()
 
         # resizing
         if self.apply_resizing:

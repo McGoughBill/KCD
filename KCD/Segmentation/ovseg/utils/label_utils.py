@@ -1,3 +1,5 @@
+import sys
+
 import numpy as np
 try:
     from skimage.measure import label
@@ -147,7 +149,10 @@ def reduce_classes(lb, classes, to_single_class=False):
     lb_new = np.zeros_like(lb)
 
     for i, c in enumerate(classes):
+        print(c,i,(lb == c).sum())
         lb_new[lb == c] = i + 1
+
+    sys.stdout.flush()
 
     if to_single_class:
         lb_new = (lb_new > 0).astype(lb.dtype)
