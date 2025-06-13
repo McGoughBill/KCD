@@ -26,6 +26,8 @@ class latent_similarity_loss(torch.nn.Module):
 
     def normalize(self, z):
         mag = torch.linalg.vector_norm(z, dim=-1, keepdim=True)
+        # avoid division by zero
+        mag = torch.clamp(mag, min=1e-8)
         return z / mag
 
     def forward(self, x, y):
@@ -33,6 +35,7 @@ class latent_similarity_loss(torch.nn.Module):
         x = self.normalize(x)
         y = self.normalize(y)
         return 1 - self.cos(x, y)
+
 def collate_fn(batch):
     ne, ce = zip(*batch)
     ne = torch.cat(ne, dim=0)
@@ -45,10 +48,10 @@ def collate_fn(batch):
 def parse_option():
     parser = argparse.ArgumentParser('ne2ceCT pretraining script', add_help=False)
 
-    parser.add_argument('--epochs', type=int, default=1000, help='number of epochs')
-    parser.add_argument('--batch_size', type=int, default=4, help='batch size')
+    parser.add_argument('--epochs', type=int, default=100, help='number of epochs')
+    parser.add_argument('--batch_size', type=int, default=32, help='batch size')
     parser.add_argument('--lr_max', type=float, default=0.00005, help='max learning rate')
-    parser.add_argument('--loss_gamma', type=float, default=0.99999, help='gamma for learning rate scheduler')
+    parser.add_argument('--loss_gamma', type=float, default=0.9999, help='gamma for learning rate scheduler')
     parser.add_argument('--dist_backend', type=str, default='nccl', help='distributed backend')
     parser.add_argument('--dist_url', type=str, default='env://', help='url used to set up distributed training')
     parser.add_argument('--world_size', type=int, default=1, help='number of nodes for distributed training')
@@ -104,8 +107,8 @@ def main_worker(gpu,args):
     workers = args.workers
     world_size = args.world_size
 
-    dataset_ne_path = os.path.join(os.environ['OV_DATA_BASE'], 'preprocessed/masked_final_pairedpretrain_nc/2mm_canceronly_customPP/')
-    dataset_ce_path = os.path.join(os.environ['OV_DATA_BASE'], 'preprocessed/masked_final_pairedpretrain_ce/2mm_canceronly_customPP/')
+    dataset_ne_path = os.path.join(os.environ['OV_DATA_BASE'], 'preprocessed/masked_final_pairedpretrain_nc/1mm_canceronly_customPP/')
+    dataset_ce_path = os.path.join(os.environ['OV_DATA_BASE'], 'preprocessed/masked_final_pairedpretrain_ce/1mm_canceronly_customPP/')
 
     assert os.path.exists(dataset_ne_path) and os.path.exists(dataset_ce_path)
     home_path = os.path.join(os.environ['OV_DATA_BASE'], 'ne2ceCT', '2d_featurealignment'.format(spacing))
@@ -142,7 +145,8 @@ def main_worker(gpu,args):
 
     sys.stdout.flush()
     dataset.apply_foldsplit()
-    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers=workers)
+    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers=workers,
+                            collate_fn=collate_fn)
 
     mod_path = '/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data/training_info/masked_kits_add_nooverlap_v2/split_0/fold_0/TileModel/model/TileModel_large_5_10_0.001'
     model_T = torch.load(mod_path, map_location='cuda:{}'.format(args.gpu))
@@ -152,7 +156,7 @@ def main_worker(gpu,args):
 
     optimizer = torch.optim.Adam(model_S.parameters(), lr=lr_max / 20, betas=(0.95, 0.9), eps=1e-08,
                                  weight_decay=0.000001)
-    scheduler = LinearWarmupExponentialDecayScheduler(optimizer, warmup_epochs=500, lr_max=lr_max,
+    scheduler = LinearWarmupExponentialDecayScheduler(optimizer, warmup_epochs=epochs/5, lr_max=lr_max,
                                                       decay_rate=loss_gamma)
 
     if os.path.exists(opt_save_loc):
@@ -173,7 +177,7 @@ def main_worker(gpu,args):
         min_val_loss = 1e6
         start_epoch = 0
 
-    loss_func_early = latent_similarity_loss()
+    loss_func = latent_similarity_loss()
 
     weight = 0.95
     running_loss = None
@@ -182,6 +186,7 @@ def main_worker(gpu,args):
         dataloader.dataset.is_train = True
         model_S.train()
         for i, (ne, ce) in enumerate(dataloader):
+            optimizer.zero_grad()
             # forward
             ne = ne.cuda(args.gpu)
             ce = ce.cuda(args.gpu)
@@ -190,8 +195,10 @@ def main_worker(gpu,args):
             student_features = model_S.features(ne)
 
 
-            loss = loss_func_early(student_features, teacher_features)
-            dist.all_reduce(loss, op=dist.ReduceOp.AVG)
+            loss = loss_func(student_features, teacher_features)
+            dist.all_reduce(loss, op=dist.ReduceOp.SUM)
+            loss = loss / dist.get_world_size()
+            loss = loss.mean()
 
             # backward
             loss.backward()
@@ -207,6 +214,7 @@ def main_worker(gpu,args):
                 print('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}, LR: {:.4f}'.format(
                     epoch + 1, epochs, i + 1, len(dataloader), running_loss, scheduler.get_last_lr()[0]))
             # print like above but with line replacement
+
 
             train_losses.append(running_loss)
             scheduler.step()
@@ -230,7 +238,11 @@ def main_worker(gpu,args):
                     with torch.no_grad():
                         teacher_features_val = model_T.features(ce)
                         student_features_val = model_S.features(ne)
-                    loss = loss_func_early(student_features_val, teacher_features_val)
+                    loss = loss_func(student_features_val, teacher_features_val)
+
+                    dist.all_reduce(loss, op=dist.ReduceOp.SUM)
+                    loss = loss / dist.get_world_size()
+                    loss = loss.mean()
                     val_losses_list.append(loss.item())
                 val_loss_list = np.array(val_losses_list)
                 #average each term over all batches

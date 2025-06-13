@@ -82,6 +82,8 @@ class DomainAdaptationLoss_kidney(nn.Module):
 
     def normalize(self, z):
         mag = torch.linalg.vector_norm(z, dim=-1, keepdim=True)
+        #prevent division by zero
+        mag = torch.clamp(mag, min=1e-8)
         return z / mag
 
     def forward(self, ne_log_list,enhancement_pred,

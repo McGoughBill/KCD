@@ -25,6 +25,26 @@ def get_3d_featureoutput_unet(in_channels, out_channels, n_stages,filters=32, fi
 
     return infer_network.UNet_ClassHead_PowerPool_featureoutput(in_channels, out_channels, kernel_sizes, False, filters_max=filters_max, filters=filters, )
 
+def collate_fn(batch):
+    ne, ce, diff = zip(*batch)
+    ne = torch.cat(ne, dim=0)
+    ce = torch.cat(ce, dim=0)
+    diff = torch.cat(diff, dim=0)
+    #go through each patch in ne; if 98% of the patch is == -2, remove it
+    fg_slices = torch.where(ne != -2, 1, 0)
+    fg_slices = fg_slices.sum(dim=(1, 2, 3)) > (ne.shape[1] * ne.shape[2] * ne.shape[3] * 0.02)
+    ne = ne[fg_slices]
+    ce = ce[fg_slices]
+    diff = diff[fg_slices]
+
+    if ne.shape[0] == 0:
+        return torch.zeros((1, 1, ne.shape[1], ne.shape[2], ne.shape[3]), device=ne.device).float(), \
+                torch.zeros((1, 1, ce.shape[1], ce.shape[2], ce.shape[3]), device=ce.device).float(), \
+                torch.zeros((1, 1, diff.shape[1], diff.shape[2], diff.shape[3]), device=diff.device).float()
+
+    #shuffle order using indexing to prevent batch_norm issues
+    shuffle_indices = torch.randperm(ne.shape[0])
+    return ne[shuffle_indices].unsqueeze(1), ce[shuffle_indices].unsqueeze(1), diff[shuffle_indices].unsqueeze(1)
 
 def parse_option():
     parser = argparse.ArgumentParser('ne2ceCT pretraining script', add_help=False)
@@ -102,7 +122,7 @@ def main_worker(gpu,args):
     dataset_ce_path = os.path.join(os.environ['OV_DATA_BASE'], 'preprocessed/masked_final_pairedpretrain_ce/2mm_canceronly_customPP/')
 
     assert os.path.exists(dataset_ne_path) and os.path.exists(dataset_ce_path)
-    home_path = os.path.join(os.environ['OV_DATA_BASE'], 'ne2ceCT', 'kidney_{}_cancer_ckpt_delay'.format(spacing))
+    home_path = os.path.join(os.environ['OV_DATA_BASE'], 'ne2ceCT', 'justchecking_{}_cancer_ckpt_delay'.format(spacing))
     ne2ceCT_path = os.path.join(home_path,
                                 'l2-{}_cce{}_cos{}_{}lr_{}lg_{}bs_{}ep_{}gpus'.format(
                                                                                    l2_weight,
@@ -140,7 +160,8 @@ def main_worker(gpu,args):
 
     sys.stdout.flush()
     dataset.apply_foldsplit()
-    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers=workers)
+    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers=workers,
+                            collate_fn=collate_fn)
 
     mod_path = '/rds/project/rds-sDuALntK11g/trained_models/masked_kits_add_nooverlap_v2_small/2mm_canceronly_customPP/6_tot_ch_talkative_cls1/fold_0/network_weights'
     model_T = get_3d_featureoutput_unet(1, out_dim, 6, filters=32, filters_max=1024).cuda(args.gpu)
@@ -155,7 +176,7 @@ def main_worker(gpu,args):
 
     optimizer = torch.optim.Adam(model_S.parameters(), lr=lr_max / 20, betas=(0.95, 0.9), eps=1e-08,
                                  weight_decay=0.000001)
-    scheduler = LinearWarmupExponentialDecayScheduler(optimizer, warmup_epochs=500, lr_max=lr_max,
+    scheduler = LinearWarmupExponentialDecayScheduler(optimizer, warmup_epochs=epochs/4, lr_max=lr_max,
                                                       decay_rate=loss_gamma)
 
     if os.path.exists(opt_save_loc):
@@ -183,7 +204,7 @@ def main_worker(gpu,args):
 
     loss_func_late = Loss(l2_weight=l2_weight,cce_weight=cce_weight, cos_weight=cos_weight).cuda(args.gpu)
     loss_func_early = Loss(l2_weight=0,cce_weight=cce_weight, cos_weight=0).cuda(args.gpu)
-    delay = 500
+    delay = epochs/4
 
     weight = 0.95
     running_loss = None
@@ -192,6 +213,7 @@ def main_worker(gpu,args):
         dataloader.dataset.is_train = True
         model_S.train()
         for i, (ne, ce, diff) in enumerate(dataloader):
+            sys.stdout.flush()
             # forward
             ne = ne.cuda(args.gpu)
             ce = ce.cuda(args.gpu)

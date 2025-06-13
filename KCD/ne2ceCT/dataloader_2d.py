@@ -178,18 +178,6 @@ class CrossPhaseDataset(Dataset):
 
         ne = torch.Tensor(np.load(os.path.join(self.ne_path, case),allow_pickle=True))
         ce = torch.Tensor(np.load(os.path.join(self.ce_path, case),allow_pickle=True))
-
-        # if ne.shape != ce.shape:
-        #     sys.stdout.write(f'ne shape: {ne.shape}, ce shape: {ce.shape}\n')
-        #     sys.stdout.write(f'case: {case}\n')
-        #     sys.stdout.flush()
-        # get random patch indices
-
-        # print(f'case: {case}, patch count: {self.case_patch_count[case]}')
-        # print(f'Ratio of voxel values in ce patch above -2 to patch size: {torch.sum(ce>(self.background_value+0.01))/self.patch_size**3}')
-        # print()
-        # sys.stdout.flush()
-
         ne,ce,indices = self._get_random_patch_indices(ne,ce,case)
 
         ne_patch = ne[0,0, indices[0]:indices[0]+self.patch_size, indices[1]:indices[1]+self.patch_size, indices[2]:indices[2]+self.patch_size]
@@ -202,15 +190,32 @@ class CrossPhaseDataset(Dataset):
                 for transform in transforms:
                     ne_patch,ce_patch = transform(ne_patch,ce_patch)
 
-        rand = np.random.randint(0, self.patch_size, size=self.slices_per_patch)
-        ne_patch = ne_patch[rand]
-        ce_patch = ce_patch[rand]
+        #extract slices (first dimension) from the patch that have non-background values
+        fg_slices = torch.any(ne_patch > (self.background_value + 0.01), dim=(1, 2))
 
+        # if no foreground slices, return empty tensor all -2
+        if torch.sum(fg_slices) == 0:
+            ne_patch = torch.full((self.patch_size, self.patch_size, self.patch_size), self.background_value).float()
+            ce_patch = torch.full((self.patch_size, self.patch_size, self.patch_size), self.background_value).float()
+            return ne_patch.unsqueeze(1), ce_patch.unsqueeze(1)
+
+        if torch.sum(fg_slices) < self.slices_per_patch:
+            # if less than slices_per_patch, repeat the slices to fill the patch
+            ne_path = ne_patch[fg_slices]
+            ce_patch = ce_patch[fg_slices]
+            rand = np.random.randint(0, ne_path.shape[0], torch.sum(fg_slices).item())
+            ne_patch = ne_patch[rand]
+            ce_patch = ce_patch[rand]
+        else:
+            # if more than slices_per_patch, randomly select slices_per_patch slices
+            rand = np.random.choice(np.where(fg_slices)[0], self.slices_per_patch, replace=False)
+            ne_patch = ne_patch[rand]
+            ce_patch = ce_patch[rand]
 
         return ne_patch.unsqueeze(1), ce_patch.unsqueeze(1)
 
 def collate_fn(batch):
-    ne, ce, diff = zip(*batch)
+    ne, ce = zip(*batch)
     ne = torch.cat(ne, dim=0)
     ce = torch.cat(ce, dim=0)
     #shuffle order using indexing to prevent batch_norm issues
@@ -236,6 +241,6 @@ if __name__ == '__main__':
     dataloader = DataLoader(dataset, batch_size=3, shuffle=True,collate_fn=collate_fn)
     for i, (ne, ce) in enumerate(dataloader):
         fig, ax = plt.subplots(1, 2)
-        ax[0,0].imshow(ne[0,0 ].cpu().detach().numpy(), cmap='gray', vmin=-2, vmax=2)
-        ax[0,1].imshow(ce[0,0 ].cpu().detach().numpy(), cmap='gray', vmin=-2, vmax=2)
+        ax[0].imshow(ne[0,0 ].cpu().detach().numpy(), cmap='gray', vmin=-2, vmax=2)
+        ax[1].imshow(ce[0,0 ].cpu().detach().numpy(), cmap='gray', vmin=-2, vmax=2)
         plt.show(block=True)
