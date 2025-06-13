@@ -5,6 +5,8 @@ import torch.nn as nn
 # from dgl.nn import ChebConv
 import torch.nn.functional as F
 import copy
+# from merlin import Merlin
+
 
 
 class MLP_classifier(nn.Module):
@@ -433,6 +435,12 @@ def return_MLP(num_features=28, num_labels=2, enc1_size=128, enc1_layers=1,
                enc2_size=32, enc2_layers=1, final_layers=1, dev='cpu'):
     return MLP_classifier(num_features, num_labels, enc1_size, enc1_layers,
                           enc2_size, enc2_layers, final_layers, dev).to(dev)
+
+def return_merlin_vision(dev='cpu', in_channels=1, out_channels=3):
+    # This function is a placeholder for the Merlin Vision model.
+    # Since Merlin Vision is not implemented in this code, we will return None.
+    # Replace this with the actual Merlin Vision model when available.
+    return None
 
 #
 # def return_GNN(num_features=4, hidden_dim=50, num_labels=2, layers_deep=8, neighbours=8, dev='cpu'):
