@@ -56,7 +56,6 @@ def parse_option():
     parser.add_argument('--distributed', action='store_true', help='start distributed training')
     parser.add_argument('--workers', default=16, type=int, help='number of workers')
     parser.add_argument('--ngpus_per_node', default=4, type=int, help='number of gpus per node')
-    parser.add_argument('--out_dim', default=2, type=int, help='output dimension')
     parser.add_argument('--spacing', default=1, type=int, help='spacing')
     parser.add_argument('--dist-url', default='tcp://127.0.0.1:23456', type=str, help='distributed url')
 
