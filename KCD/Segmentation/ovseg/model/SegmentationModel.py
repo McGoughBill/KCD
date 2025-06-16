@@ -20,6 +20,7 @@ from KCD.Segmentation.ovseg.data.Dataset import raw_Dataset
 from KCD.Segmentation.ovseg.networks.UNet import UNet
 from KCD.Segmentation.ovseg.networks.UNet_ClassHead import UNet_ClassHead, UNet_ClassHead_MaxPool
 from KCD.Segmentation.ovseg.networks.UNet_RegressHead import UNet_RegressHead
+from KCD.Segmentation.ovseg.networks.transunet import TransUNet3D
 
 from KCD.Segmentation.ovseg.networks.UNetTransformer import UNetTransformer
 from KCD.Segmentation.ovseg.networks.SwinUnetr import Trans_Unetr
@@ -190,6 +191,12 @@ class SegmentationModel(ModelBase):
             self.network = UNetTransformer(**params).to(self.dev)
         elif self.model_parameters['architecture'].lower() in ['swinunetr', 'swin-unetr','swin', 'swinunet']:
             self.network = Trans_Unetr(**params).to(self.dev)
+        elif self.model_parameters['architecture'].lower() in ['transunet','transunet3d','3dtransunet',
+                                                                'trans-unet-3d','trans-unet3d']:
+            #assert 'patch_size' in params
+            if 'patch_size' not in params:
+                raise ValueError('The TransUNet3D requires the patch_size to be set in the network parameters.')
+            self.network = TransUNet3D(**params).to(self.dev)
         else:
             raise ValueError('Got unkown architecture '+self.model_parameters['architecture'])
 
@@ -1033,6 +1040,12 @@ class SegmentationModel_trainontest(ModelBase):
             self.network = UNetTransformer(**params).to(self.dev)
         elif self.model_parameters['architecture'].lower() in ['swinunetr', 'swin-unetr', 'swin', 'swinunet']:
             self.network = Trans_Unetr(**params).to(self.dev)
+        elif self.model_parameters['architecture'].lower() in ['transunet','transunet3d','3dtransunet',
+                                                                'trans-unet-3d','trans-unet3d']:
+            #assert 'patch_size' in params
+            if 'patch_size' not in params:
+                raise ValueError('The TransUNet3D requires the patch_size to be set in the network parameters.')
+            self.network = TransUNet3D(**params).to(self.dev)
         else:
             raise ValueError('Got unkown architecture ' + self.model_parameters['architecture'])
 
