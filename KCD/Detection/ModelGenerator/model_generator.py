@@ -6,6 +6,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 import copy
 # from merlin import Merlin
+from KCD.Detection.ModelGenerator.Merlin import Merlin
+
 
 
 
@@ -436,11 +438,24 @@ def return_MLP(num_features=28, num_labels=2, enc1_size=128, enc1_layers=1,
     return MLP_classifier(num_features, num_labels, enc1_size, enc1_layers,
                           enc2_size, enc2_layers, final_layers, dev).to(dev)
 
-def return_merlin_vision(dev='cpu', in_channels=1, out_channels=3):
-    # This function is a placeholder for the Merlin Vision model.
-    # Since Merlin Vision is not implemented in this code, we will return None.
-    # Replace this with the actual Merlin Vision model when available.
-    return None
+def return_merlin_vision(dev='cpu', out_channels=3, dropout=0.4):
+
+    features = Merlin(ImageEmbedding=True).to(dev)
+    features = features.model.encode_image
+
+    #classifier head has 2048 in and returns out_channels
+    cls = nn.Sequential(
+        nn.Linear(2048, 512),
+        nn.ReLU(),
+        nn.Dropout(dropout),
+        nn.Linear(512, out_channels)
+    ).to(dev)
+
+    model = nn.Sequential(
+        features,
+        cls
+    ).to(dev)
+    return model
 
 #
 # def return_GNN(num_features=4, hidden_dim=50, num_labels=2, layers_deep=8, neighbours=8, dev='cpu'):
@@ -452,6 +467,12 @@ def return_merlin_vision(dev='cpu', in_channels=1, out_channels=3):
 
 
 if __name__ == '__main__':
-    model = return_convnext(size='large', dev='cpu', in_channels=1, out_channels=3)
-    ex_im = torch.randn(1, 1, 224, 224)
-    print(model(ex_im).shape)
+    # model = return_convnext(size='large', dev='cpu', in_channels=1, out_channels=3)
+    ex_im = torch.randn(1, 1, 60, 224, 224)
+    # print(model(ex_im).shape)
+
+    #test merlin
+    model = return_merlin_vision(dev='cpu', out_channels=3)
+    print(model)
+    test = model(ex_im)
+    print(test.shape)
