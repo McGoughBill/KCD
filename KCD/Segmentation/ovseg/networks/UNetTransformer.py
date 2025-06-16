@@ -1,8 +1,8 @@
 import torch
 import torch.nn as nn
 import numpy as np
-# import os
-# os.environ['OV_DATA_BASE'] = "/Users/mcgoug01/Library/CloudStorage/OneDrive-CRUKCambridgeInstitute/SecondYear/Segmentation/seg_data"
+import os
+os.environ['OV_DATA_BASE'] = "/Users/mcgoug01/Library/CloudStorage/OneDrive-CRUKCambridgeInstitute/SecondYear/Segmentation/seg_data"
 
 from KCD.Segmentation.ovseg.networks.nfUNet import concat_attention, concat
 

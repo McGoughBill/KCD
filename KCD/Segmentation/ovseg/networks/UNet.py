@@ -2,6 +2,9 @@ import torch
 import torch.nn as nn
 import numpy as np
 import os
+if __name__ == '__main__':
+    os.environ['OV_DATA_BASE'] = os.path.dirname(os.path.abspath(__file__))
+
 from KCD.Segmentation.ovseg.networks.nfUNet import concat_attention, concat
 
 
@@ -423,7 +426,7 @@ if __name__ == '__main__':
     for log in yb_2d:
         print(log.shape)
 
-    net_3d = get_3d_UNet(1, 2, 5, 2, 8).to(gpu)
+    net_3d = get_3d_UNet(1, 2, 4, 2, 8).to(gpu)
     xb_3d = torch.randn((1, 1, 128, 128, 32), device=gpu)
     print('3d')
     with torch.no_grad():
