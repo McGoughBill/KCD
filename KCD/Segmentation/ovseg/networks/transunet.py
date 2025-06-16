@@ -7,9 +7,6 @@ import torch
 from KCD.Segmentation.ovseg.networks.UNet import UNet
 
 import os
-if __name__ == "__main__":
-    os.environ['OV_DATA_BASE'] = os.path.dirname(os.path.abspath(__file__))
-
 from KCD.Segmentation.ovseg.networks.UNet import Logits
 from KCD.Segmentation.ovseg.networks.mask2former_modeling.vit_modeling import Transformer, CONFIGS as CONFIGS_ViT
 from KCD.Segmentation.ovseg.networks.mask2former_modeling.transformer_decoder.mask2former_transformer_decoder3d import (

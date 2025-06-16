@@ -1,5 +1,5 @@
 import os
-os.environ['OV_DATA_BASE'] = "/Users/mcgoug01/Downloads/test_ovseg"
+os.environ['OV_DATA_BASE'] = "/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data"
 
 from KCD.Segmentation.ovseg.model.SegmentationModel import SegmentationModel_trainontest as SegmentationModel
 from KCD.Segmentation.ovseg.model.model_parameters_segmentation import get_model_params_3d_res_encoder_U_Net

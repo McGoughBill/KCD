@@ -2,9 +2,6 @@ import torch
 import torch.nn as nn
 import numpy as np
 import os
-if __name__ == '__main__':
-    os.environ['OV_DATA_BASE'] = os.path.dirname(os.path.abspath(__file__))
-
 from KCD.Segmentation.ovseg.networks.nfUNet import concat_attention, concat
 
 
