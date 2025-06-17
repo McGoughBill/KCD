@@ -438,23 +438,29 @@ def return_MLP(num_features=28, num_labels=2, enc1_size=128, enc1_layers=1,
     return MLP_classifier(num_features, num_labels, enc1_size, enc1_layers,
                           enc2_size, enc2_layers, final_layers, dev).to(dev)
 
+
+class MerlinClassifier(nn.Module):
+    def __init__(self, out_channels=3, dropout=0.4, dev='cpu'):
+        super(MerlinClassifier, self).__init__()
+        self.features = Merlin(ImageEmbedding=True).to(dev)
+        self.features = self.features.model.encode_image
+
+        # classifier head has 2048 in and returns out_channels
+        self.cls = nn.Sequential(
+            nn.Dropout(dropout),
+            nn.Linear(2048, 512),
+            nn.ReLU(),
+            nn.Dropout(dropout),
+            nn.Linear(512, out_channels)
+        ).to(dev)
+
+    def forward(self, x):
+        x = torch.squeeze(self.features(x),0)
+        return self.cls(x)
+
 def return_merlin_vision(dev='cpu', out_channels=3, dropout=0.4):
 
-    features = Merlin(ImageEmbedding=True).to(dev)
-    features = features.model.encode_image
-
-    #classifier head has 2048 in and returns out_channels
-    cls = nn.Sequential(
-        nn.Linear(2048, 512),
-        nn.ReLU(),
-        nn.Dropout(dropout),
-        nn.Linear(512, out_channels)
-    ).to(dev)
-
-    model = nn.Sequential(
-        features,
-        cls
-    ).to(dev)
+    model = MerlinClassifier(out_channels=out_channels, dropout=dropout, dev=dev).to(dev)
     return model
 
 #
@@ -468,7 +474,7 @@ def return_merlin_vision(dev='cpu', out_channels=3, dropout=0.4):
 
 if __name__ == '__main__':
     # model = return_convnext(size='large', dev='cpu', in_channels=1, out_channels=3)
-    ex_im = torch.randn(1, 1, 60, 224, 224)
+    ex_im = torch.randn(16, 1, 60, 224, 224)
     # print(model(ex_im).shape)
 
     #test merlin
