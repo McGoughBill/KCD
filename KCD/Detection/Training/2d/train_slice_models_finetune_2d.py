@@ -56,16 +56,20 @@ def train_cv_slice_model_2d(home = '/media/mcgoug01/nvme/SecondYear/Data/',datan
             if not os.path.exists(slice_path):os.mkdir(slice_path)
 
             # model = torch.load('/bask/projects/p/phwq4930-renal-canc/KCD_data/Data/training_info/{}/split_0/fold_2/TileModel/model/TileModel_large_5_10_0.001'.format(pretrain_ds))
-            model = torch.load('/media/mcgoug01/nvme/SecondYear/Data/slices/TileModel_large_5_10_0.001')
+            model = torch.load('/media/bill/Crucial X6/classification_revisited/training_info/kits23_nooverlap/split_0/fold_0/TileModel/model/TileModel_large_1_10_0.001')
             opt = torch.optim.Adam(model.parameters(),lr=params['lr'])
 
             dl,test_dl = tu.generate_dataloaders(slicedataset,test_slicedataset,cases[train_index],params['batch_size'])
-            model = tu.train_model(dl,dev,params['epochs'],loss_fnc,opt,model)
             model_name = 'TESTMODEL_EFFNET_{}_{}_{}_{}_{}'.format(model_type,params['model_size'],params['epochs'],params['pred_window'],params['lr'])
-
             if not os.path.exists(os.path.join(slice_path,'model')):
                 os.mkdir(os.path.join(slice_path,'model'))
                 os.mkdir(os.path.join(slice_path,'csv'))
+
+            model = tu.train_model(dl,dev,params['epochs'],loss_fnc,opt,model,
+                                   model_name=model_name, doc_path=os.path.join(slice_path, 'csv'),
+                                   learning_rate=params['lr'])
+
+
 
             torch.save(model,os.path.join(slice_path,'model',model_name))
             model.eval()
@@ -74,6 +78,8 @@ def train_cv_slice_model_2d(home = '/media/mcgoug01/nvme/SecondYear/Data/',datan
             model_res.to_csv(os.path.join(slice_path,'csv',model_name+'.csv'))
 
         CV_results = pd.concat(cv_results, axis=0, ignore_index=True)
+        # save raw predictions
+        CV_results.to_csv(os.path.join(split_path,'{}_cv_results_{}.csv'.format(model_type,model_name)),index=False)
         model_ROC = eval_.ROC_func(CV_results['Top-{}'.format(params['pred_window'])],CV_results['label'],max_pred=params['pred_window'],intervals=1000)
         np.save(os.path.join(split_path, '{}_ROC_'.format(model_type)+model_name), model_ROC)
 
@@ -89,4 +95,4 @@ if __name__ == '__main__':
     dataset = 'coreg_ncct'
     # home = '/bask/projects/p/phwq4930-renal-canc/KCD_data/Data'
     pretrain_ds = 'kits23_nooverlap'
-    train_cv_slice_model_2d(home='/media/mcgoug01/nvme/SecondYear/Data/',dataname=dataset,splits=[0],pretrain_ds=pretrain_ds)
+    train_cv_slice_model_2d(home='/media/bill/Crucial X6/classification_revisited',dataname=dataset,splits=[0],pretrain_ds=pretrain_ds)

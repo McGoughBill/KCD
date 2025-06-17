@@ -71,7 +71,7 @@ def train_cv_slice_model_2d(home = '/Users/mcgoug01/Downloads/Data/',dataname='c
                 os.mkdir(os.path.join(slice_path,'csv'))
 
             model = tu.train_model(dl,dev,params['epochs'],loss_fnc,opt,model,
-                                   model_name=model_name,doc_path=os.path.join(slice_path,'model'),
+                                   model_name=model_name,doc_path=os.path.join(slice_path,'csv'),
                                    learning_rate=params['lr'])
 
             torch.save(model,os.path.join(slice_path,'model',model_name))

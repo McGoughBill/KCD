@@ -36,6 +36,12 @@ class SW_Data_labelled(Dataset):
         self.benign = os.listdir(os.path.join(self.home_path,"kidney"))
         self.none = os.listdir(os.path.join(self.home_path,"none"))
 
+        # remove any filenames that begin with '.'
+        self.malign = [f for f in self.malign if not f.startswith('.')]
+        self.benign = [f for f in self.benign if not f.startswith('.')]
+        self.none = [f for f in self.none if not f.startswith('.')]
+
+
         print(self.home_path,"tumour",len(self.malign),"kidney",len(self.benign),"none",len(self.none))
 
         self.data_df = pd.DataFrame(data=np.array([[*self.none,*self.malign,*self.benign],
