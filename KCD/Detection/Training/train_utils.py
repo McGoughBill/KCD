@@ -127,8 +127,8 @@ def init_slice3D_params_pretrain():
               "dilated": 40,
               "lr": 1e-3,
               "epochs": 5,
-              "depth_z": 20,
-              "boundary_z": 5,
+              "depth_z": 112,
+              "boundary_z": 30,
               'pred_window': 1,
               'seg_weight': 0.02}
     return params

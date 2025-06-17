@@ -13,6 +13,7 @@ from KCD.Segmentation.ovseg.networks.UNet import UNet
 
 import os
 from KCD.Segmentation.ovseg.networks.UNet import Logits
+from KCD.Segmentation.ovseg.networks.UNet_ClassHead import GlobalPowerPooling
 from KCD.Segmentation.ovseg.networks.mask2former_modeling.vit_modeling import Transformer, CONFIGS as CONFIGS_ViT
 from KCD.Segmentation.ovseg.networks.mask2former_modeling.transformer_decoder.mask2former_transformer_decoder3d import (
     MultiScaleMaskedTransformerDecoder3d as MSTDecoder3d,
@@ -128,7 +129,7 @@ class TransUNet3D(nn.Module):
             xb = torch.randn(1, in_channels, *patch_size)
             for block in self.unet_core.blocks_down:
                 xb = block(xb)
-            d, h, w = xb.shape[2:]  # depth, height, width of the feature map
+            channels,d, h, w = xb.shape[1:]  # depth, height, width of the feature map
             print("Feature map shape before ViT:", xb.shape)
             feat_size = (d, h, w)
 
@@ -143,24 +144,27 @@ class TransUNet3D(nn.Module):
                 self.vit.load_from(weights=torch.load(vit_pretrained, map_location="cpu"))
             # Conv to bring ViT hidden dim back to UNet decoder channels
             self.vit_post = nn.Conv3d(cfg.hidden_size, self.unet_core.filters_list[-1], 1)
-            if with_classification_head:
-                self.do_classifier = True
-                # create a a 3-layer MLP classification head that uses the features of identical
-                # shape as xb
-                # first layer - flatten. Then two linear layers with ReLU in between and a final
-                # linear layer to produce logits for each class. have dropouts after each hidden layer
-                self.vit_cls_head = nn.Sequential(
-                    nn.Flatten(),
-                    nn.Linear(np.prod(xb.shape[1:]), 512),  # flatten the feature map
-                    nn.ReLU(),
-                    nn.Dropout(0.5),
-                    nn.Linear(512, 256),
-                    nn.ReLU(),
-                    nn.Dropout(0.5),
-                    nn.Linear(256, cls_classes))
-            else:
-                self.do_classifier = False
-                self.vit_cls_head = None
+
+            self.cls_pools = nn.ModuleList()
+            self.cls_fcs = nn.ModuleList()
+            final_fc_size = 0
+            #for every conv decoder level, create a GlobalPowerPooling that doubles in spatial size with
+            # each level, starting at d, h, w = patch_size
+            for i in range(self.unet_core.n_stages):
+                self.cls_pools.append(GlobalPowerPooling(d, h, w))
+                self.fcs.append(nn.Linear(channels,channels))
+                final_fc_size += channels
+                d, h, w = d*2, h*2, w*2  # double spatial size at each level
+                channels /=2
+
+            self.final_fc = nn.Linear(final_fc_size, 128)
+            self.final_fc2 = nn.Linear(128, 2)
+
+            self.dropout = nn.Dropout(0.1)
+            self.ReLU = nn.LeakyReLU(0.1)
+
+            print(self.cls_pools)
+            print(self.fcs)
 
         # b) Mask2Former style transformer decoder -------------------------
         if self.use_masked_attn:
@@ -230,8 +234,8 @@ class TransUNet3D(nn.Module):
             xb = self.vit_post(xb)
 
         if self.do_classifier:
-            # classification head for the whole patch
-            cls_logits = self.vit_cls_head(xb)
+            #save classification features for cls head
+            cls_feats = []
 
         # expanding path (same as UNet) ---------------------------------------
         for i in range(self.unet_core.n_stages - 2, -1, -1):
@@ -239,6 +243,15 @@ class TransUNet3D(nn.Module):
             xb = self.unet_core.concats[i](xb, skips[i])
             xb = self.unet_core.blocks_up[i](xb)
             seg_feats.append(xb)  # decoder feature at this scale
+            if self.do_classifier:
+                # apply global pooling and fc to get classification features
+                classification_features = self.dropout(self.ReLU(self.cls_fcs[i](self.cls_pools[i](xb))))
+                cls_feats.append(classification_features)
+
+
+        if self.do_classifier:
+            cls_feats = torch.cat(cls_feats, dim=1)
+            cls_logits = self.final_fc2(self.dropout(self.ReLU(self.final_fc(cls_feats))))
 
         # seg_feats = seg_feats[::-1]  # fine‑>coarse as in UNet
 

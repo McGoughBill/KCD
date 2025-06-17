@@ -9,6 +9,7 @@ import torch.nn as nn
 import numpy as np
 import warnings
 import pandas as pd
+import sys
 
 def train_cv_slice_model(home = '/Users/mcgoug01/Downloads/Data/',dataname='coreg_ncct',
                          splits:list=[0],folds=5,params:dict=None,train_folds=[0],
@@ -26,8 +27,6 @@ def train_cv_slice_model(home = '/Users/mcgoug01/Downloads/Data/',dataname='core
     if epochs != None:
         params['epochs'] = epochs
 
-    if learning_rate != None:
-        params['lr'] = learning_rate
 
     save_dir = tu.init_training_home(home, dataname)
     print(save_dir)
@@ -61,6 +60,13 @@ def train_cv_slice_model(home = '/Users/mcgoug01/Downloads/Data/',dataname='core
 
             if not os.path.exists(fold_path):os.mkdir(fold_path)
             if not os.path.exists(slice_path):os.mkdir(slice_path)
+            print('Creating fold {} of split {} for model type {}'.format(fold,split,model_type))
+            if not os.path.exists(os.path.join(slice_path,'csv')):
+                os.mkdir(os.path.join(slice_path,'csv'))
+            if not os.path.exists(os.path.join(slice_path,'model')):
+                os.mkdir(os.path.join(slice_path,'model'))
+
+            sys.stdout.flush()
 
             model = model_generator.return_merlin_vision( dev=dev,out_channels=3,dropout=0.4)
             # set feature extractor gradients to false
