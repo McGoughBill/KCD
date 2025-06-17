@@ -1,5 +1,10 @@
 
 from __future__ import annotations
+
+if __name__ == "__main__":
+    # This is needed to import UNet from the same directory
+    import os
+    os.environ['OV_DATA_BASE']= os.path.dirname(os.path.abspath(__file__))
 from copy import deepcopy
 from typing import List, Sequence, Tuple
 import torch.nn as nn
@@ -12,6 +17,7 @@ from KCD.Segmentation.ovseg.networks.mask2former_modeling.vit_modeling import Tr
 from KCD.Segmentation.ovseg.networks.mask2former_modeling.transformer_decoder.mask2former_transformer_decoder3d import (
     MultiScaleMaskedTransformerDecoder3d as MSTDecoder3d,
 )
+import numpy as np
 
 
 
@@ -45,6 +51,8 @@ class TransUNet3D(nn.Module):
         fac_skip_channels: float = 1.0,
         p_dropout_logits: float = 0.0,
         stem_kernel_size: int | Sequence[int] | None = None,
+        with_classification_head: bool = False,
+        cls_classes: int = 2,
         # --- TransUNet specific ------------------------------------------------
         use_vit: bool = True,
         patch_size: Tuple[int, int, int] = (64,64,64),  # input patch size
@@ -135,6 +143,24 @@ class TransUNet3D(nn.Module):
                 self.vit.load_from(weights=torch.load(vit_pretrained, map_location="cpu"))
             # Conv to bring ViT hidden dim back to UNet decoder channels
             self.vit_post = nn.Conv3d(cfg.hidden_size, self.unet_core.filters_list[-1], 1)
+            if with_classification_head:
+                self.do_classifier = True
+                # create a a 3-layer MLP classification head that uses the features of identical
+                # shape as xb
+                # first layer - flatten. Then two linear layers with ReLU in between and a final
+                # linear layer to produce logits for each class. have dropouts after each hidden layer
+                self.vit_cls_head = nn.Sequential(
+                    nn.Flatten(),
+                    nn.Linear(np.prod(xb.shape[1:]), 512),  # flatten the feature map
+                    nn.ReLU(),
+                    nn.Dropout(0.5),
+                    nn.Linear(512, 256),
+                    nn.ReLU(),
+                    nn.Dropout(0.5),
+                    nn.Linear(256, cls_classes))
+            else:
+                self.do_classifier = False
+                self.vit_cls_head = None
 
         # b) Mask2Former style transformer decoder -------------------------
         if self.use_masked_attn:
@@ -203,6 +229,12 @@ class TransUNet3D(nn.Module):
             xb, _ = self.vit(xb)  # noqa: _
             xb = self.vit_post(xb)
 
+        print("Feature map shape after ViT:", xb.shape)
+        if self.do_classifier:
+            # classification head for the whole patch
+            cls_logits = self.vit_cls_head(xb)
+            print("Classification logits shape:", cls_logits.shape)
+
         # expanding path (same as UNet) ---------------------------------------
         for i in range(self.unet_core.n_stages - 2, -1, -1):
             xb = self.unet_core.upsamplings[i](xb)
@@ -230,6 +262,10 @@ class TransUNet3D(nn.Module):
         pyramid_logits: List[torch.Tensor] = []
         for feat, logit_head in zip(seg_feats[::-1], self.unet_core.all_logits):
             pyramid_logits.append(logit_head(feat))
+
+        if self.do_classifier:
+            return [main_logits] + pyramid_logits[1:], cls_logits
+
 
         return [main_logits] + pyramid_logits[1:]  # keep UNet order (fine→coarse)
 
@@ -273,8 +309,9 @@ class _UNetEncoderDecoder(nn.Module):
 #     return UNet(in_channels, out_channels, kernel_sizes, False)
 
 def get_3d_transunet(in_channels,out_channels,n_stages,filters=32,
-                     patch_size=(64,64,64),use_masked_attn=True,):
-    kernel_sizes = [(3,3,1) for i in range(n_stages)]
+                     patch_size=(64,64,64),use_masked_attn=True,
+                     with_classification_head=False, cls_classes=2):
+    kernel_sizes = [(3,3,3) for i in range(n_stages)]
     return TransUNet3D(
         in_channels=in_channels,
         out_channels=out_channels,
@@ -286,6 +323,8 @@ def get_3d_transunet(in_channels,out_channels,n_stages,filters=32,
         use_masked_attn=use_masked_attn,
         use_vit=True,
         vit_name="R50-ViT-B_16",  # default ViT config
+        with_classification_head=with_classification_head,
+        cls_classes=cls_classes
     )
 
 
@@ -303,10 +342,12 @@ if __name__ == "__main__":
 
     # Instantiate the network. The constructor mirrors your UNet’s signature;
     # only parameters you care about for the test are shown here.
-    net = get_3d_transunet(1,3,5,32,patch_size=patch_size).eval()
+    net = get_3d_transunet(1,3,5,32,patch_size=patch_size,
+                           with_classification_head=True,cls_classes=3).eval()
 
     with torch.no_grad():
-        y = net(x)
+        y,cls = net(x)
+    print(cls)
 
     # Print a concise summary of whatever the model returned
     if isinstance(y, (list, tuple)):
