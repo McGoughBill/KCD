@@ -229,11 +229,9 @@ class TransUNet3D(nn.Module):
             xb, _ = self.vit(xb)  # noqa: _
             xb = self.vit_post(xb)
 
-        print("Feature map shape after ViT:", xb.shape)
         if self.do_classifier:
             # classification head for the whole patch
             cls_logits = self.vit_cls_head(xb)
-            print("Classification logits shape:", cls_logits.shape)
 
         # expanding path (same as UNet) ---------------------------------------
         for i in range(self.unet_core.n_stages - 2, -1, -1):

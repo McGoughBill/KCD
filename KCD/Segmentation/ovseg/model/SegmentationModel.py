@@ -197,6 +197,11 @@ class SegmentationModel(ModelBase):
             if 'patch_size' not in params:
                 raise ValueError('The TransUNet3D requires the patch_size to be set in the network parameters.')
             self.network = TransUNet3D(**params).to(self.dev)
+        elif self.model_parameters['architecture'].lower() in ['transunet_classhead','transunetclasshead','transunet-classhead']:
+            #assert 'patch_size' in params
+            if 'patch_size' not in params:
+                raise ValueError('The TransUNet3D requires the patch_size to be set in the network parameters.')
+            self.network = TransUNet3D(**params,with_classification_head=True,cls_classes=2).to(self.dev)
         else:
             raise ValueError('Got unkown architecture '+self.model_parameters['architecture'])
 
@@ -212,7 +217,8 @@ class SegmentationModel(ModelBase):
             params.update(self.model_parameters['prediction'])
 
         if self.model_parameters['architecture'].lower() in ['unet_classhead','unetclasshead','unet-classhead',
-                                                            'unet_classhead_maxpool','unetclassheadmaxpool','unet-classhead-maxpool']:
+                                                            'unet_classhead_maxpool','unetclassheadmaxpool','unet-classhead-maxpool',
+                                                            'transunet_classhead','transunetclasshead','transunet-classhead']:
             self.prediction = SlidingWindowPrediction_classhead(**params)
         else:
             self.prediction = SlidingWindowPrediction(**params)
@@ -275,7 +281,8 @@ class SegmentationModel(ModelBase):
         prep_params = self.model_parameters['preprocessing']
         if self.model_parameters['architecture'].lower() in ['unet_classhead', 'unetclasshead', 'unet-classhead',
                                                              'unet_classhead_maxpool', 'unetclassheadmaxpool',
-                                                             'unet-classhead-maxpool']:
+                                                             'unet-classhead-maxpool','transunet_classhead',
+                                                             'transunetclasshead', 'transunet-classhead']:
             self.training = SegmentationTrainingV2_classhead(network=self.network,
                                                    trn_dl=self.data.trn_dl,
                                                    val_dl=self.data.val_dl,
@@ -362,7 +369,8 @@ class SegmentationModel(ModelBase):
         # now the importat part: the sliding window evaluation (or derivatives of it)
         if self.model_parameters['architecture'].lower() in ['unet_classhead', 'unetclasshead', 'unet-classhead',
                                                              'unet_classhead_maxpool', 'unetclassheadmaxpool',
-                                                             'unet-classhead-maxpool']:
+                                                             'unet-classhead-maxpool', 'transunet_classhead',
+                                                                'transunetclasshead', 'transunet-classhead']:
             pred,cls = self.prediction(im)
         else:
             if self.model_parameters['architecture'].lower() in ['unet_regresshead', 'unetregresshead', 'unet-regresshead']:
@@ -377,7 +385,8 @@ class SegmentationModel(ModelBase):
 
         if self.model_parameters['architecture'].lower() in ['unet_classhead', 'unetclasshead', 'unet-classhead',
                                                              'unet_classhead_maxpool', 'unetclassheadmaxpool',
-                                                             'unet-classhead-maxpool']:
+                                                             'unet-classhead-maxpool', 'transunet_classhead',
+                                                                'transunetclasshead', 'transunet-classhead']:
             return data_tpl[self.pred_key],cls
 
         return data_tpl[self.pred_key]
@@ -426,7 +435,8 @@ class SegmentationModel(ModelBase):
         # now the importat part: the sliding window evaluation (or derivatives of it)
         if self.model_parameters['architecture'].lower() in ['unet_classhead', 'unetclasshead', 'unet-classhead',
                                                              'unet_classhead_maxpool', 'unetclassheadmaxpool',
-                                                             'unet-classhead-maxpool']:
+                                                             'unet-classhead-maxpool', 'transunet_classhead',
+                                                                'transunetclasshead', 'transunet-classhead']:
             pred,cls = self.prediction(im)
             pred = np.expand_dims(pred[1], axis=0)
         else:
@@ -442,7 +452,8 @@ class SegmentationModel(ModelBase):
 
         if self.model_parameters['architecture'].lower() in ['unet_classhead', 'unetclasshead', 'unet-classhead',
                                                              'unet_classhead_maxpool', 'unetclassheadmaxpool',
-                                                             'unet-classhead-maxpool']:
+                                                             'unet-classhead-maxpool', 'transunet_classhead',
+                                                                'transunetclasshead', 'transunet-classhead']:
             return data_tpl[self.pred_key],cls
 
         return data_tpl[self.pred_key]
@@ -1046,6 +1057,11 @@ class SegmentationModel_trainontest(ModelBase):
             if 'patch_size' not in params:
                 raise ValueError('The TransUNet3D requires the patch_size to be set in the network parameters.')
             self.network = TransUNet3D(**params).to(self.dev)
+        elif self.model_parameters['architecture'].lower() in ['transunet_classhead','transunetclasshead','transunet-classhead']:
+            #assert 'patch_size' in params
+            if 'patch_size' not in params:
+                raise ValueError('The TransUNet3D requires the patch_size to be set in the network parameters.')
+            self.network = TransUNet3D(**params,with_classification_head=True,cls_classes=2).to(self.dev)
         else:
             raise ValueError('Got unkown architecture ' + self.model_parameters['architecture'])
 
@@ -1062,7 +1078,8 @@ class SegmentationModel_trainontest(ModelBase):
 
         if self.model_parameters['architecture'].lower() in ['unet_classhead', 'unetclasshead', 'unet-classhead',
                                                              'unet_classhead_maxpool', 'unetclassheadmaxpool',
-                                                             'unet-classhead-maxpool']:
+                                                             'unet-classhead-maxpool','transunet_classhead',
+                                                                'transunetclasshead', 'transunet-classhead']:
             self.prediction = SlidingWindowPrediction_classhead(**params)
         else:
             self.prediction = SlidingWindowPrediction(**params)
@@ -1118,7 +1135,8 @@ class SegmentationModel_trainontest(ModelBase):
         prep_params = self.model_parameters['preprocessing']
         if self.model_parameters['architecture'].lower() in ['unet_classhead', 'unetclasshead', 'unet-classhead',
                                                              'unet_classhead_maxpool', 'unetclassheadmaxpool',
-                                                             'unet-classhead-maxpool']:
+                                                             'unet-classhead-maxpool','transunet_classhead',
+                                                                'transunetclasshead', 'transunet-classhead']:
             self.training = SegmentationTrainingV2_classhead(network=self.network,
                                                    trn_dl=self.data.trn_dl,
                                                    val_dl=self.data.val_dl,
@@ -1245,7 +1263,8 @@ class SegmentationModel_trainontest(ModelBase):
         # now the importat part: the sliding window evaluation (or derivatives of it)
         if self.model_parameters['architecture'].lower() in ['unet_classhead', 'unetclasshead', 'unet-classhead',
                                                              'unet_classhead_maxpool', 'unetclassheadmaxpool',
-                                                             'unet-classhead-maxpool']:
+                                                             'unet-classhead-maxpool', 'transunet_classhead',
+                                                                'transunetclasshead', 'transunet-classhead']:
             pred,cls = self.prediction(im,regress=regress)
             pred = np.expand_dims(pred[1], axis=0)
         else:
@@ -1261,7 +1280,8 @@ class SegmentationModel_trainontest(ModelBase):
 
         if self.model_parameters['architecture'].lower() in ['unet_classhead', 'unetclasshead', 'unet-classhead',
                                                              'unet_classhead_maxpool', 'unetclassheadmaxpool',
-                                                             'unet-classhead-maxpool']:
+                                                             'unet-classhead-maxpool', 'transunet_classhead',
+                                                                'transunetclasshead', 'transunet-classhead']:
             return data_tpl[self.pred_key], cls
 
         return data_tpl[self.pred_key]
