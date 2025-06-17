@@ -36,6 +36,9 @@ model_params = get_model_params_3d_res_encoder_U_Net(patch_size,
                                                      n_fg_classes=n_fg_classes,
                                                      use_prg_trn=False, fp32=True)
 
+model_params['training']['class_weight'] = 0.1
+model_params['training']['class_seg_label'] = 1
+model_params['training']['vol_thresh_mm'] = 500
 
 model_params['architecture'] = 'transunet_classhead'
 model_params['network']['kernel_sizes'] =4*[(3,3,3)]
