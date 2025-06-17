@@ -13,7 +13,7 @@ import sys
 
 def train_cv_slice_model(home = '/Users/mcgoug01/Downloads/Data/',dataname='coreg_ncct',
                          splits:list=[0],folds=5,params:dict=None,train_folds=[0],
-                         epochs = None):
+                         epochs = None,all_params=False):
     # Suppress warnings
     warnings.filterwarnings("ignore") #makes dgl stop complaining!
 
@@ -70,18 +70,23 @@ def train_cv_slice_model(home = '/Users/mcgoug01/Downloads/Data/',dataname='core
 
             model = model_generator.return_merlin_vision( dev=dev,out_channels=3,dropout=0.4)
             # set feature extractor gradients to false
-            for param in model[0].parameters():
-                param.requires_grad = False
-            opt = torch.optim.Adam(model[1].parameters(),lr=params['lr'])
+            if not all_params:
+                for param in model.features.parameters():
+                    param.requires_grad = False
+                opt = torch.optim.Adam(model.cls.parameters(),lr=params['lr'])
+            else:
+                opt = torch.optim.Adam(model.parameters(),lr=params['lr'])
 
             dl,test_dl = tu.generate_dataloaders(slicedataset,test_slicedataset,cases[train_index],params['batch_size'])
-            model_name = '{}_{}_{}_{}_{}'.format(model_type,params['model_size'],params['epochs'],params['epochs'],params['lr'])
+            model_name = '{}_{}_{}_{}_allparams{}'.format(model_type,params['epochs'],params['epochs'],params['lr'],
+                                                        all_params)
 
             if not os.path.exists(os.path.join(slice_path,'model')):
                 os.mkdir(os.path.join(slice_path,'model'))
                 os.mkdir(os.path.join(slice_path,'csv'))
+
             model = tu.train_model(dl,dev,params['epochs'],loss_fnc,opt,model,
-                                      model_name=model_name,doc_path=os.path.join(slice_path,'model',model_name),
+                                      model_name=model_name,doc_path=os.path.join(slice_path,'csv'),
                                    learning_rate=params['lr'])
 
             torch.save(model,os.path.join(slice_path,'model',model_name))
@@ -109,4 +114,5 @@ if __name__ == '__main__':
     fold = 0
     dataset = 'masked_kits_add_nooverlap_v2'
     home = '/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data/'
-    train_cv_slice_model(home=home,dataname=dataset,splits=[0],train_folds=[fold],epochs=epochs)
+    train_cv_slice_model(home=home,dataname=dataset,splits=[0],train_folds=[fold],epochs=epochs,
+                         params=None,folds=5,all_params=True)

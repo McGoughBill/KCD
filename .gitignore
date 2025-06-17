@@ -4,5 +4,5 @@ __pycache__
 slurm*
 running*.sh
 model_weights.torch
-Detection/ModelGenerator/Merlin/checkpoints/*
+KCD/Detection/ModelGenerator/Merlin/checkpoints/*
 
