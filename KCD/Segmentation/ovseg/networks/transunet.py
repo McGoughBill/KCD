@@ -108,6 +108,7 @@ class TransUNet3D(nn.Module):
         self.use_masked_attn = use_masked_attn
         self.out_channels = out_channels
         self._n_pyramid_scales = self.unet_core.n_pyramid_scales
+        self.do_classification = with_classification_head
 
         # a) ViT bottleneck -------------------------------------------------
         if self.use_vit:
@@ -129,7 +130,7 @@ class TransUNet3D(nn.Module):
             xb = torch.randn(1, in_channels, *patch_size)
             for block in self.unet_core.blocks_down:
                 xb = block(xb)
-            channels,d, h, w = xb.shape[1:]  # depth, height, width of the feature map
+            d, h, w = xb.shape[2:]  # depth, height, width of the feature map
             print("Feature map shape before ViT:", xb.shape)
             feat_size = (d, h, w)
 
@@ -145,26 +146,28 @@ class TransUNet3D(nn.Module):
             # Conv to bring ViT hidden dim back to UNet decoder channels
             self.vit_post = nn.Conv3d(cfg.hidden_size, self.unet_core.filters_list[-1], 1)
 
-            self.cls_pools = nn.ModuleList()
-            self.cls_fcs = nn.ModuleList()
-            final_fc_size = 0
-            #for every conv decoder level, create a GlobalPowerPooling that doubles in spatial size with
-            # each level, starting at d, h, w = patch_size
-            for i in range(self.unet_core.n_stages):
-                self.cls_pools.append(GlobalPowerPooling(d, h, w))
-                self.fcs.append(nn.Linear(channels,channels))
-                final_fc_size += channels
-                d, h, w = d*2, h*2, w*2  # double spatial size at each level
-                channels /=2
 
-            self.final_fc = nn.Linear(final_fc_size, 128)
-            self.final_fc2 = nn.Linear(128, 2)
+            if self.do_classification:
+                self.cls_pools = []
+                self.cls_fcs = []
+                final_fc_size = 0
+                channels = self.unet_core.filters_list[-2]
+                #for every conv decoder level, create a GlobalPowerPooling that doubles in spatial size with
+                # each level, starting at d, h, w = patch_size
+                for i in range(self.unet_core.n_stages-1):
+                    self.cls_pools.append(GlobalPowerPooling((d, h, w)))
+                    self.cls_fcs.append(nn.Linear(channels,channels))
+                    final_fc_size += channels
+                    d, h, w = d*2, h*2, w*2  # double spatial size at each level
+                    channels = channels//2
 
-            self.dropout = nn.Dropout(0.1)
-            self.ReLU = nn.LeakyReLU(0.1)
+                self.cls_pools = nn.ModuleList(self.cls_pools)
+                self.cls_fcs = nn.ModuleList(self.cls_fcs)
+                self.final_fc = nn.Linear(final_fc_size, 128)
+                self.final_fc2 = nn.Linear(128, cls_classes)
+                self.dropout = nn.Dropout(0.3)
+                self.ReLU = nn.LeakyReLU(0.1)
 
-            print(self.cls_pools)
-            print(self.fcs)
 
         # b) Mask2Former style transformer decoder -------------------------
         if self.use_masked_attn:
@@ -233,9 +236,11 @@ class TransUNet3D(nn.Module):
             xb, _ = self.vit(xb)  # noqa: _
             xb = self.vit_post(xb)
 
-        if self.do_classifier:
+        if self.do_classification:
             #save classification features for cls head
             cls_feats = []
+            cls_idx = 0
+
 
         # expanding path (same as UNet) ---------------------------------------
         for i in range(self.unet_core.n_stages - 2, -1, -1):
@@ -243,13 +248,14 @@ class TransUNet3D(nn.Module):
             xb = self.unet_core.concats[i](xb, skips[i])
             xb = self.unet_core.blocks_up[i](xb)
             seg_feats.append(xb)  # decoder feature at this scale
-            if self.do_classifier:
+            if self.do_classification:
                 # apply global pooling and fc to get classification features
-                classification_features = self.dropout(self.ReLU(self.cls_fcs[i](self.cls_pools[i](xb))))
+                classification_features = self.dropout(self.ReLU(self.cls_fcs[cls_idx](self.cls_pools[cls_idx](xb))))
                 cls_feats.append(classification_features)
+                cls_idx += 1
 
 
-        if self.do_classifier:
+        if self.do_classification:
             cls_feats = torch.cat(cls_feats, dim=1)
             cls_logits = self.final_fc2(self.dropout(self.ReLU(self.final_fc(cls_feats))))
 
@@ -274,7 +280,7 @@ class TransUNet3D(nn.Module):
         for feat, logit_head in zip(seg_feats[::-1], self.unet_core.all_logits):
             pyramid_logits.append(logit_head(feat))
 
-        if self.do_classifier:
+        if self.do_classification:
             return [main_logits] + pyramid_logits[1:], cls_logits
 
 
