@@ -54,6 +54,7 @@ class TransUNet3D(nn.Module):
         stem_kernel_size: int | Sequence[int] | None = None,
         with_classification_head: bool = False,
         cls_classes: int = 2,
+        feature_output: bool = False,
         # --- TransUNet specific ------------------------------------------------
         use_vit: bool = True,
         patch_size: Tuple[int, int, int] = (64,64,64),  # input patch size
@@ -109,6 +110,7 @@ class TransUNet3D(nn.Module):
         self.out_channels = out_channels
         self._n_pyramid_scales = self.unet_core.n_pyramid_scales
         self.do_classification = with_classification_head
+        self.feature_output = feature_output
 
         # a) ViT bottleneck -------------------------------------------------
         if self.use_vit:
@@ -241,13 +243,15 @@ class TransUNet3D(nn.Module):
             cls_feats = []
             cls_idx = 0
 
-
+        feature_list = []
         # expanding path (same as UNet) ---------------------------------------
         for i in range(self.unet_core.n_stages - 2, -1, -1):
             xb = self.unet_core.upsamplings[i](xb)
             xb = self.unet_core.concats[i](xb, skips[i])
             xb = self.unet_core.blocks_up[i](xb)
             seg_feats.append(xb)  # decoder feature at this scale
+            if self.feature_output:
+                feature_list.append(xb)
             if self.do_classification:
                 # apply global pooling and fc to get classification features
                 classification_features = self.dropout(self.ReLU(self.cls_fcs[cls_idx](self.cls_pools[cls_idx](xb))))
@@ -280,8 +284,12 @@ class TransUNet3D(nn.Module):
         for feat, logit_head in zip(seg_feats[::-1], self.unet_core.all_logits):
             pyramid_logits.append(logit_head(feat))
 
+
         if self.do_classification:
-            return [main_logits] + pyramid_logits[1:], cls_logits
+            if self.feature_output:
+                return [main_logits] + pyramid_logits[1:], cls_logits, feature_list[::-1], cls_feats
+            else:
+                return [main_logits] + pyramid_logits[1:], cls_logits
 
 
         return [main_logits] + pyramid_logits[1:]  # keep UNet order (fine→coarse)
@@ -342,6 +350,25 @@ def get_3d_transunet(in_channels,out_channels,n_stages,filters=32,
         vit_name="R50-ViT-B_16",  # default ViT config
         with_classification_head=with_classification_head,
         cls_classes=cls_classes
+    )
+
+def get_3d_featureoutput_3d_transunet(in_channels,out_channels,n_stages,filters=32,
+                     patch_size=(64,64,64),use_masked_attn=True,cls_classes=2):
+    kernel_sizes = [(3,3,3) for i in range(n_stages)]
+    return TransUNet3D(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_sizes=kernel_sizes,
+        is_2d=False,
+        filters=filters,
+        n_pyramid_scales=n_stages,
+        patch_size=patch_size,
+        use_masked_attn=use_masked_attn,
+        use_vit=True,
+        vit_name="R50-ViT-B_16",  # default ViT config
+        with_classification_head=True,
+        cls_classes=cls_classes,
+        feature_output=True
     )
 
 
