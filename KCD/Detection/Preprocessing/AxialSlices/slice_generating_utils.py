@@ -1,3 +1,5 @@
+import sys
+
 import array_manipulation_utils as am
 import numpy as np
 import os
@@ -42,10 +44,7 @@ def extract_sliding_windows(arr, patch_size=(32,32,32),overlap=0.1,boundary_z=1,
                                 pack[0][np.argmax(axes==0)]:pack[0][np.argmax(axes==0)]+patch_size[np.argmax(axes==0)],
                                 pack[0][np.argmax(axes==1)]:pack[0][np.argmax(axes==1)]+patch_size[np.argmax(axes==1)],
                                 pack[0][np.argmax(axes==2)]:pack[0][np.argmax(axes==2)]+patch_size[np.argmax(axes==2)]] for pack in zxy_batched]).numpy()
-    sliding_windows = np.swapaxes(sliding_windows,axial+2,2)
-    
-    if axial == 2: sliding_windows = np.flip(np.rot90(sliding_windows,k=1,axes=(-1,-2)),axis=-1)
-    
+
     return sliding_windows
 
 def _get_zxy_list(shape,patch_size = np.array([32,32,32]),overlap=0.1,boundary_z=1):
@@ -187,15 +186,6 @@ def get_centralised_windows(reshaped_im,reshaped_seg,centroid,axes=None,patch_si
         central_window_seg = np.array([reshaped_seg[top_z+i:bottom_z+i,
                                                   a1:a2,                                
                                                   b1:b2] for i in z_list])
-        
-
-    central_window_im = np.swapaxes(central_window_im,axial_plane+1,1)
-    central_window_seg = np.swapaxes(central_window_seg,axial_plane+1,1)
-    
-    # apply orientation transforms due to effects incurred by np.swapaxes when axial_plane = 2
-    if axial_plane == 2:
-        central_window_im = np.flip(np.rot90(central_window_im,k=1,axes=(-1,-2)),axis=-1)
-        central_window_seg= np.flip(np.rot90(central_window_seg,k=1,axes=(-1,-2)),axis=-1)
 
     return central_window_im, central_window_seg
 
@@ -382,6 +372,7 @@ def create_labelled_dataset(im_path,save_dir,seg_path,target_spacing,overlap,
             ct += np.where(final_mask==0,-200,0).astype(np.float32)
             
             sw_im, sw_seg = get_shifted_windows(ct,seg,overlap=overlap,patch_size=patch_size,axes=axes,boundary_z=boundary_z)
+            print('shifted windows shape:',sw_im.shape,sw_seg.shape)
             if (sw_seg.shape[-3:]==tuple(patch_dims)) and (sw_im.shape[-3:]==tuple(patch_dims)):
                 save_windows_labelled(sw_im,sw_seg,canc_thresh,kid_thresh,
                              target_spacing,save_path,
@@ -391,6 +382,7 @@ def create_labelled_dataset(im_path,save_dir,seg_path,target_spacing,overlap,
                              kidthresh=kidney_thresh_rmm,dilate=bbox_boundary_mm,patch_dims=patch_dims)
 
             cent_im, cent_seg = get_centralised_windows(ct,seg,centroid,patch_size=patch_size,axes=axes,boundary_z=boundary_z)
+            print('centralised windows shape:',cent_im.shape,cent_seg.shape)
             if (cent_im.shape[-3:]==tuple(patch_dims)) and (cent_seg.shape[-2:]==tuple(patch_dims[-2:])):
                 save_windows_labelled(cent_im,cent_seg,canc_thresh,kid_thresh,
                              target_spacing,save_path,
@@ -398,7 +390,7 @@ def create_labelled_dataset(im_path,save_dir,seg_path,target_spacing,overlap,
                              shuffle=False,save_limit=1e4,centralised=True,
                              depth_z=depth_z,boundary_z=boundary_z,
                              kidthresh=kidney_thresh_rmm,dilate=bbox_boundary_mm,patch_dims=patch_dims)
-
+            sys.stdout.flush()
             del ct, seg, first_mask, final_mask, cent_seg, cent_im, sw_seg, sw_im
             gc.collect()
             torch.cuda.empty_cache()
