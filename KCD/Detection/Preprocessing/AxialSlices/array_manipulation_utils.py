@@ -31,11 +31,11 @@ def rescale_array(im, spacing,axes,
     target_shape = tuple(target_shape[np.array((np.argmax(axes==0),np.argmax(axes==1),np.argmax(axes==2)))])
     
     if is_seg:
-        return nn.functional.interpolate(torch.unsqueeze(torch.unsqueeze(torch.Tensor(im),dim=0),dim=0).type(torch.float32),
-                                         mode = 'nearest', size =target_shape).numpy()[0,0].astype(np.int16)
+        return nn.functional.interpolate(torch.unsqueeze(torch.unsqueeze(torch.Tensor(im.copy()),dim=0),dim=0).type(torch.float32),
+                                         mode = 'nearest', size =target_shape).numpy()[0,0].astype(np.int16).copy()
     else:
-        return nn.functional.interpolate(torch.unsqueeze(torch.unsqueeze(torch.Tensor(im),dim=0),dim=0).type(torch.float32),
-                                         mode = 'trilinear', size =target_shape).numpy()[0,0].astype(np.float32)
+        return nn.functional.interpolate(torch.unsqueeze(torch.unsqueeze(torch.Tensor(im.copy()),dim=0),dim=0).type(torch.float32),
+                                         mode = 'trilinear', size =target_shape).numpy()[0,0].astype(np.float32).copy()
 
 def filter_shifted_windows(sw_im,sw_seg,canc_thresh,kid_thresh,target_spacing,
                            shuffle=True,has_seg_label=True):
