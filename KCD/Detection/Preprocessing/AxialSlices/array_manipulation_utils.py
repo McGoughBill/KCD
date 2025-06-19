@@ -100,15 +100,18 @@ def extract_labels(sw_seg, has_seg_label=True,
     else:return np.array([1 if kids>kidney_vol_thresh else 0 for kids,tums in counts])
     
 def nifti_2_correctarr(im_n):
-    aff = im_n.affine
-    im = sitk.GetImageFromArray(im_n.get_fdata())
-    im.SetOrigin(-aff[:3,3])
-    im.SetSpacing(im_n.header['pixdim'][1:4].tolist())
-    
-    ##flips image along correct axis according to image properties
-    flip_im = sitk.Flip(im, np.diag(aff[:3,:3]<-0).tolist())
-    nda = np.rot90(sitk.GetArrayViewFromImage(flip_im))
-    return nda.copy()
+    # aff = im_n.affine
+    # im = sitk.GetImageFromArray(im_n.get_fdata())
+    # im.SetOrigin(-aff[:3,3])
+    # im.SetSpacing(im_n.header['pixdim'][1:4].tolist())
+    #
+    # ##flips image along correct axis according to image properties
+    # flip_im = sitk.Flip(im, np.diag(aff[:3,:3]<-0).tolist())
+    # nda = np.rot90(sitk.GetArrayViewFromImage(flip_im))
+
+    im_n = nib.as_closest_canonical(im_n)
+    im_data = im_n.get_fdata()
+    return im_data
 
 def get_spacing(im_nib):
     return np.abs(im_nib.header['pixdim'][1:4])

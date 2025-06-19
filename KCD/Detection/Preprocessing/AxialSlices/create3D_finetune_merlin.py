@@ -8,13 +8,13 @@ segpath = "/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data/raw_data
 
 overlap_mm = 40 ## this dictates the minimum distance apart between each slice! not the overlap.
 patch2d = 224 ## in plane slice spacing
-save_limit_percase_perlabel = 25 ## maximum number of saved shifted window slices per kidney
-voxel_spacings = [1] ## isotropic voxel size in mm
+save_limit_percase_perlabel = 50 ## maximum number of saved shifted window slices per kidney
+voxel_spacings = [1.5] ## isotropic voxel size in mm
 thresholds_r_mm = [10] ## threshold used to calculate cancer label
 kidney_r_mm = 20 ## threshold used to calculate kidney label
-depth_z = 112 ## size of slice depth in axial dimension in mm - if 1mm, then 2D
+depth_z = 60 ## size of slice depth in axial dimension in mm - if 1mm, then 2D
 bbox_boundary_mm = 40 ## dilation of segmentation label
-boundary_z= 30 ## axial spacing between slice sampling
+boundary_z= 20 ## axial spacing between slice sampling
 has_seg_label = True ## if we don't have seg label, we only generated foreground/background slices
 
 patch_size = np.array([patch2d]*3) 
@@ -29,7 +29,7 @@ for thresh in thresholds_r_mm:
         generator.create_labelled_dataset(path,save_dir,segpath,target_spacing,overlap,
                        patch_size,thresh,spacing,save_limit_percase_perlabel,
                        bbox_boundary_mm,data_name=data_name,boundary_z=boundary_z,
-                       depth_z=depth_z,kidney_thresh_rmm=kidney_r_mm)
+                       depth_z=depth_z,kidney_thresh_rmm=kidney_r_mm,is_merlin=True)
         
 for thresh in thresholds_r_mm:
     for spacing in voxel_spacings: 
@@ -40,4 +40,4 @@ for thresh in thresholds_r_mm:
         generator.create_labelled_dataset(path,save_dir,segpath,target_spacing,overlap,
                        patch_size,0,spacing,save_limit_percase_perlabel,
                        bbox_boundary_mm,data_name=data_name,boundary_z=boundary_z,
-                       depth_z=depth_z,kidney_thresh_rmm=0)
+                       depth_z=depth_z,kidney_thresh_rmm=0,is_merlin=True)
