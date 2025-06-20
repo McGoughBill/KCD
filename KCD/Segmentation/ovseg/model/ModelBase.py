@@ -442,7 +442,8 @@ class ModelBase(object):
 
             if self.model_parameters['architecture'].lower() in ['unet_classhead', 'unetclasshead', 'unet-classhead',
                                                                  'unet_classhead_maxpool', 'unetclassheadmaxpool',
-                                                                 'unet-classhead-maxpool']:
+                                                                 'unet-classhead-maxpool', 'transunet_classhead',
+                                                                    'transunetclasshead','transunet-classhead']:
 
                 # predict from this datapoint
                 pred, cls = self.__call__(data_tpl)
@@ -504,7 +505,7 @@ class ModelBase(object):
                 op_points = [0.01,0.1,0.5,0.91,0.99]
                 for op_point in op_points:
                     # predict from this datapoint
-                    pred = self.__callcont__(data_tpl,regress=regress)
+                    pred = self.__callcont__(data_tpl)
 
                     if torch.is_tensor(pred):
                         pred = pred.cpu().numpy()
@@ -553,7 +554,7 @@ class ModelBase(object):
                     sensitivity = tp/(tp+fn+(1e-6))
 
                     op_point_results[op_point] = {'ppv':ppv,'sensitivity':sensitivity}
-                pred = self.__call__(data_tpl,regress=regress)
+                pred = self.__call__(data_tpl)
                 if torch.is_tensor(pred):
                     pred = pred.cpu().numpy()
 
@@ -564,7 +565,8 @@ class ModelBase(object):
 
             if self.model_parameters['architecture'].lower() in ['unet_classhead', 'unetclasshead', 'unet-classhead',
                                                                  'unet_classhead_maxpool', 'unetclassheadmaxpool',
-                                                                 'unet-classhead-maxpool']:
+                                                                 'unet-classhead-maxpool', 'transunet_classhead',
+                                                                    'transunetclasshead','transunet-classhead']:
                 results[scan]['class_dsc'] = dsc
                 results[scan]['class_sensitivity'] = sensitivity
                 results[scan]['class_specificity'] = specificity
@@ -712,10 +714,11 @@ class ModelBase(object):
             # predict from this datapoint
             if self.model_parameters['architecture'].lower() in ['unet_classhead', 'unetclasshead', 'unet-classhead',
                                                                  'unet_classhead_maxpool', 'unetclassheadmaxpool',
-                                                                 'unet-classhead-maxpool']:
+                                                                 'unet-classhead-maxpool','transunet_classhead',
+                                                                    'transunetclasshead','transunet-classhead']:
                 pred, cls = self.__callcont__(data_tpl,do_postprocessing=True)
             else:
-                pred = self.__callcont__(data_tpl,regress=regress,do_postprocessing=True)
+                pred = self.__callcont__(data_tpl,do_postprocessing=True)
 
             if torch.is_tensor(pred):
                 pred = pred.cpu().numpy()

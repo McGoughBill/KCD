@@ -92,15 +92,15 @@ class SW_Data_labelled(Dataset):
     
     def _rotate(self,tensor,p=0.5):
         if random()>p: return tensor
-        rot_extent = np.random.randint(1,4)
-        return torch.rot90(tensor,rot_extent,dims=[-2,-1])
+        rot_extent = np.random.randint(1,4) #only ever rotate in plane
+        return torch.rot90(tensor,rot_extent,dims=[-3,-2])
     
     def _flip(self,tensor,p=0.5):
         if random()>p: return tensor
         if self.is_3d:
             flip = int(np.random.choice([-3,-2,-1],1,replace=False))
         else:
-            flip = int(np.random.choice([-2,-1],1,replace=False))
+            flip = int(np.random.choice([-3,-2],1,replace=False))
         return torch.flip(tensor,dims= [flip])
         
     def _blur(self,tensor,p=0.3):
@@ -152,7 +152,7 @@ class SW_Data_labelled(Dataset):
         image = (torch.clip(torch.Tensor(image).to(self.device),-1024,2048)+1024)/3072
 
         image = torch.unsqueeze(image,0)
-        
+
         #shuffles order of transforms every time
         np.random.shuffle(transforms)
         for transform in transforms:

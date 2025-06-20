@@ -111,10 +111,9 @@ def nifti_2_correctarr(im_n):
 
     im_n = nib.as_closest_canonical(im_n)
     im_data = im_n.get_fdata()
-    return im_data
+    spacing = im_n.header.get_zooms()[:3]  # Get the spacing from the header
+    return im_data, spacing
 
-def get_spacing(im_nib):
-    return np.abs(im_nib.header['pixdim'][1:4])
 
 # def find_orientation(spacing,kidney_centroids):
 #     rounded_spacing = np.around(spacing,decimals=2)

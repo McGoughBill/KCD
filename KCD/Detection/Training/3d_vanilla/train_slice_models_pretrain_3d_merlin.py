@@ -48,7 +48,7 @@ def train_cv_slice_model(home = '/Users/mcgoug01/Downloads/Data/',dataname='core
 
         if os.path.exists(split_fp): fold_split = np.load(split_fp,allow_pickle=True)
         else:
-            fold_split = np.array([(fold,tr_index,ts_index) for fold,(tr_index, ts_index) in enumerate(five_fold_strat.split(cases,is_ncct))])
+            fold_split = np.array([(fold,tr_index,ts_index) for fold,(tr_index, ts_index) in enumerate(five_fold_strat.split(cases,is_ncct))],dtype='object')
             np.save(os.path.join(split_path,split_fp),fold_split)
 
         results_csv_fold_paths = [os.path.join(split_path,'fold_{}'.format(fold),'csv','{}_{}_{}_{}_{}.csv'.format(model_type,params['model_size'],params['epochs'],params['epochs'],params['lr'])) for fold in range(folds)]
@@ -115,4 +115,4 @@ if __name__ == '__main__':
     dataset = 'masked_kits_add_nooverlap_v2'
     home = '/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data/'
     train_cv_slice_model(home=home,dataname=dataset,splits=[0],train_folds=[fold],epochs=epochs,
-                         params=None,folds=5,all_params=True)
+                         params=None,folds=5,all_params=False)

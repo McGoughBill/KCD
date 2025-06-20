@@ -119,7 +119,7 @@ def init_slice3D_params():
     return params
 
 def init_slice3D_params_pretrain():
-    params = {"voxel_size": 1,
+    params = {"voxel_size": 1.5,
               "model_size": "small",
               "cancthresh_r_mm": 10,
               "kidthresh_r_mm": 20,
@@ -127,23 +127,23 @@ def init_slice3D_params_pretrain():
               "dilated": 40,
               "lr": 1e-3,
               "epochs": 5,
-              "depth_z": 112,
-              "boundary_z": 30,
+              "depth_z": 60,
+              "boundary_z": 20,
               'pred_window': 1,
               'seg_weight': 0.02}
     return params
 
 def init_slice3D_params_finetune():
-    params = {"voxel_size": 1,
+    params = {"voxel_size": 1.5,
               "model_size": "small",
               "cancthresh_r_mm": 10,
               "kidthresh_r_mm": 20,
               "batch_size": 16,
               "dilated": 40,
               "lr": 5e-4,
-              "epochs": 5,
-              "depth_z": 20,
-              "boundary_z": 5,
+              "epochs": 3,
+              "depth_z": 60,
+              "boundary_z": 20,
               'pred_window': 1}
     return params
 
