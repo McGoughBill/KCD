@@ -385,7 +385,7 @@ def create_unlabelled_dataset(im_path,save_dir,seg_path,target_spacing,overlap,
                    patch_dims,foreground_thresh,
                    voxel_size_mm, save_limit,bbox_boundary_mm=50,
                    data_name='coreg_ncct',boundary_z=1,depth_z=1,
-                   kidney_thresh_rmm=20):
+                   kidney_thresh_rmm=20,is_merlin=False):
     
     save_path = fu.create_save_path_structure(im_path,data_name=data_name,save_dir=save_dir)    
     int_list = [file for file in os.listdir(im_path)]
@@ -398,9 +398,8 @@ def create_unlabelled_dataset(im_path,save_dir,seg_path,target_spacing,overlap,
     for get_int in int_list:
         if get_int=='.DS_Store': continue
         ct,seg = am.get(get_int,im_path,seg_path)
-        ct_im,seg_im = am.nifti_2_correctarr(ct), am.nifti_2_correctarr(seg)
+        (ct_im,_),(seg_im,spacing) = am.nifti_2_correctarr(ct), am.nifti_2_correctarr(seg)
         patch_size= patch_dims.copy()
-        spacing=am.get_spacing(ct)  
         spacing_axes = am.find_orientation(spacing,is_axes=False)
         if spacing_axes == (0,0,0):continue
         z_spac,inplane_spac = spacing[spacing_axes[0]], spacing[spacing_axes[1]]
@@ -413,6 +412,15 @@ def create_unlabelled_dataset(im_path,save_dir,seg_path,target_spacing,overlap,
         
         reshaped_im = am.rescale_array(ct_im,correct_spacing,axes,target_spacing = target_spacing).astype(np.float32)
         reshaped_seg = am.rescale_array(seg_im,correct_spacing,axes,target_spacing = target_spacing,is_seg=True)
+
+        if is_merlin:
+            # use torch interpolation to rescale z-axis to half resolution
+            scale_factor = (1,1,0.5)
+            reshaped_im = nn.functional.interpolate(torch.unsqueeze(torch.unsqueeze(torch.Tensor(reshaped_im),dim=0),dim=0).type(torch.float32),
+                                                    mode = 'trilinear', scale_factor=scale_factor).numpy()[0,0].astype(np.float32)
+            reshaped_seg = nn.functional.interpolate(torch.unsqueeze(torch.unsqueeze(torch.Tensor(reshaped_seg),dim=0),dim=0).type(torch.float32),
+                                                    mode = 'nearest', scale_factor=scale_factor).numpy()[0,0].astype(np.uint16)
+
 
 
         kidney_data = np.asarray([[mass,centroid] for mass, centroid in get_masses(reshaped_seg>0,vol_thresh_vox)],dtype=object)
@@ -442,8 +450,7 @@ def create_unlabelled_dataset(im_path,save_dir,seg_path,target_spacing,overlap,
             ct += np.where(final_mask==0,-200,0).astype(np.float32)
 
             cent_im, cent_seg = get_centralised_windows(ct,seg,centroid,patch_size=patch_size,axes=axes,boundary_z=boundary_z)
-            assert(cent_im.shape[-3:]==tuple(patch_dims))
-            assert(cent_seg.shape[-2:]==tuple(patch_dims[-2:]))
+            print('cent_im shape:',cent_im.shape,cent_seg.shape)
             
             save_windows_unlabelled(cent_im,cent_seg,fg_thresh,
                          target_spacing,save_path,
