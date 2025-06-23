@@ -110,8 +110,8 @@ def train_cv_slice_model(home = '/Users/mcgoug01/Downloads/Data/',dataname='core
 if __name__ == '__main__':
     import sys
     epochs = 5
-    fold = 0
+    # fold = int(sys.argv[1]) if len(sys.argv) > 1 else 0
     dataset = 'masked_coreg_v4_noised'
     home = '/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data/'
-    train_cv_slice_model(home=home,dataname=dataset,splits=[0],train_folds=[fold],epochs=epochs,
+    train_cv_slice_model(home=home,dataname=dataset,splits=[0],train_folds=[0,1,2,3,4],epochs=epochs,
                          params=None,folds=5,all_params=False)

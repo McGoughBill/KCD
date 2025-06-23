@@ -50,8 +50,14 @@ class SW_Data_labelled(Dataset):
         
         self.data_df['class'] = self.data_df['class'].astype(int)
         self.data_df['case'] = self.data_df.filepath.str.replace('-','_').str.split('_').apply(lambda x:x[0:2]).str.join("_")
-        self.data_df['side'] = self.data_df.filepath.str.replace('-','_').str.split('_').apply(lambda x:x[2])
-        self.data_df['window'] = self.data_df.filepath.str.replace('-','_').str.split('_').apply(lambda x:x[3])
+        # remove everything in case after '_random_shifted','_left_centralised',or '_right_centralised'
+        self.data_df['case'] = self.data_df['case'].str.replace('_random_shifted','').str.replace('_left_centralised','').str.replace('_right_centralised','')
+        #do same for _random, _left, _right
+        self.data_df['case'] = self.data_df['case'].str.replace('_random','').str.replace('_left','').str.replace('_right','')
+        # make 'left' if 'left' appears in filepath, 'right' if 'right' appears, 'random' if neither appears
+        self.data_df['side'] = self.data_df.filepath.str.replace('-','_').str.split('_').apply(lambda x:'left' if 'left' in x else ('right' if 'right' in x else 'random'))
+        #make 'window' equal to 'centralised' if 'centralised appears in filepath, 'random_shifted' if not
+        self.data_df['window'] = self.data_df.filepath.str.replace('-','_').str.split('_').apply(lambda x:'centralised' if 'centralised' in x else 'random_shifted')
         self.data_df['slice'] = self.data_df.filepath.str.replace('-','_').str.split('_').apply(lambda x:int(x[-1].split('index')[1].split('.')[0]))
         self.cases = self.data_df.case
                     
