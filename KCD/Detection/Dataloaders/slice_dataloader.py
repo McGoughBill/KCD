@@ -99,7 +99,10 @@ class SW_Data_labelled(Dataset):
     def _rotate(self,tensor,p=0.5):
         if random()>p: return tensor
         rot_extent = np.random.randint(1,4) #only ever rotate in plane
-        return torch.rot90(tensor,rot_extent,dims=[-3,-2])
+        if self.is_3d:
+            return torch.rot90(tensor,rot_extent,dims=[-3,-2])
+        else:
+            return torch.rot90(tensor,rot_extent,dims=[-2,-1])
     
     def _flip(self,tensor,p=0.5):
         if random()>p: return tensor

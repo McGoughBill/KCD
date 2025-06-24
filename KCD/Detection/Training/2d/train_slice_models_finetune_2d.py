@@ -95,4 +95,4 @@ if __name__ == '__main__':
     dataset = 'coreg_ncct'
     # home = '/bask/projects/p/phwq4930-renal-canc/KCD_data/Data'
     pretrain_ds = 'kits23_nooverlap'
-    train_cv_slice_model_2d(home='/media/bill/Crucial X6/classification_revisited',dataname=dataset,splits=[0],pretrain_ds=pretrain_ds)
+    train_cv_slice_model_2d(home='/media/bill/Crucial X6/classification_revisited/',dataname=dataset,splits=[0],pretrain_ds=pretrain_ds)

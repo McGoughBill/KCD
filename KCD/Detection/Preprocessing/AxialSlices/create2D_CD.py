@@ -2,9 +2,9 @@ import slice_generating_utils as generator
 import numpy as np
 
 data_name = 'coreg_ncct'
-path = "/Volumes/Crucial X6/classification_revisited/raw_data/coreg_ncct/images"
-save_dir = '/Volumes/Crucial X6/classification_revisited'
-segpath = "/Volumes/Crucial X6/classification_revisited/raw_data/coreg_ncct/labels"
+path = "/media/bill/Crucial X6/classification_revisited/raw_data/coreg_ncct/images"
+save_dir = '/media/bill/Crucial X6/classification_revisited/'
+segpath = "/media/bill/Crucial X6/classification_revisited/raw_data/coreg_ncct/labels"
 
 overlap_mm = 40 ## this dictates the minimum distance apart between each slice! not the overlap.
 patch2d = 224 ## in plane slice spacing
