@@ -12,7 +12,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 import numpy as np
 import sys
-import dgl
+# import dgl
 import warnings
 import pandas as pd
 
@@ -66,14 +66,14 @@ def eval_individual_slice_models(home='/Users/mcgoug01/Downloads/Data',trainname
         foldwise_results.append(slice_res)
         
     all_results = pd.concat(foldwise_results)
-    all_results = all_results.groupby(['case','position']).sum().reset_index(level=['case','position'])[['case','position','prediction']]
+    all_results = all_results.groupby(['case','position']).mean().reset_index(level=['case','position'])[['case','position','prediction','soft_prediction','max_scored_index']]
     print(all_results)
     print(all_results['position'])
-    all_results['prediction'] = all_results['prediction'].apply(lambda x:1 if x>=(tr_folds/2) else 0)
+    all_results['prediction'] = all_results['prediction'].apply(lambda x:1 if x>=0.5 else 0)
     all_results.to_csv(os.path.join(inference_path,'{}_'.format(model_type)+model_name+'.csv'))
     
 if __name__ == '__main__':
-    home = '/Users/mcgoug01/Downloads/Data'
+    home = '/media/bill/Crucial X6/classification_revisited/'
     trainname = 'coreg_ncct'
     infername='test_set'
     eval_individual_slice_models(home=home,trainname=trainname,infername=infername)

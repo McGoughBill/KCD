@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader
 import numpy as np
 import os
 import torch
-import dgl
+# import dgl
 import matplotlib.pyplot as plt
 import torch.nn as nn
 import pandas as pd
@@ -107,17 +107,17 @@ def init_inference_home(home, infername,trname,split):
     return split_home
         
 
-def shape_collate(samples, dev=initialize_device()):
-    features, graphs, labels = map(list, zip(*samples))
-    batched_graph = dgl.batch(graphs)
-    return torch.stack(features).to(dev), batched_graph.to(dev), torch.stack(labels).squeeze(dim=0).to(dev)
-
-
-def shape_collate_unlabelled(samples, dev=initialize_device()):
-    features, graphs = map(list, zip(*samples))
-    batched_graph = dgl.batch(graphs)
-    return torch.stack(features).to(dev), batched_graph.to(dev)
-
+# def shape_collate(samples, dev=initialize_device()):
+#     features, graphs, labels = map(list, zip(*samples))
+#     batched_graph = dgl.batch(graphs)
+#     return torch.stack(features).to(dev), batched_graph.to(dev), torch.stack(labels).squeeze(dim=0).to(dev)
+#
+#
+# def shape_collate_unlabelled(samples, dev=initialize_device()):
+#     features, graphs = map(list, zip(*samples))
+#     batched_graph = dgl.batch(graphs)
+#     return torch.stack(features).to(dev), batched_graph.to(dev)
+#
 
 def check_params(params,template_params):
     inputset = set(params.keys())
@@ -246,7 +246,6 @@ def eval_cnn(twCNN,test_tw_dl,ps_boundary=0.98,dev='cpu',boundary_size=10):
         for case in cases:
             for position in test_tw_dl.dataset.data_df[test_tw_dl.dataset.data_df['case'] ==case].side.unique():
                 if position == 'random': continue
-                print(case,position)
                 test_tw_dl.dataset.set_val_kidney(case,position)
                 entry = {'case':case,
                          'position':position}
@@ -254,12 +253,16 @@ def eval_cnn(twCNN,test_tw_dl,ps_boundary=0.98,dev='cpu',boundary_size=10):
                 for x in test_tw_dl:
                     pred = softmax(twCNN(x.to(dev)))
                     case_store.extend(pred[:,2].cpu().numpy().tolist())
-
+                entry['max_scored_index'] = np.argmax(case_store) if len(case_store)>0 else 0
                 case_store.sort(reverse=True)
                 entry['Top-{}'.format(boundary_size)]=sum(case_store[:boundary_size])
+                entry['soft_prediction'] = sum(case_store[:boundary_size])/boundary_size
+
                 entry['prediction'] = int(entry['Top-{}'.format(boundary_size)]>=boundary)
                 entry['boundary']=boundary
                 test_res.append(entry)
+                print(entry)
+                print()
             
     test_df = pd.DataFrame(test_res)
     
