@@ -45,6 +45,11 @@ names = names_sub_folders
 folders = sub_folders
 small_ai_results = [[100,0]]
 all_ai_results = [[100,0]]
+
+largest_pred = pd.read_csv(folders[0])
+# where RightCancer ==1, replace with 0.001, and where LeftCancer == 1, replace with 0.001
+largest_pred['RightCancer'] = largest_pred['RightCancer'].replace(1, 0.001)
+largest_pred['LeftCancer'] = largest_pred['LeftCancer'].replace(1, 0.001)
 for size_constraint in [True,False]:
     for name,pred_csv_fp in zip(names,folders):
 
@@ -52,6 +57,18 @@ for size_constraint in [True,False]:
         #calc sens and spec
         pred = pd.read_csv(pred_csv_fp)
         truth = pd.read_csv(truth_csv_fp)
+
+        # loop through pred cases - if pred ==1 for that case RightCancer, set largestpred['RightCancer'] to float(name)
+        for case_id in pred['CaseID'].values:
+            right_cancer_pred = pred.loc[pred['CaseID'] == case_id, 'RightCancer'].values[0]
+            left_cancer_pred = pred.loc[pred['CaseID'] == case_id, 'LeftCancer'].values[0]
+
+            # if float(name) larger than largest_pred['RightCancer'] for that case, set it to float(name)
+            if right_cancer_pred > largest_pred.loc[largest_pred['CaseID'] == case_id, 'RightCancer'].values[0]:
+                largest_pred.loc[largest_pred['CaseID'] == case_id, 'RightCancer'] = float(name)
+            if left_cancer_pred > largest_pred.loc[largest_pred['CaseID'] == case_id, 'LeftCancer'].values[0]:
+                largest_pred.loc[largest_pred['CaseID'] == case_id, 'LeftCancer'] = float(name)
+
 
         #rename truth RightCancer and LeftCancer to RightCancerLabel and LeftCancerLabel
         truth.rename(columns={'RightCancer': 'RightCancerLabel', 'LeftCancer': 'LeftCancerLabel'}, inplace=True)
@@ -145,6 +162,10 @@ for size_constraint in [True,False]:
 
 #make marker star
 marker = '*'
+
+#save largest_pred to csv
+largest_pred_fp = '/Users/mcgoug01/Dropbox (Personal)/PhD/thesis_plots/V1segdetection/largest_pred.csv'
+largest_pred.to_csv(largest_pred_fp, index=False)
 
 #plot ROC curve, and plot the point for Iztok and Cathal
 # also, plot the operating points for the AI models (high sensitivity, high accuracy, high specificity)
