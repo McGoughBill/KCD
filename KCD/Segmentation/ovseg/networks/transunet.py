@@ -355,20 +355,21 @@ def get_3d_transunet(in_channels,out_channels,n_stages,filters=32,
 def get_3d_featureoutput_3d_transunet(in_channels,out_channels,n_stages,filters=32,
                      patch_size=(64,64,64),use_masked_attn=True,cls_classes=2):
     kernel_sizes = [(3,3,3) for i in range(n_stages)]
+    n_pyramid_scales = len(kernel_sizes) - 2  # number of scales in the pyramid
     return TransUNet3D(
         in_channels=in_channels,
         out_channels=out_channels,
         kernel_sizes=kernel_sizes,
         is_2d=False,
         filters=filters,
-        n_pyramid_scales=n_stages,
+        n_pyramid_scales=n_pyramid_scales,
         patch_size=patch_size,
         use_masked_attn=use_masked_attn,
         use_vit=True,
         vit_name="R50-ViT-B_16",  # default ViT config
         with_classification_head=True,
         cls_classes=cls_classes,
-        feature_output=True
+        feature_output=True,
     )
 
 

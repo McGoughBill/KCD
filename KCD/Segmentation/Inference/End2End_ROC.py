@@ -1,5 +1,5 @@
 import os
-os.environ['OV_DATA_BASE'] = '/home/wcm23/rds/hpc-work/FineTuningKITS23'
+os.environ['OV_DATA_BASE'] = '/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data'
 from KCD.Segmentation.Inference.endtoend import EnsembleSeg, masking
 import numpy as np
 from skimage.measure import label
@@ -91,7 +91,7 @@ def EndToEnd(dataset, stage1_path, stage_2path, op_points = [0.001,0.01,0.02,0.0
     s1 = EnsembleSeg.Ensemble_Seg(dataset,name='s1',
                             seg_fp=stage1_path,
                             spacing=np.array([4] * 3),
-                            do_prep=True, do_infer=True,
+                            do_prep=False, do_infer=True,
                             is_cect=False, cont=False,overlap=0.5,
                             batch_size=16, patch_size=64)
 
@@ -132,7 +132,9 @@ def EndToEnd(dataset, stage1_path, stage_2path, op_points = [0.001,0.01,0.02,0.0
 
 
 if __name__ == '__main__':
-    s1_path = '/home/wcm23/rds/hpc-work/FineTuningKITS23/trained_models/coreg_ncct/4mm_binary/6,3x3x3,32_finetune_fromallcect'
-    s2_path = '/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data/trained_models/masked_coreg_ncct/2mm_binary_canceronly/6,3x3x3,32_finetune_fromkits23_cect_long'
+    s1_path = '/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data/trained_models/coreg_v4_noised/4mm_kidneybinary_customPP/6_finetune_trained'
+    # s2_path = '/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data/trained_models/masked_coreg_v4_noised_PO/2mm_cancerbinary_customPP/PO_yesradar_from:l2-0.0001_cce1.0_cos1.0_0.0001lr_0.9999lg_20bs_300ep_4gpus_efr_dfr50'
 
-    EndToEnd('test_set', s1_path, s2_path)
+    #radar ncct
+    s2_path = '/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data/trained_models/masked_coreg_v4_noised/2mm_cancerbinary_customPP/6_finetune_RADAR_efr_dfr100'
+    EndToEnd('ykst', s1_path, s2_path)

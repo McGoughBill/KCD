@@ -22,9 +22,9 @@ np.random.seed(0)
 data_name = 'masked_coreg_v4_noised_PO'
 spacing = 2
 preprocessed_name = '2mm_cancerbinary_customPP'
-efr = 1000
-dfr = 50
-pretrain_name = 'l2-0.0001_cce1.0_cos1.0_0.0001lr_0.9999lg_20bs_300ep_4gpus'
+efr = 0
+dfr = 0
+pretrain_name = 'l2-0.0001_cce1_cos1_0.0001lr_0.9999lg_20bs_500ep_4gpus'
 fold = int(sys.argv[1]) if len(sys.argv) > 1 else 0
 
 dev = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -69,7 +69,7 @@ model_params['training']['opt_name'] = 'ADAM'
 model_params['training']['opt_params'] = {'lr': lr,
                                           'betas': (0.95, 0.9),
                                           'eps': 1e-08}
-model_params['training']['lr_params'] = {'n_warmup_epochs': 25, 'lr_max': 0.00005}
+model_params['training']['lr_params'] = {'n_warmup_epochs': 25, 'lr_max': 0.0002}
 model_params['data']['trn_dl_params']['epoch_len'] = 1000
 model_params['data']['trn_dl_params']['padded_patch_size'] = [2 * patch_size[0]] * 3
 model_params['data']['val_dl_params']['padded_patch_size'] = [2 * patch_size[0]] * 3
@@ -82,7 +82,7 @@ model_params['data']['trn_dl_params']['min_biased_samples'] = model_params['data
 
 model_name = 'PO_yesradar_from:' + pretrain_name+'_efr_dfr{}'.format(dfr)
 for vf in vfs:
-    opt_save_loc = '/home/wcm23/rds/rds-artist-sDuALntK11g/ne2ceCT/PO_2_cancer_ckpt_delay/l2-0.0001_cce1.0_cos1.0_0.0001lr_0.9999lg_20bs_300ep_4gpus/optimizer_state'
+    opt_save_loc = '/home/wcm23/rds/rds-artist-sDuALntK11g/ne2ceCT/PO_2_cancer_ckpt_delay/l2-0.0001_cce1_cos1_0.0001lr_0.9999lg_20bs_500ep_4gpus/optimizer_state'
     checkpoint = torch.load(opt_save_loc)
     sd = checkpoint['model_state_dict']
     # remove keys from state_dict that contain 'fcs','class_pooling', and 'final_fc'

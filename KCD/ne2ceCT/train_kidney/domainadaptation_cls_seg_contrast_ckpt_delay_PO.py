@@ -49,13 +49,13 @@ def collate_fn(batch):
 def parse_option():
     parser = argparse.ArgumentParser('ne2ceCT pretraining script', add_help=False)
 
-    parser.add_argument('--epochs', type=int, default=1000, help='number of epochs')
-    parser.add_argument('--l2_weight', type=float, default=0, help='l2 weight')
-    parser.add_argument('--cce_weight', type=float, default=0, help='cce weight')
-    parser.add_argument('--cos_weight', type=float, default=0, help='cosine similarity weight')
-    parser.add_argument('--batch_size', type=int, default=4, help='batch size')
-    parser.add_argument('--lr_max', type=float, default=0.00005, help='max learning rate')
-    parser.add_argument('--loss_gamma', type=float, default=0.99999, help='gamma for learning rate scheduler')
+    parser.add_argument('--epochs', type=int, default=500, help='number of epochs')
+    parser.add_argument('--l2_weight', type=float, default=1e-4, help='l2 weight')
+    parser.add_argument('--cce_weight', type=float, default=1, help='cce weight')
+    parser.add_argument('--cos_weight', type=float, default=1, help='cosine similarity weight')
+    parser.add_argument('--batch_size', type=int, default=20, help='batch size')
+    parser.add_argument('--lr_max', type=float, default=1e-4, help='max learning rate')
+    parser.add_argument('--loss_gamma', type=float, default=0.9999, help='gamma for learning rate scheduler')
     parser.add_argument('--dist_backend', type=str, default='nccl', help='distributed backend')
     parser.add_argument('--dist_url', type=str, default='env://', help='url used to set up distributed training')
     parser.add_argument('--world_size', type=int, default=1, help='number of nodes for distributed training')
@@ -64,7 +64,7 @@ def parse_option():
     parser.add_argument('--workers', default=16, type=int, help='number of workers')
     parser.add_argument('--ngpus_per_node', default=4, type=int, help='number of gpus per node')
     parser.add_argument('--out_dim', default=2, type=int, help='output dimension')
-    parser.add_argument('--spacing', default=1, type=int, help='spacing')
+    parser.add_argument('--spacing', default=2, type=int, help='spacing')
     parser.add_argument('--dist-url', default='tcp://127.0.0.1:23456', type=str, help='distributed url')
 
     args = parser.parse_args()
@@ -163,7 +163,7 @@ def main_worker(gpu,args):
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers=workers,
                             collate_fn=collate_fn)
 
-    mod_path = '/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data/trained_models/PR_publiconly_CECTpretrain/2mm_canceronly_customPP/6_tot_ch_talkative_MP_cls0.1/fold_0/network_weights'
+    mod_path = '/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data/trained_models/PR_publiconly_CECTpretrain_small/2mm_canceronly_customPP/6_tot_ch_talkative_MP_cls0.1_small/fold_0/network_weights'
     model_T = get_3d_featureoutput_unet(1, out_dim, 6, filters=32, filters_max=1024).cuda(args.gpu)
     model_T.load_state_dict(torch.load(mod_path,map_location='cuda:{}'.format(args.gpu)))
     model_S = get_3d_featureoutput_unet(1, out_dim, 6, filters=32, filters_max=1024).cuda(args.gpu)

@@ -1186,6 +1186,41 @@ class UNet_regressivehead_wrapper(nn.Module):
 
         return logs_list, out_class_latents, regressive
 
+class TransUnet_regressivehead_wrapper(nn.Module):
+    def __init__(self,UNet,depth,start_filters=32,patch_size=64):
+        super().__init__()
+        self.UNet = UNet
+        self.depth = depth
+        self.num_upsamplers = self.depth - 2
+
+        self.upsamplers = []
+        #kernel size needs to increase by 2 for each upsampling layer
+
+        for i in range(self.num_upsamplers):
+            self.upsamplers.append(UpConv(start_filters*(2**i),
+                                          3,
+                                          is_2d=False,
+                                          kernel_size=2**i))
+
+        self.upsamplers = nn.ModuleList(self.upsamplers)
+        #create a conv layer with 3*self.num_upsamplers input channels and 1 output channel
+        self.regressive_head = ConvNormNonlinBlock(in_channels=3*self.num_upsamplers,
+                                                    out_channels=1,
+                                                    is_2d=False,
+                                                    kernel_size=3)
+
+    def forward(self,xb):
+        logs_list, out, feature_list, out_class_latents = self.UNet(xb)
+        regressives = []
+        for i in range(self.num_upsamplers):
+            regressives.append( self.upsamplers[i](feature_list[i]))
+
+        # channell-wise concat, then apply the regressive head
+        regressive = torch.cat(regressives,dim=1)
+        regressive = self.regressive_head(regressive)
+
+        return logs_list, out_class_latents, regressive
+
 
 class UNet_regressivehead_wrapper_kidney(nn.Module):
     def __init__(self,UNet,depth,start_filters=32,patch_size=64):

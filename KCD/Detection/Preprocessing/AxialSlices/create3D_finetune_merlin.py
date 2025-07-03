@@ -19,17 +19,6 @@ has_seg_label = True ## if we don't have seg label, we only generated foreground
 
 patch_size = np.array([patch2d]*3) 
 patch_size[0]=depth_z
-
-for thresh in thresholds_r_mm:
-    for spacing in voxel_spacings: 
-        target_spacing = np.array([spacing]*3)
-        overlap = overlap_mm/(patch_size*spacing)
-        # overlap_mm = spacing*patch2d/10
-        print("Voxel Spacing {}mm".format(spacing))
-        generator.create_labelled_dataset(path,save_dir,segpath,target_spacing,overlap,
-                       patch_size,thresh,spacing,save_limit_percase_perlabel,
-                       bbox_boundary_mm,data_name=data_name,boundary_z=boundary_z,
-                       depth_z=depth_z,kidney_thresh_rmm=kidney_r_mm,is_merlin=True)
         
 for thresh in thresholds_r_mm:
     for spacing in voxel_spacings: 
@@ -41,3 +30,14 @@ for thresh in thresholds_r_mm:
                        patch_size,0,spacing,save_limit_percase_perlabel,
                        bbox_boundary_mm,data_name=data_name,boundary_z=boundary_z,
                        depth_z=depth_z,kidney_thresh_rmm=0,is_merlin=True)
+
+for thresh in thresholds_r_mm:
+    for spacing in voxel_spacings:
+        target_spacing = np.array([spacing]*3)
+        overlap = overlap_mm/(patch_size*spacing)
+        # overlap_mm = spacing*patch2d/10
+        print("Voxel Spacing {}mm".format(spacing))
+        generator.create_labelled_dataset(path,save_dir,segpath,target_spacing,overlap,
+                       patch_size,thresh,spacing,save_limit_percase_perlabel,
+                       bbox_boundary_mm,data_name=data_name,boundary_z=boundary_z,
+                       depth_z=depth_z,kidney_thresh_rmm=kidney_r_mm,is_merlin=True)

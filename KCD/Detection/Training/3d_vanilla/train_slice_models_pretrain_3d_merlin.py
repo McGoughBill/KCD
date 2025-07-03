@@ -115,4 +115,4 @@ if __name__ == '__main__':
     dataset = 'masked_kits_add_nooverlap_v2'
     home = '/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data/'
     train_cv_slice_model(home=home,dataname=dataset,splits=[0],train_folds=[fold],epochs=epochs,
-                         params=None,folds=5,all_params=False)
+                         params=None,folds=5,all_params=True)

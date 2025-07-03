@@ -133,8 +133,8 @@ def nifti_2_correctarr(im_n):
 
 def find_orientation(spacing,is_axes=True,im=None):
     rounded_spacing = np.around(spacing,decimals=1)
-
-    if not (2 in np.unique(rounded_spacing,return_counts=True)[1]): return 0,0,0
+    if not (2 in np.unique(rounded_spacing,return_counts=True)[1]):
+        return 0,0,0
     inplane_spacing = stats.mode(rounded_spacing,keepdims=False)[0]
     indices = np.array([0,1,2])
     axial = indices[rounded_spacing!=inplane_spacing][0]

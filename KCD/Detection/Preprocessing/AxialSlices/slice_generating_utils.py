@@ -133,13 +133,13 @@ def get_centralised_windows(reshaped_im,reshaped_seg,centroid,axes=None,patch_si
                             boundary_z = 1):
     axial_plane,lr,ud = axes
     shape_in = reshaped_im.shape
-    zc,xc,yc = np.array([*centroid])[axes]
-
-    pad = [0, patch_size[0] - shape_in[2], 0, patch_size[2] - shape_in[1],
-           0, patch_size[1] - shape_in[0]]
+    xc,yc,zc = centroid
+    pad = [patch_size[2] - shape_in[0],
+           0, patch_size[1] - shape_in[1], 0, patch_size[0] - shape_in[2],0][::-1]
     pad = np.maximum(pad, 0).tolist()
     reshaped_im = nn.functional.pad(torch.Tensor(reshaped_im), pad).type(torch.float32).numpy()
     reshaped_seg = nn.functional.pad(torch.Tensor(reshaped_seg), pad).type(torch.float32).numpy()
+
     shape = reshaped_im.shape
 
 
@@ -158,11 +158,17 @@ def get_centralised_windows(reshaped_im,reshaped_seg,centroid,axes=None,patch_si
     central_window_im = np.zeros((max(1,len(z_list)),patch_size[1],patch_size[2], patch_size[0]),dtype=np.float32)
     central_window_seg = np.zeros((max(1,len(z_list)),patch_size[1],patch_size[2],patch_size[0]),dtype=np.uint16)
 
+    if len(z_list) == 0:
+        z_list = [0]
+
+    print('reshape im shape:',reshaped_im.shape)
+
     for i,z in enumerate(z_list):
         central_window_im[i, :, :, :] = reshaped_im[top_left_x:bottom_right_x, top_left_y:bottom_right_y,
                                         z:z + patch_size[0]]
         central_window_seg[i, :, :, :] = reshaped_seg[top_left_x:bottom_right_x, top_left_y:bottom_right_y,
                                          z:z + patch_size[0]]
+
 
     return central_window_im, central_window_seg
 
@@ -265,8 +271,14 @@ def save_windows_unlabelled(windowed_im,windowed_seg,fg_thresh,target_spacing,
     else: string = 'shifted'
     
     _,sw_normals,sw_none= am.filter_shifted_windows(windowed_im,windowed_seg,1e6,fg_thresh,target_spacing[0],shuffle=shuffle,has_seg_label=False)
+    if min(len(sw_normals),save_limit) == 0:
+        # do not use filtering if there are no foreground windows
+        sw_subtypes = [windowed_im]
+        sw_normals = windowed_im
+
     sw_subtypes = [sw_normals]
     names = ["foreground"]
+
     print("Creating {} foreground {} windows.".format(min(len(sw_normals),save_limit),
                                                                       string))
 
@@ -309,6 +321,7 @@ def create_labelled_dataset(im_path,save_dir,seg_path,target_spacing,overlap,
         if axes == (0,0,0):continue
         axial,lr,ud = axes
         axes = np.array(axes)
+
 
         
         reshaped_im = am.rescale_array(ct_im, correct_spacing, axes, target_spacing = target_spacing).astype(np.float32)
@@ -386,28 +399,29 @@ def create_unlabelled_dataset(im_path,save_dir,seg_path,target_spacing,overlap,
                    voxel_size_mm, save_limit,bbox_boundary_mm=50,
                    data_name='coreg_ncct',boundary_z=1,depth_z=1,
                    kidney_thresh_rmm=20,is_merlin=False):
-    
-    save_path = fu.create_save_path_structure(im_path,data_name=data_name,save_dir=save_dir)    
+    save_path = fu.create_save_path_structure(im_path,data_name=data_name,save_dir=save_dir)
     int_list = [file for file in os.listdir(im_path)]
-    
+
     bbox_boundary = int(np.round(bbox_boundary_mm/target_spacing[0]))
     vol_thresh_vox = 1000 / float(np.prod(target_spacing)) # ignore 'kidney' segmentations with a vol less than 100mm cubed
     kernel = spim.generate_binary_structure(3, 2).astype(np.uint8)
     fg_thresh = ((foreground_thresh/target_spacing[0])**2) * 3.1416
-    
     for get_int in int_list:
         if get_int=='.DS_Store': continue
         ct,seg = am.get(get_int,im_path,seg_path)
         (ct_im,_),(seg_im,spacing) = am.nifti_2_correctarr(ct), am.nifti_2_correctarr(seg)
         patch_size= patch_dims.copy()
         spacing_axes = am.find_orientation(spacing,is_axes=False)
-        if spacing_axes == (0,0,0):continue
+        if spacing_axes == (0,0,0):
+            # check if all spacings are identical; if so, use shape of data to generate axes
+            if len(set(spacing))==1:
+                pass
+            else:
+                print('spacing axes not found for:',get_int)
+                continue
         z_spac,inplane_spac = spacing[spacing_axes[0]], spacing[spacing_axes[1]]
         correct_spacing = np.array((z_spac,inplane_spac,inplane_spac))
-        axes = am.find_orientation(ct_im.shape,is_axes=True,im=ct_im)
-        if axes == (0,0,0):continue
-        axial,lr,ud = axes
-        axes = np.array(axes)
+        axes = np.array([2,1,0])
 
         
         reshaped_im = am.rescale_array(ct_im,correct_spacing,axes,target_spacing = target_spacing).astype(np.float32)
@@ -424,9 +438,12 @@ def create_unlabelled_dataset(im_path,save_dir,seg_path,target_spacing,overlap,
 
 
         kidney_data = np.asarray([[mass,centroid] for mass, centroid in get_masses(reshaped_seg>0,vol_thresh_vox)],dtype=object)
-
         kid_str = get_kid_str(kidney_data,reshaped_im,reshaped_seg,spacing,axes,labelled=False)
+        sys.stdout.flush()
         if kid_str == ['_failure']:continue
+
+        print('Number of positive voxels in segmentation:',np.sum(reshaped_seg>0))
+
                 
         for kidney_datum, name in zip(kidney_data,kid_str):
             print("\nGenerating from {} {}-side.".format(get_int,name))
@@ -441,16 +458,22 @@ def create_unlabelled_dataset(im_path,save_dir,seg_path,target_spacing,overlap,
                        coords[2]:coords[5]] = np.ones((coords[3]-coords[0],
                                                        coords[4]-coords[1],
                                                        coords[5]-coords[2]))
+
             first_mask = first_mask*(reshaped_seg>0).astype(np.uint8)
             final_mask = spim.binary_dilation(first_mask, kernel, iterations=bbox_boundary).astype(np.uint16)
             
             seg = first_mask*reshaped_seg
+            print('number of positive voxels in {} segmentation:'.format(name),np.sum(seg>0))
             ct = (final_mask*reshaped_im).astype(np.float32)
             # get rid of zero'd background that confounds training - make bg -200HU, the min possible val in image.
             ct += np.where(final_mask==0,-200,0).astype(np.float32)
 
+            print('Unique values in ct:',np.unique(ct,return_counts=True))
+
             cent_im, cent_seg = get_centralised_windows(ct,seg,centroid,patch_size=patch_size,axes=axes,boundary_z=boundary_z)
             print('cent_im shape:',cent_im.shape,cent_seg.shape)
+
+            print('Unique values in centralised ct:',np.unique(cent_im,return_counts=True))
             
             save_windows_unlabelled(cent_im,cent_seg,fg_thresh,
                          target_spacing,save_path,

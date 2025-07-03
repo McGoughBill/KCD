@@ -51,7 +51,8 @@ def train_cv_slice_model(home = '/Users/mcgoug01/Downloads/Data/',dataname='core
             fold_split = np.array([(fold,tr_index,ts_index) for fold,(tr_index, ts_index) in enumerate(five_fold_strat.split(cases,is_ncct))],dtype='object')
             np.save(os.path.join(split_path,split_fp),fold_split)
 
-        results_csv_fold_paths = [os.path.join(split_path,'fold_{}'.format(fold),'csv','{}_{}_{}_{}_{}.csv'.format(model_type,params['model_size'],params['epochs'],params['epochs'],params['lr'])) for fold in range(folds)]
+        results_csv_fold_paths = [os.path.join(split_path,'fold_{}'.format(fold),'csv','finetunedfrompretrain_{}_{}_{}_{}_allparams{}'.format(model_type,params['epochs'],params['epochs'],params['lr'],
+                                                        all_params)) for fold in range(folds)]
 
         for fold,train_index, test_index in fold_split:
             fold_path = os.path.join(split_path,'fold_{}'.format(fold))
@@ -69,6 +70,13 @@ def train_cv_slice_model(home = '/Users/mcgoug01/Downloads/Data/',dataname='core
 
             model = torch.load(
                 '/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data/training_info/masked_kits_add_nooverlap_v2/split_0/fold_0/PatchModel_merlin/model/PatchModel_merlin_5_5_0.001_allparamsTrue')
+
+            if not all_params:
+                for param in model.features.parameters():
+                    param.requires_grad = False
+                opt = torch.optim.Adam(model.cls.parameters(),lr=params['lr'])
+            else:
+                opt = torch.optim.Adam(model.parameters(),lr=params['lr'])
 
             opt = torch.optim.Adam(model.parameters(),lr=params['lr'])
 
@@ -91,17 +99,16 @@ def train_cv_slice_model(home = '/Users/mcgoug01/Downloads/Data/',dataname='core
             cv_results.append(test_df)
             model_res.to_csv(os.path.join(slice_path,'csv',model_name+'.csv'))
 
-        if all([os.path.exists(csv_fold_path) for csv_fold_path in results_csv_fold_paths]):
-            CV_results = pd.concat(cv_results, axis=0, ignore_index=True)
-            model_ROC = eval_.ROC_func(CV_results['Top-{}'.format(params['pred_window'])],CV_results['label'],max_pred=params['pred_window'],intervals=1000)
-            np.save(os.path.join(split_path, '{}_ROC_'.format(model_type)+model_name), model_ROC)
+        CV_results = pd.concat(cv_results, axis=0, ignore_index=True)
+        model_ROC = eval_.ROC_func(CV_results['Top-{}'.format(params['pred_window'])],CV_results['label'],max_pred=params['pred_window'],intervals=1000)
+        np.save(os.path.join(split_path, '{}_ROC_'.format(model_type)+model_name), model_ROC)
 
-            fig = plt.figure(figsize=(8, 6))
-            tu.plot_roc('{}'.format(model_type),model_name,model_ROC)
-            plt.legend()
-            plt.savefig(os.path.join(split_path, '{}_ROC_'.format(model_type)+model_name+'.png'))
-            plt.show()
-            plt.close()
+        fig = plt.figure(figsize=(8, 6))
+        tu.plot_roc('{}'.format(model_type),model_name,model_ROC)
+        plt.legend()
+        plt.savefig(os.path.join(split_path, '{}_ROC_'.format(model_type)+model_name+'.png'))
+        plt.show()
+        plt.close()
 
 if __name__ == '__main__':
     import sys
@@ -110,4 +117,4 @@ if __name__ == '__main__':
     dataset = 'masked_coreg_v4_noised'
     home = '/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data/'
     train_cv_slice_model(home=home,dataname=dataset,splits=[0],train_folds=[0,1,2,3,4],epochs=epochs,
-                         params=None,folds=5,all_params=False)
+                         params=None,folds=5,all_params=True)

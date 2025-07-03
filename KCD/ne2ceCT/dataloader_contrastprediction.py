@@ -54,7 +54,7 @@ class CrossPhaseDataset(Dataset):
         self.patch_per_val_case=10
 
 
-    def apply_foldsplit(self, split_ratio=0.8, train_cases=None):
+    def apply_foldsplit(self, split_ratio=0.9, train_cases=None):
         if self.split is not None:
             self.train_cases = self.split[0]
             self.test_cases = self.split[1]

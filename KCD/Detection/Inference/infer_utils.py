@@ -67,16 +67,19 @@ def init_slice3D_params():
     return params
 
 def init_slice3D_params_finetune():
-    params = {"voxel_size": 1,
+    params = {"voxel_size": 1.5,
               "model_size": "small",
-              "fg_thresh": 0,
-              "batch_size": 16,
+              "cancthresh_r_mm": 10,
+              "kidthresh_r_mm": 20,
+              "batch_size": 2,
               "dilated": 40,
               "lr": 5e-4,
-              "epochs": 5,
-              "depth_z": 20,
-              "boundary_z": 5,
-              'pred_window': 1}
+              "epochs": 3,
+              "depth_z": 60,
+              "boundary_z": 20,
+              'pred_window': 1,
+              "fg_thresh":0,
+              }
     return params
 
 
