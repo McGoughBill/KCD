@@ -75,10 +75,10 @@ def main(nc_data_path,save_nc_path,ce_data_path,save_ce_path,
         os.system(f'cp {os.path.join (ce_data_path,file)} {os.path.join(save_ce_path,save_file)}')
 
 if __name__ == '__main__':
-    nc_data_path = '/rds/project/rds-sDuALntK11g/raw_data/cropped_paired_combined_ncct/images'
-    ce_data_path = '/rds/project/rds-sDuALntK11g/raw_data/cropped_paired_combined_cect/images'
-    save_ce_path = '/rds/project/rds-sDuALntK11g/raw_data/final_pairedpretrain_ce/images'
-    save_nc_path = '/rds/project/rds-sDuALntK11g/raw_data/final_pairedpretrain_nc/images'
+    nc_data_path = '/path/to/kcd_data/raw_data/cropped_paired_combined_ncct/images'
+    ce_data_path = '/path/to/kcd_data/raw_data/cropped_paired_combined_cect/images'
+    save_ce_path = '/path/to/kcd_data/raw_data/final_pairedpretrain_ce/images'
+    save_nc_path = '/path/to/kcd_data/raw_data/final_pairedpretrain_nc/images'
     dose_fractions = [0.7]
     for dose_fraction in dose_fractions[::-1]:
         main(nc_data_path,save_nc_path,ce_data_path,save_ce_path,

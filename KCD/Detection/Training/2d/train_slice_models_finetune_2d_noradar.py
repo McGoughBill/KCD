@@ -10,7 +10,7 @@ import numpy as np
 import warnings
 import pandas as pd
 
-def train_cv_slice_model_2d(home = '/media/mcgoug01/nvme/SecondYear/Data/',dataname='coreg_ncct',pretrain_ds='kits23_nooverlap',
+def train_cv_slice_model_2d(home = '/path/to/kcd_data/nvme/SecondYear/Data/',dataname='coreg_ncct',pretrain_ds='kits23_nooverlap',
                          splits:list=[0],folds=5,params:dict=None,train_folds=[0],
                          epochs = None):
     # Suppress warnings
@@ -55,8 +55,8 @@ def train_cv_slice_model_2d(home = '/media/mcgoug01/nvme/SecondYear/Data/',datan
             if not os.path.exists(fold_path):os.mkdir(fold_path)
             if not os.path.exists(slice_path):os.mkdir(slice_path)
 
-            # model = torch.load('/bask/projects/p/phwq4930-renal-canc/KCD_data/Data/training_info/{}/split_0/fold_2/TileModel/model/TileModel_large_5_10_0.001'.format(pretrain_ds))
-            model = torch.load('/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data/training_info/masked_kits_add_nooverlap_v2/split_0/fold_0/TileModel/model/TileModel_large_5_10_0.001')
+            # model = torch.load('/path/to/kcd_data/KCD_data/Data/training_info/{}/split_0/fold_2/TileModel/model/TileModel_large_5_10_0.001'.format(pretrain_ds))
+            model = torch.load('/path/to/kcd_data/data/seg_data/training_info/masked_kits_add_nooverlap_v2/split_0/fold_0/TileModel/model/TileModel_large_5_10_0.001')
             opt = torch.optim.Adam(model.parameters(),lr=params['lr'])
 
             dl,test_dl = tu.generate_dataloaders(slicedataset,test_slicedataset,cases[train_index],params['batch_size'])
@@ -91,4 +91,4 @@ if __name__ == '__main__':
     import sys
     dataset = 'masked_coreg_v4_noised'
     pretrain_ds = 'masked_kits_add_nooverlap_v2'
-    train_cv_slice_model_2d(home = '/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data/',dataname=dataset,splits=[0],pretrain_ds=pretrain_ds)
+    train_cv_slice_model_2d(home = '/path/to/kcd_data/data/seg_data/',dataname=dataset,splits=[0],pretrain_ds=pretrain_ds)

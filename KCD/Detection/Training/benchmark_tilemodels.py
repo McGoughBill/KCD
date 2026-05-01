@@ -10,7 +10,7 @@ import numpy as np
 import warnings
 import pandas as pd
 
-def benchmark(home = '/Users/mcgoug01/Downloads/Data/',dataname='coreg_ncct',
+def benchmark(home = '/path/to/kcd_data/Downloads/Data/',dataname='coreg_ncct',
                             splits:list=[0],folds=5,params:dict=None,model_arch='resnext',
               voting_window=10, reading=0):
     # Suppress warnings
@@ -92,5 +92,5 @@ if __name__ == '__main__':
     model_arch = str(sys.argv[1])
     voting_window = int(sys.argv[2])
     reading = int(sys.argv[3])
-    home = '/bask/projects/p/phwq4930-renal-canc/KCD_data/Data'
+    home = '/path/to/kcd_data/KCD_data/Data'
     benchmark(home=home,dataname=dataset,splits=[0],model_arch=model_arch,voting_window=voting_window,reading=reading)

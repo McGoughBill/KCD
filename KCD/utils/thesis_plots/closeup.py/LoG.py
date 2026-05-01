@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 plt.switch_backend('TkAgg')
 
-image = cv2.imread('/Users/mcgoug01/Downloads/DSC_0564_BWsmall.png')
+image = cv2.imread('/path/to/kcd_data/Downloads/DSC_0564_BWsmall.png')
 gaussian_kernel = np.array([[1, 2, 1],
                             [2, 4, 2],
                             [1, 2, 1]], np.float32)/16

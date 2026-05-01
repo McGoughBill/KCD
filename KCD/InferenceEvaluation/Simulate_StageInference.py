@@ -13,8 +13,8 @@ from scipy.ndimage.filters import gaussian_filter1d
 import matplotlib.lines as mlines
 import matplotlib.pyplot as plt
 
-res = pd.read_csv('/Users/mcgoug01/Library/CloudStorage/OneDrive-CRUKCambridgeInstitute/SecondYear/Classification/evaluate/inference_unseen/twcnn3d/compare_assessed.csv')
-res2d = pd.read_csv('/Users/mcgoug01/Library/CloudStorage/OneDrive-CRUKCambridgeInstitute/SecondYear/Classification/evaluate/inference_unseen/twcnn2d/compare_assessed_tilestackcorrected.csv')
+res = pd.read_csv('/path/to/kcd_data/Library/CloudStorage/OneDrive-CRUKCambridgeInstitute/SecondYear/Classification/evaluate/inference_unseen/twcnn3d/compare_assessed.csv')
+res2d = pd.read_csv('/path/to/kcd_data/Library/CloudStorage/OneDrive-CRUKCambridgeInstitute/SecondYear/Classification/evaluate/inference_unseen/twcnn2d/compare_assessed_tilestackcorrected.csv')
 res2d['2d_output'] = res2d['tile_output']
 res2d = res2d [['2d_output','Shape_output','case','position','label']]
 

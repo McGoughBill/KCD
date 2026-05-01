@@ -10,7 +10,7 @@ import numpy as np
 import warnings
 import pandas as pd
 
-def train_cv_slice_model_2d(home = '/Users/mcgoug01/Downloads/Data/',dataname='coreg_ncct',pretrain_ds='kits23_nooverlap',
+def train_cv_slice_model_2d(home = '/path/to/kcd_data/Downloads/Data/',dataname='coreg_ncct',pretrain_ds='kits23_nooverlap',
                          splits:list=[0],folds=5,params:dict=None,train_folds=[0],
                          epochs = None):
     # Suppress warnings
@@ -54,7 +54,7 @@ def train_cv_slice_model_2d(home = '/Users/mcgoug01/Downloads/Data/',dataname='c
             if not os.path.exists(fold_path):os.mkdir(fold_path)
             if not os.path.exists(slice_path):os.mkdir(slice_path)
 
-            model = torch.load('/media/mcgoug01/nvme/SecondYear/Data/slices/TileModel_resnext_large_5_10_0.001'.format(pretrain_ds))
+            model = torch.load('/path/to/kcd_data/nvme/SecondYear/Data/slices/TileModel_resnext_large_5_10_0.001'.format(pretrain_ds))
             opt = torch.optim.Adam(model.parameters(),lr=params['lr'])
 
             dl,test_dl = tu.generate_dataloaders(slicedataset,test_slicedataset,cases[train_index],params['batch_size'])
@@ -85,6 +85,6 @@ def train_cv_slice_model_2d(home = '/Users/mcgoug01/Downloads/Data/',dataname='c
 if __name__ == '__main__':
     import sys
     dataset = 'coreg_ncct'
-    home = '/media/mcgoug01/nvme/SecondYear/Data/'
+    home = '/path/to/kcd_data/nvme/SecondYear/Data/'
     pretrain_ds = 'kits23_nooverlap'
     train_cv_slice_model_2d(home=home,dataname=dataset,splits=[0],pretrain_ds=pretrain_ds)

@@ -7,13 +7,13 @@ import sys
 # dilate mask by 25mm, using the header information from the original image
 
 # directory A
-# dir_A = '/rds/project/rds-sDuALntK11g/raw_data/nc_reg/images'
-# dir_B = '/rds/project/rds-sDuALntK11g/predictions_nii/ce/[2 2 2]mm'
-# dir_C = '/rds/project/rds-sDuALntK11g/raw_data/masked_nc_reg/images'
+# dir_A = '/path/to/kcd_data/raw_data/nc_reg/images'
+# dir_B = '/path/to/kcd_data/predictions_nii/ce/[2 2 2]mm'
+# dir_C = '/path/to/kcd_data/raw_data/masked_nc_reg/images'
 
-dir_A = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/raw_data/tcia_ncct_reg/images'
-dir_B = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/predictions_nii/tcia_cect/[2 2 2]mm'
-dir_C = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/raw_data/masked_tcia_ncct_reg/images'
+dir_A = '/path/to/kcd_data/data/seg_data/raw_data/tcia_ncct_reg/images'
+dir_B = '/path/to/kcd_data/data/seg_data/predictions_nii/tcia_cect/[2 2 2]mm'
+dir_C = '/path/to/kcd_data/data/seg_data/raw_data/masked_tcia_ncct_reg/images'
 
 if not os.path.exists(dir_C):
     os.makedirs(dir_C)

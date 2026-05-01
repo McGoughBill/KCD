@@ -350,7 +350,7 @@ if __name__ == "__main__":
     model.train()
 
     from KCD.Detection.Dataloaders.sliceseg_dataloader import SW_Data_seglabelled
-    dataset = SW_Data_seglabelled(path="/Users/mcgoug01/Downloads/Data",name="kits23_nooverlap",device='cpu',depth_z=1,boundary_z=1)
+    dataset = SW_Data_seglabelled(path="/path/to/kcd_data/Downloads/Data",name="kits23_nooverlap",device='cpu',depth_z=1,boundary_z=1)
     dataset.apply_foldsplit()
 
     im,(seg,label) = dataset[0]

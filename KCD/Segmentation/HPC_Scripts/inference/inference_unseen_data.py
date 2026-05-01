@@ -1,11 +1,11 @@
 import os
-os.environ['OV_DATA_BASE'] = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/'
+os.environ['OV_DATA_BASE'] = '/path/to/kcd_data/data/seg_data/'
 
 from KCD.Segmentation.Inference.EnsembleSeg import Ensemble_Seg
 import numpy as np
 
-seg_fp = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/trained_models/coreg_v2_noised/4mm_kidneybinary_customPP/6_finetune'
-# seg_fp = '/home/wcm23/rds/hpc-work/FineTuningKITS23/trained_models/all_cect/4mm_binary/6,3x3x3,32'
+seg_fp = '/path/to/kcd_data/data/seg_data/trained_models/coreg_v2_noised/4mm_kidneybinary_customPP/6_finetune'
+# seg_fp = '/path/to/kcd_data/FineTuningKITS23/trained_models/all_cect/4mm_binary/6,3x3x3,32'
 data_names = ['coreg_v2_noised']
 do_prep = True
 do_infer = True
@@ -19,8 +19,8 @@ for data_name in data_names:
                         batch_size=4, patch_size=64)
 
 
-seg_fp = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/trained_models/coreg_v2_noised/4mm_kidneybinary_customPP/6_finetune_l2-0.0_cce1.0_2e-05lr_0.999993lg_16bs_1000ep_4gpus'
-# seg_fp = '/home/wcm23/rds/hpc-work/FineTuningKITS23/trained_models/all_cect/4mm_binary/6,3x3x3,32'
+seg_fp = '/path/to/kcd_data/data/seg_data/trained_models/coreg_v2_noised/4mm_kidneybinary_customPP/6_finetune_l2-0.0_cce1.0_2e-05lr_0.999993lg_16bs_1000ep_4gpus'
+# seg_fp = '/path/to/kcd_data/FineTuningKITS23/trained_models/all_cect/4mm_binary/6,3x3x3,32'
 data_names = ['coreg_v2_noised']
 do_prep = True
 do_infer = True

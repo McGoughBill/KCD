@@ -154,8 +154,8 @@ def _remove_accents_(unicode_filename):
 
 
 if __name__ == '__main__':
-    COLTEA_home = '/bask/projects/p/phwq4930-renal-canc/YKST/unpacked'
-    COLTEA_save = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/raw_data/ykst/images'
+    COLTEA_home = '/path/to/kcd_data/YKST/unpacked'
+    COLTEA_save = '/path/to/kcd_data/data/seg_data/raw_data/ykst/images'
 
     if not os.path.exists(COLTEA_save):
         os.makedirs(COLTEA_save)

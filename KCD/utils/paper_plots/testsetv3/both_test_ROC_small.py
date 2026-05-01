@@ -4,22 +4,22 @@ import numpy as np
 import matplotlib.ticker as plticker
 import matplotlib.patches as mpatches
 import nibabel as nib
-seg_loc = '/Users/mcgoug01/Library/CloudStorage/OneDrive-CRUKCambridgeInstitute/SecondYear/Segmentation/seg_data/raw_data/test_set_v2/labels'
+seg_loc = '/path/to/kcd_data/raw_data/test_set_v2/labels'
 
 full_dose = False
 
-meta_folder = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions_v3/fulldose_test_ROCv3'
+meta_folder = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions_v3/fulldose_test_ROCv3'
 sub_folders = [os.path.join(meta_folder, f,'predictions.csv') for f in os.listdir(meta_folder) if os.path.isdir(os.path.join(meta_folder, f))]
 names = [float(f.split('/')[-2]) for f in sub_folders]
-save_loc = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/nat_paper'
+save_loc = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/nat_paper'
 # sort sub_folders by names_sub_folders
 folders = [x for _,x in sorted(zip(names,sub_folders))]
 names_sub_folders = sorted(names)
 
-truth_csv_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/Bill/FD/internaltest_metadata.csv'
-iztok_predfulldose_csv_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/iztokFD.csv'
-hania_predfulldose_csv_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/haniaFD.csv'
-cathal_predfulldose_csv_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/cathalFD.csv'
+truth_csv_fp = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/Bill/FD/internaltest_metadata.csv'
+iztok_predfulldose_csv_fp = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/iztokFD.csv'
+hania_predfulldose_csv_fp = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/haniaFD.csv'
+cathal_predfulldose_csv_fp = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/cathalFD.csv'
 folders = [iztok_predfulldose_csv_fp, hania_predfulldose_csv_fp,cathal_predfulldose_csv_fp] + folders
 names_sub_folders = ['Iztok','Hania','Cathal'] + names_sub_folders
 fulldose_ai_results = [[100,0]]
@@ -68,7 +68,7 @@ for ogid in tr['OriginalID']:
 print('mean small size is',np.mean(pile))
 
 size_df = pd.DataFrame(sizes_dictlist)
-size_df.to_csv('/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/Bill/internaltest_sizes.csv',index=False)
+size_df.to_csv('/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/Bill/internaltest_sizes.csv',index=False)
 print(size_df)
 print(len(large_cases))
 
@@ -151,13 +151,13 @@ print(f'AUC: {fd_auc:.3f}')
 print(fulldose_ai_results)
 
 
-lowdose_folder =  '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions_v3/lowdose_test_ROCv3'
-truth_csv_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/Bill/LD/internaltest_metadata.csv'
+lowdose_folder =  '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions_v3/lowdose_test_ROCv3'
+truth_csv_fp = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/Bill/LD/internaltest_metadata.csv'
 ld_sub_folders = [os.path.join(lowdose_folder, f,'predictions.csv') for f in os.listdir(lowdose_folder) if os.path.isdir(os.path.join(lowdose_folder, f))]
 names_ld= [float(f.split('/')[-2]) for f in ld_sub_folders]
-iztok_predlowdose_csv_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/iztokLD.csv'
-cathal_predlowdose_csv_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/cathalLD.csv'
-hania_predlowdose_csv_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/haniaLD.csv'
+iztok_predlowdose_csv_fp = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/iztokLD.csv'
+cathal_predlowdose_csv_fp = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/cathalLD.csv'
+hania_predlowdose_csv_fp = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/haniaLD.csv'
 ld_sub_folders = [x for _,x in sorted(zip(names_ld,ld_sub_folders))]
 names_ld_folders = sorted(names_ld)
 

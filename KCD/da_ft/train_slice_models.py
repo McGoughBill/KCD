@@ -14,7 +14,7 @@ import pandas as pd
 torch.manual_seed(0)
 np.random.seed(0)
 
-def finetune_da_model(path_to_pretrained_model,home = '/Users/mcgoug01/Downloads/Data/',
+def finetune_da_model(path_to_pretrained_model,home = '/path/to/kcd_data/Downloads/Data/',
                          dataname='coreg_ncct', type='normal',
                          splits:list=[0],folds=5,params:dict=None):
     # Suppress warnings
@@ -97,7 +97,7 @@ def finetune_da_model(path_to_pretrained_model,home = '/Users/mcgoug01/Downloads
         plt.show()
         plt.close()
 
-def finetune_da_model_nonlin(path_to_pretrained_model,home = '/Users/mcgoug01/Downloads/Data/',
+def finetune_da_model_nonlin(path_to_pretrained_model,home = '/path/to/kcd_data/Downloads/Data/',
                          dataname='coreg_ncct', type='normal',
                          splits:list=[0],folds=5,params:dict=None):
     # Suppress warnings
@@ -177,7 +177,7 @@ def finetune_da_model_nonlin(path_to_pretrained_model,home = '/Users/mcgoug01/Do
         plt.show()
         plt.close()
 
-def finetune_da_model_e2e(path_to_pretrained_model,home = '/Users/mcgoug01/Downloads/Data/',
+def finetune_da_model_e2e(path_to_pretrained_model,home = '/path/to/kcd_data/Downloads/Data/',
                          dataname='coreg_ncct', type='normal',
                          splits:list=[0],folds=5,params:dict=None):
     # Suppress warnings
@@ -253,7 +253,7 @@ def finetune_da_model_e2e(path_to_pretrained_model,home = '/Users/mcgoug01/Downl
         plt.show()
         plt.close()
 
-def overtrain_da_model_e2e(path_to_pretrained_model,home = '/Users/mcgoug01/Downloads/Data/',
+def overtrain_da_model_e2e(path_to_pretrained_model,home = '/path/to/kcd_data/Downloads/Data/',
                          dataname='coreg_ncct', type='normal',
                          splits:list=[0],folds=5,params:dict=None):
     # Suppress warnings
@@ -332,7 +332,7 @@ def overtrain_da_model_e2e(path_to_pretrained_model,home = '/Users/mcgoug01/Down
         plt.show()
         plt.close()
 
-def finetune_SSL_model(home = '/Users/mcgoug01/Downloads/Data/',
+def finetune_SSL_model(home = '/path/to/kcd_data/Downloads/Data/',
                          dataname='coreg_ncct',type='normal',
                          splits:list=[0],folds=5,params:dict=None):
     # Suppress warnings
@@ -409,7 +409,7 @@ def finetune_SSL_model(home = '/Users/mcgoug01/Downloads/Data/',
         plt.show()
         plt.close()
 
-def finetune_SSL_model_nonlin(home = '/Users/mcgoug01/Downloads/Data/',
+def finetune_SSL_model_nonlin(home = '/path/to/kcd_data/Downloads/Data/',
                          dataname='coreg_ncct',type='normal',
                          splits:list=[0],folds=5,params:dict=None):
     # Suppress warnings
@@ -486,7 +486,7 @@ def finetune_SSL_model_nonlin(home = '/Users/mcgoug01/Downloads/Data/',
         plt.show()
         plt.close()
 
-def finetune_SSL_model_e2e(home = '/Users/mcgoug01/Downloads/Data/',
+def finetune_SSL_model_e2e(home = '/path/to/kcd_data/Downloads/Data/',
                          dataname='coreg_ncct',type='normal',
                          splits:list=[0],folds=5,params:dict=None):
     # Suppress warnings
@@ -559,7 +559,7 @@ def finetune_SSL_model_e2e(home = '/Users/mcgoug01/Downloads/Data/',
         plt.show()
         plt.close()
 
-def overtrain_SSL_model_e2e(home = '/Users/mcgoug01/Downloads/Data/',
+def overtrain_SSL_model_e2e(home = '/path/to/kcd_data/Downloads/Data/',
                          dataname='coreg_ncct',type='normal',
                          splits:list=[0],folds=5,params:dict=None):
     # Suppress warnings
@@ -644,8 +644,8 @@ if __name__ == '__main__':
 
 
     dataset = 'coreg_ncct'
-    path_to_pretrained_model = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/ne2ceCT/resnet_tciaandcoltea_1_cancer/l1-0.2_l2-1.0_var0.01_cov0.2_cce0.0_cos1.0_clip0.0_2e-05lr_0.99998lg_80bs_5000ep_4gpus/network_weights'
-    home = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/3DSlice_data'
+    path_to_pretrained_model = '/path/to/kcd_data/data/seg_data/ne2ceCT/resnet_tciaandcoltea_1_cancer/l1-0.2_l2-1.0_var0.01_cov0.2_cce0.0_cos1.0_clip0.0_2e-05lr_0.99998lg_80bs_5000ep_4gpus/network_weights'
+    home = '/path/to/kcd_data/data/seg_data/3DSlice_data'
     if model_type == 'linear':
         if is_da:
             finetune_da_model(path_to_pretrained_model,home=home,dataname=dataset,splits=[0,1,2],

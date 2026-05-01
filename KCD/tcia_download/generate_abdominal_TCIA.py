@@ -3,15 +3,15 @@ import numpy as np
 import nibabel as nib
 
 # define the path to the registered images
-registered_ncct_path = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/raw_data/tcia_ncct_reg/images'
-registered_cect_path = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/raw_data/tcia_cect/images'
+registered_ncct_path = '/path/to/kcd_data/data/seg_data/raw_data/tcia_ncct_reg/images'
+registered_cect_path = '/path/to/kcd_data/data/seg_data/raw_data/tcia_cect/images'
 
 # coregistered images have identical names, so we can use the same list for both
 registered_ncct_ims = [f for f in os.listdir(registered_ncct_path) if f.endswith('.nii.gz')]
 
 # define the path where cropped and registered images were saved
-cropped_ncct_path = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/raw_data/cropped_tcia_ncct/images'
-cropped_cect_path = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/raw_data/cropped_tcia_cect/images'
+cropped_ncct_path = '/path/to/kcd_data/data/seg_data/raw_data/cropped_tcia_ncct/images'
+cropped_cect_path = '/path/to/kcd_data/data/seg_data/raw_data/cropped_tcia_cect/images'
 
 # load the cropped images from ncct
 cropped_ncct_ims = [f for f in os.listdir(cropped_ncct_path) if f.endswith('.nii.gz')]
@@ -20,11 +20,11 @@ cropped_ncct_ims = [f for f in os.listdir(cropped_ncct_path) if f.endswith('.nii
 registered_ncct_ims = [im for im in registered_ncct_ims if im in cropped_ncct_ims]
 
 #define path where masked ncct images are saved
-masked_ncct_path = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/raw_data/masked_tcia_ncct/images'
+masked_ncct_path = '/path/to/kcd_data/data/seg_data/raw_data/masked_tcia_ncct/images'
 
 # define the path where to save abdominal coregistered images
-abdominal_ncct_path = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/raw_data/abdominal_tcia_ncct/images'
-abdominal_cect_path = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/raw_data/abdominal_tcia_cect/images'
+abdominal_ncct_path = '/path/to/kcd_data/data/seg_data/raw_data/abdominal_tcia_ncct/images'
+abdominal_cect_path = '/path/to/kcd_data/data/seg_data/raw_data/abdominal_tcia_cect/images'
 
 
 # create the directories if they don't exist

@@ -73,16 +73,16 @@ def main(raw_data_path, output_data_path,dose_fraction=0.75,current=400,exposure
         save_nii_image(noised_image, aff, save_path,header)
 
 if __name__ == '__main__':
-    raw_data_path = '/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/HLCYG/raw_data/kidney/images'
+    raw_data_path = '/path/to/kcd_data/data/HLCYG/raw_data/kidney/images'
     dose_fractions = [0.025,0.05,0.1,0.2,0.4,0.8,0.9]
     for dose_fraction in dose_fractions[::-1]:
-        output_data_path = '/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/HLCYG/raw_data/kidney/noised_ims_{}'.format(dose_fraction)
+        output_data_path = '/path/to/kcd_data/data/HLCYG/raw_data/kidney/noised_ims_{}'.format(dose_fraction)
         main(raw_data_path, output_data_path,dose_fraction=dose_fraction,current=1000,exposure_time=0.5)
 
         # copy the original images, noised images, and the corresponding masks to a new folder
         #when copying masks, copy the masks with the original name and the noised name
 
-        new_folder = '/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/HLCYG/raw_data/kidney_noised_{}/'.format(dose_fraction)
+        new_folder = '/path/to/kcd_data/data/HLCYG/raw_data/kidney_noised_{}/'.format(dose_fraction)
         nf_im = os.path.join(new_folder,'images')
         nf_mk = os.path.join(new_folder,'labels')
 

@@ -3,8 +3,8 @@
 import pandas
 import os
 
-casewise_confidences = pandas.read_csv('/Users/mcgoug01/Downloads/test_results/casewise_confidences.csv')
-results = pandas.read_csv('/Users/mcgoug01/Downloads/test_results/output/results.csv')
+casewise_confidences = pandas.read_csv('/path/to/kcd_data/Downloads/test_results/casewise_confidences.csv')
+results = pandas.read_csv('/path/to/kcd_data/Downloads/test_results/output/results.csv')
 
 casewise_confidences['patient'] = casewise_confidences['file'].str.split('.').str[0]
 
@@ -50,8 +50,8 @@ for boundary_dose in [ 50,100,150,200,250,300,500]:
 
 sensitivities = pandas.DataFrame(sensitivities)
 small_sensitivities = pandas.DataFrame(small_sensitivities)
-sensitivities.to_csv('/Users/mcgoug01/Downloads/test_results/sensitivities.csv')
-small_sensitivities.to_csv('/Users/mcgoug01/Downloads/test_results/small_sensitivities.csv')
+sensitivities.to_csv('/path/to/kcd_data/Downloads/test_results/sensitivities.csv')
+small_sensitivities.to_csv('/path/to/kcd_data/Downloads/test_results/small_sensitivities.csv')
 
 specificity = casewise_confidences[casewise_confidences['label']==0]['correct'].mean()
 print(specificity)
@@ -82,7 +82,7 @@ ax[1].text(8, 0.5, 'High\nDose', color='g', fontsize=12)
 #put text in top right of each plot with correlation - like a legend
 ax[0].text(1.5, 0.9, f'Correlation: {correlation_radconf.iloc[0,1]:.2f}', fontsize=12)
 ax[1].text(8, 0.9, f'Correlation: {correlation_doseconf.iloc[0,1]:.2f}', fontsize=12)
-plt.savefig('/Users/mcgoug01/Downloads/Figure_1.png')
+plt.savefig('/path/to/kcd_data/Downloads/Figure_1.png')
 plt.show()
 
 
@@ -128,7 +128,7 @@ ax[1].legend(['Sensitivity', 'Number of Small Cancers', 'YKST median dose', 'YLS
 
 correlation = casewise_confidences[['radius_mm', 'dose']].corr()
 # ax[0].text(3.8, 60, f'Correlation between\nradius and dose: {correlation.iloc[0,1]:.2f}', fontsize=12)
-plt.savefig('/Users/mcgoug01/Downloads/Figure_2.png')
+plt.savefig('/path/to/kcd_data/Downloads/Figure_2.png')
 plt.show()
 
 
@@ -140,8 +140,8 @@ sns.histplot(casewise_confidences['dose'], ax=ax, bins=20)
 ax.set_title('Histogram of Doses')
 ax.set_xlabel('Dose (mGy)')
 ax.set_ylabel('Frequency')
-plt.savefig('/Users/mcgoug01/Downloads/Figure_3.png')
+plt.savefig('/path/to/kcd_data/Downloads/Figure_3.png')
 plt.show()
 
 
-casewise_confidences.to_csv('/Users/mcgoug01/Downloads/test_results/dose_and_size.csv')
+casewise_confidences.to_csv('/path/to/kcd_data/Downloads/test_results/dose_and_size.csv')

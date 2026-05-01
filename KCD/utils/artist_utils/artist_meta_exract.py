@@ -1,8 +1,8 @@
 import pandas as pd
 
 # Load the data
-dateOfDiagnosis = pd.read_csv('/Users/mcgoug01/Downloads/ARTIST imaging request_unidentifiable.csv')
-studyMetadata = pd.read_csv('/Users/mcgoug01/Downloads/StudyListOut_unidentifiable.csv')
+dateOfDiagnosis = pd.read_csv('/path/to/kcd_data/Downloads/ARTIST imaging request_unidentifiable.csv')
+studyMetadata = pd.read_csv('/path/to/kcd_data/Downloads/StudyListOut_unidentifiable.csv')
 
 # Display the first few rows of the data
 print(dateOfDiagnosis.head())
@@ -74,4 +74,4 @@ plt.tight_layout()
 plt.show()
 
 #save the cleaned data
-studyMetadata_perpatient_cleaned.to_csv('/Users/mcgoug01/Downloads/Access_list_cleaned.csv',index=False)
+studyMetadata_perpatient_cleaned.to_csv('/path/to/kcd_data/Downloads/Access_list_cleaned.csv',index=False)

@@ -11,7 +11,7 @@ from KCD.Detection.ModelGenerator import model_generator
 from KCD.Detection.Training import train_utils as tu
     
 
-def train_cv_individual_models(home = '/Users/mcgoug01/Downloads/Data/',dataname='merged_training_set',
+def train_cv_individual_models(home = '/path/to/kcd_data/Downloads/Data/',dataname='merged_training_set',
                             splits:list=[0],folds=5,params:dict=None):
     # Suppress warnings
     warnings.filterwarnings("ignore") #makes dgl stop complaining!
@@ -118,7 +118,7 @@ def train_cv_individual_models(home = '/Users/mcgoug01/Downloads/Data/',dataname
         plt.close()
         
 
-def train_cv_shape_ensemble(home = '/Users/mcgoug01/Downloads/Data/',dataname='merged_training_set',
+def train_cv_shape_ensemble(home = '/path/to/kcd_data/Downloads/Data/',dataname='merged_training_set',
                          splits:list=[0],params:dict=None,folds=5):
     # Suppress warnings
     warnings.filterwarnings("ignore") #makes dgl stop complaining!

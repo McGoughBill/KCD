@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 plt.switch_backend('TkAgg')
 
 import nibabel as nib
-seg_loc = '/Users/mcgoug01/Library/CloudStorage/OneDrive-CRUKCambridgeInstitute/SecondYear/Segmentation/seg_data/raw_data/coreg_cect_v3/labels/'
+seg_loc = '/path/to/kcd_data/raw_data/coreg_cect_v3/labels/'
 results = []
 files = [file for file in os.listdir(seg_loc) if file.endswith('.nii.gz')]
 print(len(files))

@@ -10,8 +10,8 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 
-path = '/Users/mcgoug01/Library/CloudStorage/OneDrive-CRUKCambridgeInstitute/SecondYear/Classification/CNN_dataset/sliding_window_kidneywisemasked/add_ncct_unseen/Voxel-1mm/Threshold-0mm/kidney-kthresh10'
-# path = '/Users/mcgoug01/Library/CloudStorage/OneDrive-CRUKCambridgeInstitute/SecondYear/Classification/CNN_dataset/sliding_window_kidneywisemasked/add_ncct_unseen/Voxel-1mm/Threshold-0mm/kidney'
+path = '/path/to/kcd_data/Library/CloudStorage/OneDrive-CRUKCambridgeInstitute/SecondYear/Classification/CNN_dataset/sliding_window_kidneywisemasked/add_ncct_unseen/Voxel-1mm/Threshold-0mm/kidney-kthresh10'
+# path = '/path/to/kcd_data/Library/CloudStorage/OneDrive-CRUKCambridgeInstitute/SecondYear/Classification/CNN_dataset/sliding_window_kidneywisemasked/add_ncct_unseen/Voxel-1mm/Threshold-0mm/kidney'
 
 cases = [int(file.split('_')[1]) for file in os.listdir(path) if file.endswith('.npy')]
 cases = np.unique(cases)

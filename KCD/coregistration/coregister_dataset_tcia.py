@@ -103,9 +103,9 @@ def nonlinear_coreg(moving,fixed,
 if __name__ == '__main__':
     from random import shuffle
 
-    ncct_dir = '/home/wcm23/rds/hpc-work/TCIA/ncct_nii'
-    cect_dir = '/home/wcm23/rds/hpc-work/TCIA/cect_nii'
-    save_dir = '/home/wcm23/rds/hpc-work/TCIA/ncct_registered'
+    ncct_dir = '/path/to/kcd_data/TCIA/ncct_nii'
+    cect_dir = '/path/to/kcd_data/TCIA/cect_nii'
+    save_dir = '/path/to/kcd_data/TCIA/ncct_registered'
 
     lets_shuffle = True
 

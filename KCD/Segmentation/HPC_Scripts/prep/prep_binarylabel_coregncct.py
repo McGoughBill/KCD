@@ -1,5 +1,5 @@
 import os
-os.environ['OV_DATA_BASE'] = "/home/wcm23/rds/hpc-work/FineTuningKITS23"
+os.environ['OV_DATA_BASE'] = "/path/to/kcd_data/FineTuningKITS23"
 from KCD.Segmentation.ovseg.preprocessing.SegmentationPreprocessing import SegmentationPreprocessing
 import sys
 data_name = 'coreg_v4_noised'

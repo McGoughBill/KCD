@@ -2,7 +2,7 @@ import os
 import pandas as pd
 import numpy as np
 
-results_home = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/conv_intv'
+results_home = '/path/to/kcd_data/data/seg_data/conv_intv'
 
 #extract all folders in results_home
 

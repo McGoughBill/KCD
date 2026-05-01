@@ -69,16 +69,16 @@ def main(raw_data_path, output_data_path,dose_fraction=0.75,current=400,exposure
         save_nii_image(noised_image, aff, os.path.join(output_data_path, file),header)
 
 if __name__ == '__main__':
-    raw_data_path = '/home/wcm23/rds/hpc-work/FineTuningKITS23/raw_data/coreg_v4/images'
+    raw_data_path = '/path/to/kcd_data/FineTuningKITS23/raw_data/coreg_v4/images'
     dose_fractions = [0.7]
     for dose_fraction in dose_fractions[::-1]:
-        output_data_path = '/home/wcm23/rds/hpc-work/FineTuningKITS23/raw_data/coreg_v4/noised_ims_{}'.format(dose_fraction)
+        output_data_path = '/path/to/kcd_data/FineTuningKITS23/raw_data/coreg_v4/noised_ims_{}'.format(dose_fraction)
         main(raw_data_path, output_data_path,dose_fraction=dose_fraction,current=1000,exposure_time=0.5)
 
     # copy the original images, noised images, and the corresponding masks to a new folder
     #when copying masks, copy the masks with the original name and the noised name
 
-    new_folder = '/home/wcm23/rds/hpc-work/FineTuningKITS23/raw_data/coreg_v4_noised'
+    new_folder = '/path/to/kcd_data/FineTuningKITS23/raw_data/coreg_v4_noised'
     nf_im = os.path.join(new_folder,'images')
     nf_mk = os.path.join(new_folder,'labels')
 

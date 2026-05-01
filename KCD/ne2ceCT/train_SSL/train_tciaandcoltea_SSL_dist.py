@@ -1,6 +1,6 @@
 import torch
 import os
-os.environ['OV_DATA_BASE'] ='/bask/projects/p/phwq4930-renal-canc/data/seg_data'
+os.environ['OV_DATA_BASE'] ='/path/to/kcd_data/data/seg_data'
 from torch.utils.data import DataLoader
 import torch.multiprocessing as mp
 torch.multiprocessing.set_sharing_strategy('file_system')

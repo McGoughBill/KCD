@@ -3,10 +3,10 @@ import pandas as pd
 import os
 
 
-sizes_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/Bill/internaltest_sizes.csv'
-ld_conf_per_patient_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions/lowdose_ROC/percase_confidences.csv'
-fd_conf_per_patient_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions/fulldose_ROC/percase_confidences.csv'
-labels ='/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/Bill/FD/internaltest_metadata.csv'
+sizes_fp = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/Bill/internaltest_sizes.csv'
+ld_conf_per_patient_fp = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions/lowdose_ROC/percase_confidences.csv'
+fd_conf_per_patient_fp = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions/fulldose_ROC/percase_confidences.csv'
+labels ='/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/Bill/FD/internaltest_metadata.csv'
 labels_df = pd.read_csv(labels)
 
 # load confidences
@@ -126,11 +126,11 @@ plt.plot(ld_means[:,0], ld_means[:,1], color='black', linestyle='dashed', label=
 plt.xlabel('Sensitivity')
 plt.ylabel('Specificity')
 plt.legend()
-plt.savefig('/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/Bill/bootstrap_internal.png')
+plt.savefig('/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/Bill/bootstrap_internal.png')
 plt.show()
 
 #save the results
 results = pd.DataFrame({'confidences': confidences, 'ld_sens': ld_means[:,0], 'ld_spec': ld_means[:,1], 'fd_sens': fd_means[:,0], 'fd_spec': fd_means[:,1],
                         'ld_sens_std': ld_stds[:,0], 'ld_spec_std': ld_stds[:,1], 'fd_sens_std': fd_stds[:,0], 'fd_spec_std': fd_stds[:,1]})
-results.to_csv('/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/Bill/bootstrap_results_internal.csv', index=False)
+results.to_csv('/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/Bill/bootstrap_results_internal.csv', index=False)
 

@@ -10,7 +10,7 @@ import numpy as np
 import warnings
 import pandas as pd
 
-def train_cv_slice_model_2d(home = '/media/mcgoug01/nvme/SecondYear/Data/',dataname='coreg_ncct',pretrain_ds='kits23_nooverlap',
+def train_cv_slice_model_2d(home = '/path/to/kcd_data/nvme/SecondYear/Data/',dataname='coreg_ncct',pretrain_ds='kits23_nooverlap',
                          splits:list=[0],folds=5,params:dict=None,train_folds=[0],
                          epochs = None):
     # Suppress warnings
@@ -55,8 +55,8 @@ def train_cv_slice_model_2d(home = '/media/mcgoug01/nvme/SecondYear/Data/',datan
             if not os.path.exists(fold_path):os.mkdir(fold_path)
             if not os.path.exists(slice_path):os.mkdir(slice_path)
 
-            # model = torch.load('/bask/projects/p/phwq4930-renal-canc/KCD_data/Data/training_info/{}/split_0/fold_2/TileModel/model/TileModel_large_5_10_0.001'.format(pretrain_ds))
-            model = torch.load('/media/bill/Crucial X6/classification_revisited/training_info/kits23_nooverlap/split_0/fold_0/TileModel/model/TileModel_large_1_10_0.001')
+            # model = torch.load('/path/to/kcd_data/KCD_data/Data/training_info/{}/split_0/fold_2/TileModel/model/TileModel_large_5_10_0.001'.format(pretrain_ds))
+            model = torch.load('/path/to/kcd_data/classification_revisited/training_info/kits23_nooverlap/split_0/fold_0/TileModel/model/TileModel_large_1_10_0.001')
             opt = torch.optim.Adam(model.parameters(),lr=params['lr'])
 
             dl,test_dl = tu.generate_dataloaders(slicedataset,test_slicedataset,cases[train_index],params['batch_size'])
@@ -93,6 +93,6 @@ def train_cv_slice_model_2d(home = '/media/mcgoug01/nvme/SecondYear/Data/',datan
 if __name__ == '__main__':
     import sys
     dataset = 'coreg_ncct'
-    # home = '/bask/projects/p/phwq4930-renal-canc/KCD_data/Data'
+    # home = '/path/to/kcd_data/KCD_data/Data'
     pretrain_ds = 'kits23_nooverlap'
-    train_cv_slice_model_2d(home='/media/bill/Crucial X6/classification_revisited/',dataname=dataset,splits=[0],pretrain_ds=pretrain_ds)
+    train_cv_slice_model_2d(home='/path/to/kcd_data/classification_revisited/',dataname=dataset,splits=[0],pretrain_ds=pretrain_ds)

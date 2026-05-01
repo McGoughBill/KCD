@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 import os
-os.environ['OV_DATA_BASE'] ="/rds/project/rds-sDuALntK11g"
+os.environ['OV_DATA_BASE'] ="/path/to/kcd_data"
 from torch.utils.data import DataLoader
 import torch.multiprocessing as mp
 torch.multiprocessing.set_sharing_strategy('file_system')
@@ -142,10 +142,10 @@ def main_worker(gpu,args):
     dataset.apply_foldsplit()
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers=workers)
 
-    teach_path = '/rds/project/rds-sDuALntK11g/trained_models/masked_kits_add_nooverlap_v2_small/2mm_canceronly_customPP/6_tot_ch_talkative_cls1/fold_0/network_weights'
+    teach_path = '/path/to/kcd_data/trained_models/masked_kits_add_nooverlap_v2_small/2mm_canceronly_customPP/6_tot_ch_talkative_cls1/fold_0/network_weights'
     model_T = get_3d_featureoutput_unet(1, out_dim, 6, filters=32, filters_max=1024).cuda(args.gpu)
     model_T.load_state_dict(torch.load(teach_path,map_location='cuda:{}'.format(args.gpu)))
-    stud_path = '/rds/project/rds-sDuALntK11g/trained_models/masked_final_pairedpretrain_nc_small/2mm_canceronly_customPP/6_finetune/fold_0/network_weights'
+    stud_path = '/path/to/kcd_data/trained_models/masked_final_pairedpretrain_nc_small/2mm_canceronly_customPP/6_finetune/fold_0/network_weights'
     model_S = get_3d_featureoutput_unet(1, out_dim, 6, filters=32, filters_max=1024).cuda(args.gpu)
     stud_load_dict = torch.load(stud_path,map_location='cuda:{}'.format(args.gpu))
     # if stud_load_dict is missing keys from model_S, add them

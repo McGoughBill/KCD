@@ -5,9 +5,9 @@ import nibabel as nib
 import os
 import pandas as pd
 
-csv_path = '/Users/mcgoug01/Downloads/test_set_v2/internaltest_metadata.xlsx'
-nii_path = '/Users/mcgoug01/Downloads/test_set_v2/preprocessed_nii'
-dest_path = '/Users/mcgoug01/Downloads/test_set_v2/renamed_nii'
+csv_path = '/path/to/kcd_data/Downloads/test_set_v2/internaltest_metadata.xlsx'
+nii_path = '/path/to/kcd_data/Downloads/test_set_v2/preprocessed_nii'
+dest_path = '/path/to/kcd_data/Downloads/test_set_v2/renamed_nii'
 affine = np.eye(4)
 if not os.path.exists(dest_path):
     os.makedirs(dest_path)

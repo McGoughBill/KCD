@@ -4,8 +4,8 @@ import numpy as np
 import nibabel as nib
 import os
 
-npy_path = '/Users/mcgoug01/Downloads/test_set_v2/preprocessed_npy'
-nii_path = '/Users/mcgoug01/Downloads/test_set_v2/preprocessed_nii'
+npy_path = '/path/to/kcd_data/Downloads/test_set_v2/preprocessed_npy'
+nii_path = '/path/to/kcd_data/Downloads/test_set_v2/preprocessed_nii'
 
 if not os.path.exists(nii_path):
     os.makedirs(nii_path)

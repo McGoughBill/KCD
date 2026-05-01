@@ -157,7 +157,7 @@ class SW_Data_seglabelled(Dataset):
         return image,(torch.Tensor(seg).long(),torch.Tensor([label]).long())
 
 if __name__ == '__main__':
-    dataset = SW_Data_seglabelled(path="/Users/mcgoug01/Downloads/Data",name="coreg_ncct",device='cpu')
+    dataset = SW_Data_seglabelled(path="/path/to/kcd_data/Downloads/Data",name="coreg_ncct",device='cpu')
     dataset.apply_foldsplit()
     im,(seg,label) = dataset[0]
 

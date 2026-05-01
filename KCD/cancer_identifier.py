@@ -1,7 +1,7 @@
 
 
 import os
-os.environ['OV_DATA_BASE'] = "/home/wcm23/rds/rds-artist-sDuALntK11g"
+os.environ['OV_DATA_BASE'] = "/path/to/kcd_data"
 import shutil
 import numpy as np
 from scipy.ndimage import label
@@ -9,9 +9,9 @@ import matplotlib.pyplot as plt
 import nibabel as nib
 
 # define the folders to copy from and to
-src_dir = '/home/wcm23/rds/rds-artist-sDuALntK11g/raw_data/masked_final_pairedpretrain_nc/images'
-pred_dir = '/home/wcm23/rds/rds-artist-sDuALntK11g/predictions_nii/masked_final_pairedpretrain_ce/cancer_[2 2 2]mm'
-dest_dir = '/home/wcm23/rds/rds-artist-sDuALntK11g/raw_data/masked_final_pairedpretrain_nc_literallyall/'
+src_dir = '/path/to/kcd_data/raw_data/masked_final_pairedpretrain_nc/images'
+pred_dir = '/path/to/kcd_data/predictions_nii/masked_final_pairedpretrain_ce/cancer_[2 2 2]mm'
+dest_dir = '/path/to/kcd_data/raw_data/masked_final_pairedpretrain_nc_literallyall/'
 
 if not os.path.exists(dest_dir):
     os.makedirs(dest_dir)

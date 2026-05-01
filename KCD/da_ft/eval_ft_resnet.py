@@ -1,9 +1,9 @@
 import pandas as pd
 import numpy as np
 import os
-os.environ['OV_DATA_BASE'] ='/bask/projects/p/phwq4930-renal-canc/data/seg_data'
+os.environ['OV_DATA_BASE'] ='/path/to/kcd_data/data/seg_data'
 
-home = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/3DSlice_data/training_info/coreg_ncct'
+home = '/path/to/kcd_data/data/seg_data/3DSlice_data/training_info/coreg_ncct'
 splits = [subdir for subdir in os.listdir(home) if os.path.isdir(os.path.join(home,subdir))]
 combined_res = []
 for subdir in splits:

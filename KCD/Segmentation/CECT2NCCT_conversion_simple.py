@@ -12,11 +12,11 @@ import numpy as np
 import nibabel as nib
 from skimage.morphology import binary_erosion, binary_dilation
 
-# CECT_path = "/Users/mcgoug01/Downloads/AbCT1k/all_images"
-# seg_path = "/Users/mcgoug01/Downloads/AbCT1k/all_labels"
+# CECT_path = "/path/to/kcd_data/Downloads/AbCT1k/all_images"
+# seg_path = "/path/to/kcd_data/Downloads/AbCT1k/all_labels"
 
-CECT_path = "/Users/mcgoug01/Library/CloudStorage/OneDrive-CRUKCambridgeInstitute/SecondYear/Segmentation/seg_data/raw_data/kits23/all_images"
-seg_path = "/Users/mcgoug01/Library/CloudStorage/OneDrive-CRUKCambridgeInstitute/SecondYear/Segmentation/seg_data/raw_data/kits23/all_labels"
+CECT_path = "/path/to/kcd_data/raw_data/kits23/all_images"
+seg_path = "/path/to/kcd_data/raw_data/kits23/all_labels"
 
 import torch.nn as nn
 pool = nn.AvgPool3d(7,stride=1,padding=3).cuda()
@@ -93,7 +93,7 @@ def create_label(im):
     # return np.where(dilate==1,lb,0)
     return lb_thresh
     
-save_path = "/Users/mcgoug01/Downloads/all_sncct/"
+save_path = "/path/to/kcd_data/Downloads/all_sncct/"
 from os import *
 for case in listdir(CECT_path):
     im_sv = join(save_path,"images")

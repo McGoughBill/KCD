@@ -1,6 +1,6 @@
 import torch
 import os
-os.environ['OV_DATA_BASE'] = '/Users/mcgoug01/Downloads/assessing_latent'
+os.environ['OV_DATA_BASE'] = '/path/to/kcd_data/Downloads/assessing_latent'
 from KCD.ne2ceCT.dataloader import CrossPhaseDataset
 from KCD.Segmentation.Inference import infer_network
 import matplotlib.pyplot as plt
@@ -21,17 +21,17 @@ def get_3d_featureoutput_unet(in_channels, out_channels, n_stages,filters=32, fi
 if __name__ == '__main__':
     # load model
     ce_model = get_3d_featureoutput_unet(1, 2, 7)
-    ce_model.load_state_dict(torch.load('/Users/mcgoug01/Downloads/assessing_latent/ce_model', map_location='cpu'))
+    ce_model.load_state_dict(torch.load('/path/to/kcd_data/Downloads/assessing_latent/ce_model', map_location='cpu'))
 
     nc2ceCT_model = get_3d_featureoutput_unet(1, 2, 7)
-    nc2ceCT_model.load_state_dict(torch.load('/Users/mcgoug01/Downloads/assessing_latent/network_weights', map_location='cpu'))
+    nc2ceCT_model.load_state_dict(torch.load('/path/to/kcd_data/Downloads/assessing_latent/network_weights', map_location='cpu'))
 
     ce_model.eval()
     nc2ceCT_model.eval()
 
-    ce_data_path = '/Users/mcgoug01/Downloads/assessing_latent/ce'
-    ne_data_path = '/Users/mcgoug01/Downloads/assessing_latent/nc'
-    split_path = '/Users/mcgoug01/Downloads/assessing_latent'
+    ce_data_path = '/path/to/kcd_data/Downloads/assessing_latent/ce'
+    ne_data_path = '/path/to/kcd_data/Downloads/assessing_latent/nc'
+    split_path = '/path/to/kcd_data/Downloads/assessing_latent'
 
     dataset = CrossPhaseDataset(ne_data_path, ce_data_path,split_path, device='cpu', is_train=False,
                                 patch_size=128)

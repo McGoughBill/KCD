@@ -13,8 +13,8 @@ from scipy.ndimage.filters import gaussian_filter1d
 import matplotlib.lines as mlines
 import matplotlib.pyplot as plt
 
-res = pd.read_csv('/Users/mcgoug01/Downloads/Data/inference/merged_training_set_split_0/test_set/compare_shape.csv')
-res2d = pd.read_csv('/Users/mcgoug01/Library/CloudStorage/OneDrive-CRUKCambridgeInstitute/SecondYear/Classification/evaluate/inference_unseen/twcnn2d/compare_assessed_tilestackcorrected.csv')
+res = pd.read_csv('/path/to/kcd_data/Downloads/Data/inference/merged_training_set_split_0/test_set/compare_shape.csv')
+res2d = pd.read_csv('/path/to/kcd_data/Library/CloudStorage/OneDrive-CRUKCambridgeInstitute/SecondYear/Classification/evaluate/inference_unseen/twcnn2d/compare_assessed_tilestackcorrected.csv')
 res2d['2d_output'] = res2d['tile_output']
 res2d = res2d [['Shape_output','case','position','label','Contour (bill)','2d_output']]
 
@@ -120,5 +120,5 @@ plt.legend(handles=[rawp,rawt,raw_or2d,raws],ncol=4,fontsize=11,
 plt.xlim(19,81)
 plt.ylim(-2,102)
 plt.show()
-plt.savefig('/Users/mcgoug01/Library/CloudStorage/OneDrive-CRUKCambridgeInstitute/SecondYear/Classification/evaluate/inference_unseen/or_specsens_continuous.png',bbox_inches='tight')
+plt.savefig('/path/to/kcd_data/Library/CloudStorage/OneDrive-CRUKCambridgeInstitute/SecondYear/Classification/evaluate/inference_unseen/or_specsens_continuous.png',bbox_inches='tight')
 

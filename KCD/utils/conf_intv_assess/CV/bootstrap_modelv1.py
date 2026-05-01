@@ -4,9 +4,9 @@ import os
 import nibabel as nib
 from skimage.measure import label, regionprops
 
-if not os.path.exists('/Users/mcgoug01/Downloads/valid_v1/sizes.csv'):
-    nii_label_loc = '/Users/mcgoug01/Downloads/labels_v1'
-    with open('/Users/mcgoug01/Downloads/valid_v1/sizes.csv', 'w') as f:
+if not os.path.exists('/path/to/kcd_data/Downloads/valid_v1/sizes.csv'):
+    nii_label_loc = '/path/to/kcd_data/Downloads/labels_v1'
+    with open('/path/to/kcd_data/Downloads/valid_v1/sizes.csv', 'w') as f:
         f.write('file,size\n')
     for file in os.listdir(nii_label_loc):
         if file.endswith('.nii.gz'):
@@ -19,13 +19,13 @@ if not os.path.exists('/Users/mcgoug01/Downloads/valid_v1/sizes.csv'):
             regions = regionprops(labeled_data)
             largest_region = max(regions, key=lambda r: r.area)
             size = largest_region.area * vox_size
-            with open('/Users/mcgoug01/Downloads/valid_v1/sizes.csv', 'a') as f:
+            with open('/path/to/kcd_data/Downloads/valid_v1/sizes.csv', 'a') as f:
                 f.write(f'{file},{size}\n')
 
 
 
-sizes_fp = '/Users/mcgoug01/Downloads/valid_v1/sizes.csv'
-conf_per_patient_fp = '/Users/mcgoug01/Downloads/valid_v1/results_confwise.npy'
+sizes_fp = '/path/to/kcd_data/Downloads/valid_v1/sizes.csv'
+conf_per_patient_fp = '/path/to/kcd_data/Downloads/valid_v1/results_confwise.npy'
 sizes = np.genfromtxt(sizes_fp, delimiter=',')
 print(min(sizes), max(sizes))
 large = sizes > ((20**3)*np.pi*4/3)
@@ -137,6 +137,6 @@ plt.legend(fontsize=15, loc='lower right')
 print(AUC)
 plt.tight_layout()
 #change width of ax[1] to 3
-plt.savefig('/Users/mcgoug01/Downloads/cvroc_seg.png')
+plt.savefig('/path/to/kcd_data/Downloads/cvroc_seg.png')
 plt.show()
 plt.close()

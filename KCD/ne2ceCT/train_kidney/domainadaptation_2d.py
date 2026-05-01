@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 import os
-os.environ['OV_DATA_BASE'] ="/rds/project/rds-sDuALntK11g"
+os.environ['OV_DATA_BASE'] ="/path/to/kcd_data"
 from torch.utils.data import DataLoader
 import torch.multiprocessing as mp
 torch.multiprocessing.set_sharing_strategy('file_system')
@@ -148,7 +148,7 @@ def main_worker(gpu,args):
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers=workers,
                             collate_fn=collate_fn)
 
-    mod_path = '/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data/training_info/masked_kits_add_nooverlap_v2/split_0/fold_0/TileModel/model/TileModel_large_5_10_0.001'
+    mod_path = '/path/to/kcd_data/data/seg_data/training_info/masked_kits_add_nooverlap_v2/split_0/fold_0/TileModel/model/TileModel_large_5_10_0.001'
     model_T = torch.load(mod_path, map_location='cuda:{}'.format(args.gpu))
     model_S = torch.load(mod_path, map_location='cuda:{}'.format(args.gpu))
     model_T.eval()

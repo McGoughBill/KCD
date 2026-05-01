@@ -285,9 +285,9 @@ class ObjectData_unlabelled(Dataset):
 if __name__ == "__main__":
     dataset='merged_training_set'
     name = 'add_ncct_unseen'
-    ds1 = ObjectData_unlabelled('/Users/mcgoug01/Downloads/Data',data_name='add_ncct_unseen',norm_param_dataname=name)
+    ds1 = ObjectData_unlabelled('/path/to/kcd_data/Downloads/Data',data_name='add_ncct_unseen',norm_param_dataname=name)
     a = ds1[0]
     
-    # ds2 = ObjectData_labelled('/Users/mcgoug01/Downloads/Data',data_name=dataset)
+    # ds2 = ObjectData_labelled('/path/to/kcd_data/Downloads/Data',data_name=dataset)
     # ds2.apply_foldsplit()
     # b = ds2[0]

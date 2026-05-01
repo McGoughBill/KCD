@@ -17,7 +17,7 @@ import dgl
 import warnings
 import pandas as pd
 
-def eval_individual_slice_models(home='/Users/mcgoug01/Downloads/Data',trainname='coreg_ncct',
+def eval_individual_slice_models(home='/path/to/kcd_data/Downloads/Data',trainname='coreg_ncct',
                                  infername='test_set',params:dict=None,tr_split=0,tr_folds=5,
                                  spec_boundary=98):
     warnings.filterwarnings("ignore")
@@ -74,7 +74,7 @@ def eval_individual_slice_models(home='/Users/mcgoug01/Downloads/Data',trainname
     all_results.to_csv(os.path.join(inference_path,'{}_'.format(model_type)+model_name+'.csv'))
     
 if __name__ == '__main__':
-    # home = '/bask/projects/p/phwq4930-renal-canc/KCD_data/Data'
+    # home = '/path/to/kcd_data/KCD_data/Data'
     trainname = 'coreg_ncct'
     infername='test_set'
     eval_individual_slice_models(trainname=trainname,infername=infername)

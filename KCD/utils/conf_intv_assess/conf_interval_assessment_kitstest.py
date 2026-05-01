@@ -7,10 +7,10 @@ from skimage.measure import label
 import pandas as pd
 
 
-home = '/bask/projects/p/phwq4930-renal-canc/data/seg_data'
+home = '/path/to/kcd_data/data/seg_data'
 # preds = os.path.join(home, 'preds_highspec')
 labels = os.path.join(home, 'labels')
-preds = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/predictions_nii/masked_coregncctv2_kits/s2_[2 2 2]mm_cont'
+preds = '/path/to/kcd_data/data/seg_data/predictions_nii/masked_coregncctv2_kits/s2_[2 2 2]mm_cont'
 save_loc = os.path.join(home, 'conf_ROC_test.npy')
 csv_path = os.path.join(home, 'conf_ROC_test.csv')
 png_path = os.path.join(home, 'conf_ROC_test.png')

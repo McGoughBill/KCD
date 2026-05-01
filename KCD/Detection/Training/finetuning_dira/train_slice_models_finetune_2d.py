@@ -10,8 +10,8 @@ import warnings
 import pandas as pd
 import KCD.Detection.Training.finetuning_dira.segmentation_models_pytorch as smp
 
-def train_cv_slice_model_2d(home = '/media/mcgoug01/nvme/SecondYear/Data/',dataname='coreg_ncct',
-                         splits:list=[0],folds=5,params:dict=None,epochs = None,train_save_path = '/bask/homes/r/ropj6012/KCD'):
+def train_cv_slice_model_2d(home = '/path/to/kcd_data/nvme/SecondYear/Data/',dataname='coreg_ncct',
+                         splits:list=[0],folds=5,params:dict=None,epochs = None,train_save_path = '/path/to/kcd_data'):
     # Suppress warnings
     warnings.filterwarnings("ignore") #makes dgl stop complaining!
 
@@ -58,8 +58,8 @@ def train_cv_slice_model_2d(home = '/media/mcgoug01/nvme/SecondYear/Data/',datan
             if not os.path.exists(fold_path):os.mkdir(fold_path)
             if not os.path.exists(slice_path):os.mkdir(slice_path)
 
-            # model = torch.load('/bask/projects/p/phwq4930-renal-canc/KCD_data/Data/training_info/{}/split_0/fold_2/TileModel/model/TileModel_large_5_10_0.001'.format(pretrain_ds))
-            model_saved = torch.load('/bask/projects/p/phwq4930-renal-canc/data/ChestXRay/checkpoint/DiRA_moco/dira/checkpoint.pth')
+            # model = torch.load('/path/to/kcd_data/KCD_data/Data/training_info/{}/split_0/fold_2/TileModel/model/TileModel_large_5_10_0.001'.format(pretrain_ds))
+            model_saved = torch.load('/path/to/kcd_data/data/ChestXRay/checkpoint/DiRA_moco/dira/checkpoint.pth')
             model = smp.unet.model.Unet('resnet50')
             ckpt = {k.replace("module.encoder_q.backbone.", ""): v for k, v in model_saved['state_dict'].items() if 'encoder_q.backbone' in k}
             model.load_state_dict(ckpt)
@@ -105,6 +105,6 @@ def train_cv_slice_model_2d(home = '/media/mcgoug01/nvme/SecondYear/Data/',datan
 if __name__ == '__main__':
     import sys
     dataset = 'coreg_ncct'
-    # home = '/bask/projects/p/phwq4930-renal-canc/KCD_data/Data'
+    # home = '/path/to/kcd_data/KCD_data/Data'
     pretrain_ds = 'kits23_nooverlap'
-    train_cv_slice_model_2d(home='/bask/projects/p/phwq4930-renal-canc/KCD_data/Data',dataname=dataset,splits=[0])
+    train_cv_slice_model_2d(home='/path/to/kcd_data/KCD_data/Data',dataname=dataset,splits=[0])

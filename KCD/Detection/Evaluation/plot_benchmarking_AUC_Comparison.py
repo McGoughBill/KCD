@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 # set the plt backend to TKAgg
 plt.switch_backend('TKAgg')
 
-folder = '/Users/mcgoug01/Downloads/ROCs'
+folder = '/path/to/kcd_data/Downloads/ROCs'
 # extract the names of files in the folder that end with .npy
 files = [f for f in os.listdir(folder) if f.endswith('.npy')]
 

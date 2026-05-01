@@ -2,7 +2,7 @@ import os
 import pandas as pd
 import pickle
 
-results_home = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/trained_models/masked_coreg_v2_noised/2mm_cancerbinary_customPP'
+results_home = '/path/to/kcd_data/data/seg_data/trained_models/masked_coreg_v2_noised/2mm_cancerbinary_customPP'
 
 #extract all folders in results_home
 

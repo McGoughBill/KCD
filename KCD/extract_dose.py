@@ -7,9 +7,9 @@ import numpy as np
 import nibabel as nib
 import pydicom
 
-mask_dir = '/Users/mcgoug01/Downloads/test_results/mask_flip'
-dicom_dir = '/Users/mcgoug01/Downloads/test_results/dicoms'
-output_dir = '/Users/mcgoug01/Downloads/test_results/output'
+mask_dir = '/path/to/kcd_data/Downloads/test_results/mask_flip'
+dicom_dir = '/path/to/kcd_data/Downloads/test_results/dicoms'
+output_dir = '/path/to/kcd_data/Downloads/test_results/output'
 
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)

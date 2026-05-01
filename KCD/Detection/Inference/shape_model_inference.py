@@ -13,7 +13,7 @@ import warnings
 import pandas as pd
 
 
-def eval_individual_shape_models(home='/Users/mcgoug01/Downloads/Data',trainname='merged_training_set',
+def eval_individual_shape_models(home='/path/to/kcd_data/Downloads/Data',trainname='merged_training_set',
                                  infername='test_set',params:dict=None,tr_split=0,tr_folds=5,spec_boundary=98):
     warnings.filterwarnings("ignore")
     if params==None:params = iu.init_shape_params()
@@ -75,7 +75,7 @@ def eval_individual_shape_models(home='/Users/mcgoug01/Downloads/Data',trainname
     GNN_res.to_csv(os.path.join(inference_path,'GNN_'+GNN_name+'.csv'))
     
     
-def eval_shape_ensemble(home='/Users/mcgoug01/Downloads/Data',trainname='merged_training_set',
+def eval_shape_ensemble(home='/path/to/kcd_data/Downloads/Data',trainname='merged_training_set',
                                  infername='test_set',params:dict=None,tr_split=0,tr_folds=5,spec_boundary=98):
     warnings.filterwarnings("ignore")
     if params==None:params = iu.init_shape_params()

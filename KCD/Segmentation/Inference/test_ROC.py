@@ -12,9 +12,9 @@ from skimage.segmentation import watershed
 # and the optimum size threshold for determining the presence of a cancerous region
 # we will do this by finding the threshold that maximises the dice score on a dataset
 
-cancer_infp = os.path.join('/bask/projects/p/phwq4930-renal-canc/data/seg_data/predictions_nii/masked_test_set/[2 2 2]mm_cont')
-kidney_infp = os.path.join('/bask/projects/p/phwq4930-renal-canc/data/seg_data/predictions_nii/test_set/[4 4 4]mm')
-cancer_label = os.path.join('/bask/projects/p/phwq4930-renal-canc/data/seg_data/raw_data/test_set/cect_labels')
+cancer_infp = os.path.join('/path/to/kcd_data/data/seg_data/predictions_nii/masked_test_set/[2 2 2]mm_cont')
+kidney_infp = os.path.join('/path/to/kcd_data/data/seg_data/predictions_nii/test_set/[4 4 4]mm')
+cancer_label = os.path.join('/path/to/kcd_data/data/seg_data/raw_data/test_set/cect_labels')
 confidence_thresholds = np.append(np.arange(0,0.1,0.01),np.arange(0.1, 0.9, 0.1))
 confidence_thresholds = np.append(confidence_thresholds,np.arange(0.9,0.98,0.01))
 confidence_thresholds = np.append(confidence_thresholds,np.arange(0.98,1.005,0.005))
@@ -203,7 +203,7 @@ for conf in confidence_thresholds:
 
 import pandas
 import matplotlib.pyplot as plt
-path = '/bask/projects/p/phwq4930-renal-canc/data'
+path = '/path/to/kcd_data/data'
 
 df = pandas.DataFrame(results)
 df.to_csv(os.path.join(path, 'results_400_test.csv'))

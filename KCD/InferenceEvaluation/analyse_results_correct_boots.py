@@ -8,10 +8,10 @@ import warnings
 import matplotlib.colors as mcolors
 warnings.filterwarnings("ignore")
 
-resnext_3d = pandas.read_csv('/Users/mcgoug01/Downloads/Data/inference/coreg_ncct_split_0/test_set/combined_results_resnext.csv')
-effnet_3d = pandas.read_csv('/Users/mcgoug01/Downloads/Data/inference/coreg_ncct_split_0/test_set/combined_results_effnet.csv')
-shape = pandas.read_csv('/Users/mcgoug01/Downloads/Data/inference/coreg_ncct_split_0/test_set/combined_results_shape.csv')
-tile2d = pandas.read_csv('/Users/mcgoug01/Downloads/Data/inference/coreg_ncct_split_0/test_set/combined_results_2d.csv')
+resnext_3d = pandas.read_csv('/path/to/kcd_data/Downloads/Data/inference/coreg_ncct_split_0/test_set/combined_results_resnext.csv')
+effnet_3d = pandas.read_csv('/path/to/kcd_data/Downloads/Data/inference/coreg_ncct_split_0/test_set/combined_results_effnet.csv')
+shape = pandas.read_csv('/path/to/kcd_data/Downloads/Data/inference/coreg_ncct_split_0/test_set/combined_results_shape.csv')
+tile2d = pandas.read_csv('/path/to/kcd_data/Downloads/Data/inference/coreg_ncct_split_0/test_set/combined_results_2d.csv')
 
 #drop unnamed
 resnext_3d = resnext_3d.drop([column for column in resnext_3d.columns if 'unnamed' in column.lower()],axis=1)
@@ -133,7 +133,7 @@ for model,c in zip(['ResNeXt 3D', 'Shape Ensemble', 'EffNet 2D'],
 plt.legend()
 plt.xlabel('Diameter / mm',fontsize=14)
 plt.ylabel('Sensitivity / %',fontsize=14)
-plt.savefig('/Users/mcgoug01/Desktop/size_wise_sensitivity.png',dpi=300)
+plt.savefig('/path/to/kcd_data/Desktop/size_wise_sensitivity.png',dpi=300)
 plt.show()
 
 

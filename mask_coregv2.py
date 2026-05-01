@@ -11,13 +11,13 @@ plt.switch_backend('TkAgg')
 # dilate mask by 25mm, using the header information from the original image
 
 # directory A
-# dir_A = '/rds/project/rds-sDuALntK11g/raw_data/nc_reg/images'
-# dir_B = '/rds/project/rds-sDuALntK11g/predictions_nii/ce/[2 2 2]mm'
-# dir_C = '/rds/project/rds-sDuALntK11g/raw_data/masked_nc_reg/images'
+# dir_A = '/path/to/kcd_data/raw_data/nc_reg/images'
+# dir_B = '/path/to/kcd_data/predictions_nii/ce/[2 2 2]mm'
+# dir_C = '/path/to/kcd_data/raw_data/masked_nc_reg/images'
 
-dir_A = '/Users/mcgoug01/Downloads/masking/images'
-dir_B = '/Users/mcgoug01/Downloads/masking/cect_[4 4 4]mm'
-dir_C = '/Users/mcgoug01/Downloads/masking/masked_images'
+dir_A = '/path/to/kcd_data/Downloads/masking/images'
+dir_B = '/path/to/kcd_data/Downloads/masking/cect_[4 4 4]mm'
+dir_C = '/path/to/kcd_data/Downloads/masking/masked_images'
 
 if not os.path.exists(dir_C):
     os.makedirs(dir_C)

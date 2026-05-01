@@ -1,6 +1,6 @@
 import torch
 import os
-os.environ['OV_DATA_BASE'] ='/rds/project/rds-YVbkxwUTQs4/zl_isc2024_McGough/data_path'
+os.environ['OV_DATA_BASE'] ='/path/to/kcd_data/zl_isc2024_McGough/data_path'
 from torch.utils.data import DataLoader
 import intel_extension_for_pytorch as ipex
 
@@ -96,10 +96,10 @@ def main_worker(args):
 
     model_T = get_3d_featureoutput_unet(1, out_dim, 6, filters=32, filters_max=1024).to(dev)
     model_T.load_state_dict(torch.load(
-        '/rds/project/rds-YVbkxwUTQs4/zl_isc2024_McGough/dummy_teacher_model',map_location=dev))
+        '/path/to/kcd_data/zl_isc2024_McGough/dummy_teacher_model',map_location=dev))
     model_S = get_3d_featureoutput_unet(1, out_dim, 6, filters=32, filters_max=1024).to(dev)
     model_S.load_state_dict(torch.load(
-        '/rds/project/rds-YVbkxwUTQs4/zl_isc2024_McGough/dummy_teacher_model',map_location=dev))
+        '/path/to/kcd_data/zl_isc2024_McGough/dummy_teacher_model',map_location=dev))
 
     model_T.eval()
     model_S.train()

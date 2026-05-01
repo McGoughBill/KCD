@@ -2,7 +2,7 @@ from KCD.utils import dcm2nii
 import os
 
 if __name__ == '__main__':
-    home = '/Users/mcgoug01/Downloads/TCIA/CT'
+    home = '/path/to/kcd_data/Downloads/TCIA/CT'
 
     meta,fold = os.path.split(home)
     save_home = os.path.join(meta, fold + '-NIFTI')

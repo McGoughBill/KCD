@@ -10,7 +10,7 @@ import numpy as np
 import warnings
 import pandas as pd
 
-def train_cv_slice_model(home = '/Users/mcgoug01/Downloads/Data/',dataname='coreg_ncct',pretrain_ds='kits23_nooverlap',
+def train_cv_slice_model(home = '/path/to/kcd_data/Downloads/Data/',dataname='coreg_ncct',pretrain_ds='kits23_nooverlap',
                          splits:list=[0],folds=5,params:dict=None,is_3D=True):
     # Suppress warnings
     warnings.filterwarnings("ignore") #makes dgl stop complaining!
@@ -59,7 +59,7 @@ def train_cv_slice_model(home = '/Users/mcgoug01/Downloads/Data/',dataname='core
             if not os.path.exists(fold_path):os.mkdir(fold_path)
             if not os.path.exists(slice_path):os.mkdir(slice_path)
 
-            model = torch.load('/bask/projects/p/phwq4930-renal-canc/KCD_data/Data/training_info/{}/split_0/fold_3/PatchModel/model/PatchModel-MTL_small_25_25_0.001_0.02'.format(pretrain_ds))
+            model = torch.load('/path/to/kcd_data/KCD_data/Data/training_info/{}/split_0/fold_3/PatchModel/model/PatchModel-MTL_small_25_25_0.001_0.02'.format(pretrain_ds))
             opt = torch.optim.Adam(model.parameters(),lr=params['lr'])
 
             dl,test_dl = tu.generate_dataloaders(slicedataset,test_slicedataset,cases[train_index],params['batch_size'])
@@ -90,5 +90,5 @@ def train_cv_slice_model(home = '/Users/mcgoug01/Downloads/Data/',dataname='core
 
 if __name__ == '__main__':
     dataset = 'coreg_ncct'
-    home = '/bask/projects/p/phwq4930-renal-canc/KCD_data/Data'
+    home = '/path/to/kcd_data/KCD_data/Data'
     train_cv_slice_model(home=home,dataname=dataset,is_3D=True,splits=[0,1])

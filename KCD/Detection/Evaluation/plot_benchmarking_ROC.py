@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 # set the plt backend to TKAgg
 plt.switch_backend('TKAgg')
 
-folder = '/Users/mcgoug01/Downloads/CV_ROCs'
+folder = '/path/to/kcd_data/Downloads/CV_ROCs'
 # extract the names of files in the folder that end with .npy
 files = [f for f in os.listdir(folder) if f.endswith('.npy')]
 files.sort(reverse=True)
@@ -118,5 +118,5 @@ plt.ylim([-0,102])
 plt.xlim([-2,100])
 
 
-plt.savefig('/Users/mcgoug01/Desktop/ROC.png',dpi=300)
+plt.savefig('/path/to/kcd_data/Desktop/ROC.png',dpi=300)
 plt.show()

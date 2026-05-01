@@ -1,5 +1,5 @@
 import os
-os.environ['OV_DATA_BASE'] = "/rds/project/rds-sDuALntK11g"
+os.environ['OV_DATA_BASE'] = "/path/to/kcd_data"
 from KCD.Segmentation.ovseg.preprocessing.SegmentationPreprocessing import SegmentationPreprocessing
 
 spacing = 4

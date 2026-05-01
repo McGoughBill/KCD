@@ -4,9 +4,9 @@ import os
 import shutil
 
 # get list of '.nii.gz' files in first dir
-src_dir = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/raw_data/tcia_ncct_reg/images'
-check_dir = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/raw_data/masked_tcia_ncct_reg/images'
-dst_dir = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/raw_data/successful_tcia_ncct_reg/images'
+src_dir = '/path/to/kcd_data/data/seg_data/raw_data/tcia_ncct_reg/images'
+check_dir = '/path/to/kcd_data/data/seg_data/raw_data/masked_tcia_ncct_reg/images'
+dst_dir = '/path/to/kcd_data/data/seg_data/raw_data/successful_tcia_ncct_reg/images'
 
 if not os.path.exists(dst_dir):
     os.makedirs(dst_dir)

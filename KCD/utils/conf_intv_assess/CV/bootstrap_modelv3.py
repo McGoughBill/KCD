@@ -2,8 +2,8 @@ import numpy as np
 import pandas as pd
 import os
 
-sizes_fp = '/Users/mcgoug01/Downloads/valid_v3/sizes.csv'
-conf_per_patient_fp = '/Users/mcgoug01/Downloads/valid_v3/results_confwise.npy'
+sizes_fp = '/path/to/kcd_data/Downloads/valid_v3/sizes.csv'
+conf_per_patient_fp = '/path/to/kcd_data/Downloads/valid_v3/results_confwise.npy'
 sizes = np.genfromtxt(sizes_fp, delimiter=',')
 large = sizes > ((15**3)*np.pi*4/3)
 conf_per_patient = np.load(conf_per_patient_fp)
@@ -173,7 +173,7 @@ ax.plot(np.array([highspec_spec,highdist_spec, highsens_spec])*100,
 ax.legend(fontsize=16, loc='lower left')
 print(AUC)
 #save
-# plt.savefig('/Users/mcgoug01/Downloads/bootstrap/ROC.png')
+# plt.savefig('/path/to/kcd_data/Downloads/bootstrap/ROC.png')
 
 # include op point confidences to 4 dp in titles
 # ax.title('Receiver Operating Characteristic, AUC = {:.4f}'.format(AUC), fontsize=20)
@@ -197,5 +197,5 @@ for text in lt.get_texts():
     text.set_fontsize(16)
 plt.tight_layout()
 #change width of ax[1] to 3
-plt.savefig('/Users/mcgoug01/Cambridge University Dropbox/William McGough/nat_paper/cvROCv3.png',dpi=300)
+plt.savefig('/path/to/kcd_data/Cambridge University Dropbox/William McGough/nat_paper/cvROCv3.png',dpi=300)
 plt.show()

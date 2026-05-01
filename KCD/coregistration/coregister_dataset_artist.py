@@ -103,9 +103,9 @@ def nonlinear_coreg(moving,fixed,
 if __name__ == '__main__':
     from random import shuffle
 
-    ncct_dir = '/rds/project/rds-sDuALntK11g/IMAGING_niftipairs/nc/images'
-    cect_dir = '/rds/project/rds-sDuALntK11g/IMAGING_niftipairs/ce/images'
-    save_dir = '/rds/project/rds-sDuALntK11g/IMAGING_niftipairs/nc_reg/images'
+    ncct_dir = '/path/to/kcd_data/IMAGING_niftipairs/nc/images'
+    cect_dir = '/path/to/kcd_data/IMAGING_niftipairs/ce/images'
+    save_dir = '/path/to/kcd_data/IMAGING_niftipairs/nc_reg/images'
 
     lets_shuffle = True
 

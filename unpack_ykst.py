@@ -7,10 +7,10 @@ import zipfile
 import sys
 
 # define the path to the zip file
-zip_file = '/bask/projects/p/phwq4930-renal-canc/YKST/wcm23-20240611_170702_.zip'
+zip_file = '/path/to/kcd_data/YKST/wcm23-20240611_170702_.zip'
 
 # define the path to the directory where the contents of the zip file will be saved
-save_dir = '/bask/projects/p/phwq4930-renal-canc/YKST/unpacked/'
+save_dir = '/path/to/kcd_data/YKST/unpacked/'
 
 if not os.path.exists(save_dir):
     os.makedirs(save_dir)

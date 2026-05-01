@@ -4,11 +4,11 @@
 import os
 import shutil
 
-dir_a = '/Users/mcgoug01/Downloads/test_set_alt/add_ncct_images'
-dir_b = '/Users/mcgoug01/Downloads/test_set_alt/add_cect_images'
-dir_b2 = '/Users/mcgoug01/Downloads/test_set_alt2/cect_labels'
-dir_c = '/Users/mcgoug01/Downloads/test_set_alt2/successfully_coregistered'
-dst = '/Users/mcgoug01/Downloads/test_set_alt2/failed_registration'
+dir_a = '/path/to/kcd_data/Downloads/test_set_alt/add_ncct_images'
+dir_b = '/path/to/kcd_data/Downloads/test_set_alt/add_cect_images'
+dir_b2 = '/path/to/kcd_data/Downloads/test_set_alt2/cect_labels'
+dir_c = '/path/to/kcd_data/Downloads/test_set_alt2/successfully_coregistered'
+dst = '/path/to/kcd_data/Downloads/test_set_alt2/failed_registration'
 
 if not os.path.exists(dst):
     os.makedirs(dst)

@@ -3,9 +3,9 @@ import pandas as pd
 import os
 from sklearn.metrics import auc
 
-fp = '/Users/mcgoug01/Dropbox (Personal)/PhD/thesis_plots/V1segdetection/largest_pred.csv'
-label_fp = '/Users/mcgoug01/Dropbox (Personal)/PhD/thesis_plots/V1segdetection/labels.csv'
-sizes_fp = '/Users/mcgoug01/Dropbox (Personal)/PhD/thesis_plots/V1segdetection/sizes_test.csv'
+fp = '/path/to/kcd_data/Dropbox (Personal)/PhD/thesis_plots/V1segdetection/largest_pred.csv'
+label_fp = '/path/to/kcd_data/Dropbox (Personal)/PhD/thesis_plots/V1segdetection/labels.csv'
+sizes_fp = '/path/to/kcd_data/Dropbox (Personal)/PhD/thesis_plots/V1segdetection/sizes_test.csv'
 
 if not os.path.exists(fp):
     print('File not found:', fp)
@@ -77,6 +77,6 @@ plt.tight_layout()
 
 plt.xlim([-2, 100])
 plt.ylim([0, 102])
-plt.savefig('/Users/mcgoug01/Dropbox (Personal)/PhD/thesis_plots/V1segdetection/testroc_seg.png')
+plt.savefig('/path/to/kcd_data/Dropbox (Personal)/PhD/thesis_plots/V1segdetection/testroc_seg.png')
 
 plt.show()

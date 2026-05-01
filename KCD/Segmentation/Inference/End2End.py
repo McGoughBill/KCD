@@ -1,5 +1,6 @@
 import os
-os.environ['OV_DATA_BASE'] = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/'
+from KCD.config import get_paths
+get_paths()  # populates OV_DATA_BASE from configs/paths.yaml or env
 from KCD.Segmentation.Inference.endtoend import EnsembleSeg, masking
 import numpy as np
 from skimage.measure import label
@@ -134,7 +135,7 @@ def EndToEnd(dataset, stage1_path, stage_2path, op_points = [0.0442,0.7017,0.999
 
 if __name__ == '__main__':
     dataset = 'ykst'
-    s1_path = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/trained_models/coreg_v2_noised/4mm_kidneybinary_customPP/6_finetune_trained'
-    s2_path = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/trained_models/masked_coreg_v2_noised/2mm_cancerbinary_customPP/6_finetune_l2-1e-05_cce1.0_cos1.0_2e-05lr_0.999997lg_16bs_2000ep_4gpus_efr_dfr100_seg_lr0.0001'
+    s1_path = '/path/to/kcd_data/data/seg_data/trained_models/coreg_v2_noised/4mm_kidneybinary_customPP/6_finetune_trained'
+    s2_path = '/path/to/kcd_data/data/seg_data/trained_models/masked_coreg_v2_noised/2mm_cancerbinary_customPP/6_finetune_l2-1e-05_cce1.0_cos1.0_2e-05lr_0.999997lg_16bs_2000ep_4gpus_efr_dfr100_seg_lr0.0001'
 
     EndToEnd(dataset, s1_path, s2_path)

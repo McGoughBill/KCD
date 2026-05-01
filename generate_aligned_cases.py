@@ -5,9 +5,9 @@ import os
 # this scripts copies the npy files from directory A to directory B if it exists as a nifti file in directory C
 
 # directory A
-dir_A = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/preprocessed/tcia_ncct_reg/2mm_canceronly_customPP/images'
-dir_B = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/preprocessed/tcia_ncct_reg/cmd_ready_2/images'
-dir_C = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/raw_data/abdominal_tcia_cect/images'
+dir_A = '/path/to/kcd_data/data/seg_data/preprocessed/tcia_ncct_reg/2mm_canceronly_customPP/images'
+dir_B = '/path/to/kcd_data/data/seg_data/preprocessed/tcia_ncct_reg/cmd_ready_2/images'
+dir_C = '/path/to/kcd_data/data/seg_data/raw_data/abdominal_tcia_cect/images'
 
 # get all the files in directory A
 files_A = [f for f in os.listdir(dir_A) if os.path.isfile(os.path.join(dir_A, f)) and f.endswith('.npy')]

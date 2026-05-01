@@ -81,16 +81,16 @@ if __name__ == '__main__':
     import sys
     iterations = int(sys.argv[1])
 
-    raw_data_path = '/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data/raw_data/coreg_v4/images'
+    raw_data_path = '/path/to/kcd_data/data/seg_data/raw_data/coreg_v4/images'
     dose_fractions = [0.7]
     for dose_fraction in dose_fractions[::-1]:
-        output_data_path = '/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data/raw_data/coreg_v4/noised_ims_sirt{}_{}'.format(iterations,dose_fraction)
+        output_data_path = '/path/to/kcd_data/data/seg_data/raw_data/coreg_v4/noised_ims_sirt{}_{}'.format(iterations,dose_fraction)
         main(raw_data_path, output_data_path,dose_fraction=dose_fraction,current=1000,exposure_time=0.5,num_iterations=iterations)
 
     # copy the original images, noised images, and the corresponding masks to a new folder
     #when copying masks, copy the masks with the original name and the noised name
 
-    new_folder = '/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data/raw_data/coreg_v4_noised_sirt_{}/'.format(iterations)
+    new_folder = '/path/to/kcd_data/data/seg_data/raw_data/coreg_v4_noised_sirt_{}/'.format(iterations)
     nf_im = os.path.join(new_folder,'images')
     nf_mk = os.path.join(new_folder,'labels')
 

@@ -5,10 +5,10 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 
-path = '/Users/mcgoug01/Downloads/test_data'
+path = '/path/to/kcd_data/Downloads/test_data'
 cancer_infp = os.path.join(path, 'cancer_inferences')
 masked_ct_path = os.path.join(path, 'images')
-ct_path = '/Users/mcgoug01/Library/CloudStorage/OneDrive-CRUKCambridgeInstitute/SecondYear/Segmentation/seg_data/raw_data/add_ncct/images'
+ct_path = '/path/to/kcd_data/raw_data/add_ncct/images'
 kidney_infp = os.path.join(path, 'kidney_inferences')
 
 #take the first file in the directory

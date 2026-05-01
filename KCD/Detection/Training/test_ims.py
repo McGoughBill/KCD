@@ -7,9 +7,9 @@ import os
 import shutil
 
 # Set the directories
-source_dir = '/Users/mcgoug01/Library/CloudStorage/OneDrive-CRUKCambridgeInstitute/SecondYear/Segmentation/seg_data/raw_data/test_set/add_ncct'
-dest_dir = '/Users/mcgoug01/Library/CloudStorage/OneDrive-CRUKCambridgeInstitute/SecondYear/Segmentation/seg_data/raw_data/test_set/images'
-check_dir = '/Users/mcgoug01/Library/CloudStorage/OneDrive-CRUKCambridgeInstitute/SecondYear/Segmentation/seg_data/raw_data/test_set/add_labels'
+source_dir = '/path/to/kcd_data/raw_data/test_set/add_ncct'
+dest_dir = '/path/to/kcd_data/raw_data/test_set/images'
+check_dir = '/path/to/kcd_data/raw_data/test_set/add_labels'
 # Get the files
 source_files = os.listdir(source_dir)
 dest_files = os.listdir(dest_dir)

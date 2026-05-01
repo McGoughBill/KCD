@@ -335,8 +335,8 @@ if __name__ == '__main__':
     import torch.nn as nn
     import warnings
     warnings.filterwarnings("ignore")
-    path = '/Users/mcgoug01/Downloads/models'
-    home = '/Users/mcgoug01/Library/CloudStorage/OneDrive-CRUKCambridgeInstitute/SecondYear/Classification/CNN_dataset/sliding_window_kidneywisemasked/add_ncct_unseen/Voxel-1mm/Threshold-0mm/3D-Depth20-Thresh10mm/kidney'
+    path = '/path/to/kcd_data/Downloads/models'
+    home = '/path/to/kcd_data/Library/CloudStorage/OneDrive-CRUKCambridgeInstitute/SecondYear/Classification/CNN_dataset/sliding_window_kidneywisemasked/add_ncct_unseen/Voxel-1mm/Threshold-0mm/3D-Depth20-Thresh10mm/kidney'
     softmax = nn.Softmax(dim=-1)
     
     # interesting cases - 202L (very good),  24L - interesing/confusing,  163R/184L revelatory.

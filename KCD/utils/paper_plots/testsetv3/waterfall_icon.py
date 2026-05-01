@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
-home = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions/fulldose_ROC/'
+home = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions/fulldose_ROC/'
 observations = home + 'observations.csv'
 observations = pd.read_csv(observations)
 #sort by confidence primarily, then by size if confidence is the same
@@ -137,7 +137,7 @@ plt.tight_layout()
 # add figure-wide title
 # fig.suptitle(titlename,fontsize=15)
 plt.savefig(home+'waterfall.png')
-plt.savefig('/Users/mcgoug01/Cambridge University Dropbox/William McGough/nat_paper/waterfall_fulldose.png')
+plt.savefig('/path/to/kcd_data/Cambridge University Dropbox/William McGough/nat_paper/waterfall_fulldose.png')
 
 plt.show()
 

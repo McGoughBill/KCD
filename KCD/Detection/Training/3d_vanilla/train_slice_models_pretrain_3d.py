@@ -10,7 +10,7 @@ import numpy as np
 import warnings
 import pandas as pd
 
-def train_cv_slice_model(home = '/Users/mcgoug01/Downloads/Data/',dataname='coreg_ncct',
+def train_cv_slice_model(home = '/path/to/kcd_data/Downloads/Data/',dataname='coreg_ncct',
                          splits:list=[0],folds=5,params:dict=None,train_folds=[0],
                          epochs = None,learning_rate=None):
     # Suppress warnings
@@ -94,9 +94,10 @@ def train_cv_slice_model(home = '/Users/mcgoug01/Downloads/Data/',dataname='core
 
 if __name__ == '__main__':
     import sys
+    from KCD.config import get_paths
     epochs = int(sys.argv[1])
     fold = int(sys.argv[2])
     lr = float(sys.argv[3])
     dataset = 'kits23_nooverlap'
-    home = '/bask/projects/p/phwq4930-renal-canc/KCD_data/Data'
+    home = os.path.join(get_paths()['data_root'], 'KCD_data', 'Data')
     train_cv_slice_model(home=home,dataname=dataset,splits=[0],train_folds=[fold],epochs=epochs,learning_rate=lr)

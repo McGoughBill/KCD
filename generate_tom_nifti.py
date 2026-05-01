@@ -151,9 +151,9 @@ def _remove_accents_(unicode_filename):
 
 
 if __name__ == '__main__':
-    COLTEA_home = '/home/wcm23/rds/rds-artist-sDuALntK11g/TOM_ARTIST'
-    COLTEA_save = '/home/wcm23/rds/rds-artist-sDuALntK11g/TOM_ARTIST_NIFTI'
-    alt = '/home/wcm23/rds/rds-artist-sDuALntK11g/TOM_ARTIST_NIFTI_FILTERED'
+    COLTEA_home = '/path/to/kcd_data/TOM_ARTIST'
+    COLTEA_save = '/path/to/kcd_data/TOM_ARTIST_NIFTI'
+    alt = '/path/to/kcd_data/TOM_ARTIST_NIFTI_FILTERED'
 
     if not os.path.exists(COLTEA_save):
         os.makedirs(COLTEA_save)

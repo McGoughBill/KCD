@@ -12,9 +12,9 @@ from skimage.segmentation import watershed
 # and the optimum size threshold for determining the presence of a cancerous region
 # we will do this by finding the threshold that maximises the dice score on a dataset
 
-cancer_infp = os.path.join('/bask/projects/p/phwq4930-renal-canc/data/seg_data/predictions_nii/masked_test_set/[2 2 2]mm_cont')
-kidney_infp = os.path.join('/bask/projects/p/phwq4930-renal-canc/data/seg_data/predictions_nii/test_set/[4 4 4]mm')
-cancer_label = os.path.join('/bask/projects/p/phwq4930-renal-canc/data/seg_data/raw_data/test_set/cect_labels')
+cancer_infp = os.path.join('/path/to/kcd_data/data/seg_data/predictions_nii/masked_test_set/[2 2 2]mm_cont')
+kidney_infp = os.path.join('/path/to/kcd_data/data/seg_data/predictions_nii/test_set/[4 4 4]mm')
+cancer_label = os.path.join('/path/to/kcd_data/data/seg_data/raw_data/test_set/cect_labels')
 confidence_thresholds = np.append(np.arange(0,0.1,0.01),np.arange(0.1, 0.9, 0.1))
 confidence_thresholds = np.append(confidence_thresholds,np.arange(0.9,1.01,0.01))
 
@@ -152,4 +152,4 @@ import pandas
 # group by file, position, label - find max confidence for each
 df = pandas.DataFrame(results)
 df = df.groupby(['file','position','label']).max().reset_index()
-df.to_csv(os.path.join('/bask/projects/p/phwq4930-renal-canc/data', 'casewise_confidences.csv'))
+df.to_csv(os.path.join('/path/to/kcd_data/data', 'casewise_confidences.csv'))

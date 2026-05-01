@@ -5,7 +5,7 @@ import os
 import scipy.optimize as opt
 
 
-save_loc = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/nat_paper'
+save_loc = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/nat_paper'
 def polynomial_model(x, a, b, c):
     return a * x**0.1 + b * x + c
 

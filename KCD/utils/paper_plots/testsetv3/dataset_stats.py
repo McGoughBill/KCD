@@ -7,12 +7,12 @@ import torch
 import matplotlib.pyplot as plt
 plt.switch_backend('TkAgg')
 
-label_loc = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/Bill/FD/internaltest_metadata.csv'
+label_loc = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/Bill/FD/internaltest_metadata.csv'
 labels = pd.read_csv(label_loc)
 print(labels)
 import nibabel as nib
-seg_loc = '/Users/mcgoug01/Library/CloudStorage/OneDrive-CRUKCambridgeInstitute/SecondYear/Segmentation/seg_data/raw_data/coreg_v4/labels'
-kits_seg_loc = '/Users/mcgoug01/Library/CloudStorage/OneDrive-CRUKCambridgeInstitute/SecondYear/Segmentation/seg_data/raw_data/test_set_v2/labels'
+seg_loc = '/path/to/kcd_data/raw_data/coreg_v4/labels'
+kits_seg_loc = '/path/to/kcd_data/raw_data/test_set_v2/labels'
 results = []
 for key in labels.OriginalID.values:
     #extract studyID from this
@@ -91,7 +91,7 @@ for key in labels.OriginalID.values:
 df = pd.DataFrame(results)
 
 #save to same loc using name 'internal_exo_size.csv'
-df.to_csv('/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/Bill/FD/internal_exo_size.csv')
+df.to_csv('/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/Bill/FD/internal_exo_size.csv')
 print(df)
 df['exo_b'] = df['exo_frac']>=0.5
 df['meso_b'] =(df['exo_frac']<0.5) & (df['exo_frac']>0.2)

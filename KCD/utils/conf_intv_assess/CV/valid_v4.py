@@ -13,24 +13,24 @@ import sys
 # and the optimum size threshold for determining the presence of a cancerous region
 # we will do this by finding the threshold that maximises the dice score on a dataset
 
-cancer_gt = '/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data/raw_data/coreg_v3_noised/labels'
+cancer_gt = '/path/to/kcd_data/data/seg_data/raw_data/coreg_v3_noised/labels'
 
 RADAR = bool(int(sys.argv[1]))
 from_scratch = bool(int(sys.argv[2]))
 
 if RADAR:
     if from_scratch:
-        cancer_infp = '/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data/predictions/masked_coreg_v4_noised/2mm_cancerbinary_customPP/6_finetune_RADAR_efr0_dfr0/cross_validation_continuous'
+        cancer_infp = '/path/to/kcd_data/data/seg_data/predictions/masked_coreg_v4_noised/2mm_cancerbinary_customPP/6_finetune_RADAR_efr0_dfr0/cross_validation_continuous'
         pt_string = 'radarnonfrozen'
     else:
-        cancer_infp = '/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data/predictions/masked_coreg_v4_noised/2mm_cancerbinary_customPP/6_finetune_RADAR_efr_dfr100/cross_validation_continuous'
+        cancer_infp = '/path/to/kcd_data/data/seg_data/predictions/masked_coreg_v4_noised/2mm_cancerbinary_customPP/6_finetune_RADAR_efr_dfr100/cross_validation_continuous'
         pt_string = 'radarfrozen'
 else:
     if from_scratch:
-        cancer_infp = '/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data/predictions/masked_coreg_v4_noised/2mm_cancerbinary_customPP/6_finetune_CECT_efr0_dfr0/cross_validation_continuous'
+        cancer_infp = '/path/to/kcd_data/data/seg_data/predictions/masked_coreg_v4_noised/2mm_cancerbinary_customPP/6_finetune_CECT_efr0_dfr0/cross_validation_continuous'
         pt_string = 'cectnonfrozen'
     else:
-        cancer_infp = '/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data/predictions/masked_coreg_v4_noised/2mm_cancerbinary_customPP/6_finetune_CECT_efr_dfr100/cross_validation_continuous'
+        cancer_infp = '/path/to/kcd_data/data/seg_data/predictions/masked_coreg_v4_noised/2mm_cancerbinary_customPP/6_finetune_CECT_efr_dfr100/cross_validation_continuous'
         pt_string = 'cectfrozen'
 
 confidence_thresholds = np.append(np.arange(0,0.1,0.01),np.arange(0.1, 0.9, 0.05))
@@ -164,15 +164,15 @@ for conf in confidence_thresholds[::-1]:
 
 percase_results = np.array(percase_results)
 # save results to npy
-np.save(os.path.join('/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data/raw_data/masked_coreg_v4_noised/results_confwise_{}.npy'.format(pt_string)), percase_results)
+np.save(os.path.join('/path/to/kcd_data/data/seg_data/raw_data/masked_coreg_v4_noised/results_confwise_{}.npy'.format(pt_string)), percase_results)
 
 import pandas as pd
 import matplotlib.pyplot as plt
 plt.switch_backend('TkAgg')
 df = pd.DataFrame(results)
-df.to_csv(os.path.join('/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data/raw_data/masked_coreg_v4_noised/results_all_validation_{}.csv'.format(pt_string)))
+df.to_csv(os.path.join('/path/to/kcd_data/data/seg_data/raw_data/masked_coreg_v4_noised/results_all_validation_{}.csv'.format(pt_string)))
 
-path_to_results = '/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data/raw_data/masked_coreg_v4_noised/results_all_validation_{}.csv'.format(pt_string)
+path_to_results = '/path/to/kcd_data/data/seg_data/raw_data/masked_coreg_v4_noised/results_all_validation_{}.csv'.format(pt_string)
 df = pd.read_csv(path_to_results)
 plt.figure()
 
@@ -192,5 +192,5 @@ plt.ylabel('Sensitivity (%)')
 plt.xlabel('1 - Specificity (%)')
 plt.title('2-Stage Segmentation-based Detection Validation ROC')
 plt.legend(loc="lower right")
-plt.savefig(os.path.join('/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data/raw_data/masked_coreg_v4_noised/roc_curve_{}.png'.format(pt_string)))
+plt.savefig(os.path.join('/path/to/kcd_data/data/seg_data/raw_data/masked_coreg_v4_noised/roc_curve_{}.png'.format(pt_string)))
 plt.show()

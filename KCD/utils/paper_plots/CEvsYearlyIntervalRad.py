@@ -4,7 +4,7 @@ import matplotlib.ticker as ticker
 import scipy.optimize as opt
 import os
 
-save_loc = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/nat_paper'
+save_loc = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/nat_paper'
 
 
 # Define model functions for curve fitting

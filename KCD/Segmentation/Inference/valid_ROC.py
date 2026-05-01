@@ -12,7 +12,7 @@ from skimage.segmentation import watershed
 # and the optimum size threshold for determining the presence of a cancerous region
 # we will do this by finding the threshold that maximises the dice score on a dataset
 
-path = '/Users/mcgoug01/Downloads/valid_v4'
+path = '/path/to/kcd_data/Downloads/valid_v4'
 cancer_infp = os.path.join(path, 'cross_validation_continuous')
 cancer_gt = os.path.join(path, 'labels')
 print(path)
