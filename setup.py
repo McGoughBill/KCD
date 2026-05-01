@@ -1,18 +1,23 @@
-from setuptools import setup,find_packages
+from setuptools import setup, find_packages
 
 setup(
-    name='KCD_early',
-    packages=find_packages('KCD_src', exclude=['test']),
-    install_requires=['torch','matplotlib','nibabel','dicom2nifti',
-                'gecatsim',
-              'numpy','opencv-python','pandas','pydicom',
-              'scikit-image','scikit-learn','scipy','numpy-stl',
-              'simpleitk','torchvision','pymeshfix','rt_utils'],
+    name='KCD',
+    packages=find_packages(exclude=['test', 'tests']),
+    install_requires=[
+        'torch', 'torchvision',
+        'numpy', 'pandas', 'scipy',
+        'scikit-image', 'scikit-learn',
+        'matplotlib',
+        'nibabel', 'simpleitk', 'pydicom', 'dicom2nifti', 'rt_utils',
+        'opencv-python', 'numpy-stl', 'pymeshfix',
+        'gecatsim',
+        'pyyaml',
+    ],
     python_requires='>=3.10',
-    description='Python Package for the early detection of renal cancer',
-    version='0.1',
-    url='https://github.com/mcgoughlin/KCD',
-    author='bmcgough',
+    description='Automated small kidney cancer detection in non-contrast CT',
+    version='1.0',
+    url='https://github.com/McGoughBill/KCD',
+    author='Bill McGough',
     author_email='billy.mcgough1@hotmail.com',
-    keywords=['pip','pytorch','cancer']
-    )
+    keywords=['medical-imaging', 'kidney-cancer', 'ct', 'deep-learning', 'pytorch'],
+)
