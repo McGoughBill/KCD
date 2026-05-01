@@ -1,8 +1,6 @@
 # Literature Review and Lab Notes
 
-> Background notes accumulated during the development of *Automated Small Kidney Cancer Detection in Non-Contrast Computed Tomography*. Kept here for context — not user-facing documentation. See the project [README](../README.md) for setup and reproduction instructions.
->
-> Pre-print: https://arxiv.org/abs/2312.05258
+> Background notes accumulated during the development of *Kidney cancer screening in non-contrast computed tomography via domain-adaptive deep learning* (manuscript under review). Kept here for context — not user-facing documentation. See the project [README](../README.md) for setup and reproduction instructions.
 
 ## Related work
 

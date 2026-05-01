@@ -1,8 +1,6 @@
-# KCD — Automated Small Kidney Cancer Detection in Non-Contrast CT
+# KCD — Kidney cancer screening in non-contrast CT via domain-adaptive deep learning
 
-Code accompanying the paper *Automated Small Kidney Cancer Detection in Non-Contrast Computed Tomography*.
-
-> **Pre-print:** [arXiv:2312.05258](https://arxiv.org/abs/2312.05258)
+Code accompanying the paper *Kidney cancer screening in non-contrast computed tomography via domain-adaptive deep learning* (manuscript under review).
 
 This repository contains the training, inference, and evaluation pipelines used to produce the results in the paper. The original investigation included a number of ablation studies and cohort-specific experiments; for the public release, we have kept the canonical pipeline scripts and removed cohort/site-specific variants. Background notes from the development of this work live in [`docs/literature_review.md`](docs/literature_review.md).
 
@@ -139,15 +137,7 @@ Trained model weights are not bundled in the repo. Contact the authors or downlo
 
 ## Citation
 
-```bibtex
-@article{mcgough2023kcd,
-    title   = {Automated Small Kidney Cancer Detection in Non-Contrast Computed Tomography},
-    author  = {McGough, William and others},
-    journal = {arXiv preprint arXiv:2312.05258},
-    year    = {2023},
-    url     = {https://arxiv.org/abs/2312.05258}
-}
-```
+Manuscript under review. A formal citation will be added once the paper is accepted.
 
 ## License
 
