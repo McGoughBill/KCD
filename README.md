@@ -141,7 +141,17 @@ Manuscript under review. A formal citation will be added once the paper is accep
 
 ## License
 
-Apache License 2.0 — see [LICENSE](LICENSE).
+**Academic Open Source Software Licence Agreement** — Copyright © Cancer Research Technology Limited 2021. See [LICENSE](LICENSE) for full terms.
+
+Key restrictions (please read the full LICENSE before use):
+
+- Licensee must be a **Not-for-Profit Entity** (registered charity, academic / research-focused organisation, or non-commercial entity).
+- Use is restricted to **Academic Use** — education, teaching, and academic research.
+- **Clinical use is prohibited** — the Software must not be used for the diagnosis or treatment of human beings in the clinic.
+- **No commercial use** — any commercial purpose, or use by a commercial entity, requires a separate bespoke licence from Cancer Research Technology Ltd.
+- Any modified or derived version (*Licensee Version Software*) must itself be published in source form under the same licence and made available for download.
+
+For commercial licensing enquiries, contact Cancer Research Technology Ltd.
 
 ## Acknowledgements
 
