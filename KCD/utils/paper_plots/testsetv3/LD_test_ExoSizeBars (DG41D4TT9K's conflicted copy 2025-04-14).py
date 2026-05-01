@@ -4,16 +4,16 @@ import numpy as np
 import matplotlib.ticker as plticker
 import matplotlib.patches as mpatches
 
-meta_folder = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions_v3/lowdose_test_ROCv3'
+meta_folder = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions_v3/lowdose_test_ROCv3'
 sub_folders = [os.path.join(meta_folder, f,'predictions.csv') for f in os.listdir(meta_folder) if os.path.isdir(os.path.join(meta_folder, f))]
 names = [float(f.split('/')[-2]) for f in sub_folders]
-save_loc = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/nat_paper'
+save_loc = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/nat_paper'
 # sort sub_folders by names_sub_folders
 folders = [x for _,x in sorted(zip(names,sub_folders))]
 names_sub_folders = sorted(names)
 
-truth_csv_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/Bill/LD/internaltest_metadata.csv'
-exo_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/Bill/FD/internal_exo_size.csv'
+truth_csv_fp = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/Bill/LD/internaltest_metadata.csv'
+exo_fp = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/Bill/FD/internal_exo_size.csv'
 truth = pd.read_csv(truth_csv_fp)
 exo_etc = pd.read_csv(exo_fp)
 
@@ -169,7 +169,7 @@ plt.tight_layout(rect=[0, 0.03, 1, 0.9])
 plt.savefig(os.path.join(save_loc,'exo_endo_sens_spec.png'),dpi=300)
 plt.show()
 
-high_acc_pred_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions_v3/lowdose_test_ROCv3/0.550/predictions.csv'
+high_acc_pred_fp = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions_v3/lowdose_test_ROCv3/0.550/predictions.csv'
 high_acc_pred = pd.read_csv(high_acc_pred_fp)
 high_acc_pred = high_acc_pred.sort_values(by='OriginalID')
 truth = truth.sort_values(by='OriginalID')

@@ -188,11 +188,11 @@ if __name__ == '__main__':
     import matplotlib.pyplot as plt
     plt.switch_backend('TkAgg')
     dataset_ne_path = os.path.join(
-        '/media/mcgoug01/Crucial X6/ovseg_test/preprocessed/small_coreg_ncct/small_coreg_ncct_2/images')
-    dataset_ce_path = os.path.join('/media/mcgoug01/Crucial X6/ovseg_test/preprocessed/add_cect/add_cect_2/images')
+        '/path/to/kcd_data/Crucial X6/ovseg_test/preprocessed/small_coreg_ncct/small_coreg_ncct_2/images')
+    dataset_ce_path = os.path.join('/path/to/kcd_data/Crucial X6/ovseg_test/preprocessed/add_cect/add_cect_2/images')
     # test the dataset
-    # ce_path = '/media/mcgoug01/Crucial X6/ovseg_test/preprocessed/coltea_art/coltea_art_2/images/'
-    # ne_path = '/media/mcgoug01/Crucial X6/ovseg_test/preprocessed/coltea_nat/coltea_nat_2/images/'
+    # ce_path = '/path/to/kcd_data/Crucial X6/ovseg_test/preprocessed/coltea_art/coltea_art_2/images/'
+    # ne_path = '/path/to/kcd_data/Crucial X6/ovseg_test/preprocessed/coltea_nat/coltea_nat_2/images/'
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     device='cpu'
     dataset = CrossPhaseDataset(dataset_ne_path, dataset_ce_path, device=device, is_train=True)

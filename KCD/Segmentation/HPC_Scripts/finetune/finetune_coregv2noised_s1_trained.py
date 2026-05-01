@@ -1,6 +1,6 @@
 import os
 
-os.environ['OV_DATA_BASE'] = "/bask/projects/p/phwq4930-renal-canc/data/seg_data/"
+os.environ['OV_DATA_BASE'] = "/path/to/kcd_data/data/seg_data/"
 from KCD.Segmentation.ovseg.model.SegmentationModel import SegmentationModel
 from KCD.Segmentation.ovseg.model.model_parameters_segmentation import get_model_params_3d_res_encoder_U_Net
 import gc
@@ -65,7 +65,7 @@ model_params['data']['trn_dl_params']['batch_size'] = 32
 model_params['data']['val_dl_params']['epoch_len'] = 100
 
 for vf in vfs:
-    path_to_model = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/trained_models/final_pairedpretrain_nc/4mm_kidney_customPP/6,3x3x3,32_trainontest/fold_0/network_weights'
+    path_to_model = '/path/to/kcd_data/data/seg_data/trained_models/final_pairedpretrain_nc/4mm_kidney_customPP/6,3x3x3,32_trainontest/fold_0/network_weights'
 
     model = SegmentationModel(val_fold=vf,
                               data_name=data_name,

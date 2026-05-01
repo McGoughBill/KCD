@@ -70,10 +70,10 @@ def main(raw_data_path, output_data_path,dose_fraction=0.75,current=400,exposure
         save_nii_image(noised_image, aff, os.path.join(output_data_path, file))
 
 if __name__ == '__main__':
-    raw_data_path = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/raw_data/real_test_set_v2/images'
+    raw_data_path = '/path/to/kcd_data/data/seg_data/raw_data/real_test_set_v2/images'
     dose_fractions = [0.8]
     for dose_fraction in dose_fractions:
-        output_data_path = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/raw_data/real_test_set_v2_noisy/images'
+        output_data_path = '/path/to/kcd_data/data/seg_data/raw_data/real_test_set_v2_noisy/images'
         if not os.path.exists(output_data_path):
             os.makedirs(output_data_path)
         main(raw_data_path, output_data_path,dose_fraction=dose_fraction,current=1000,exposure_time=0.5)
@@ -81,7 +81,7 @@ if __name__ == '__main__':
     # copy the original images, noised images, and the corresponding masks to a new folder
     #when copying masks, copy the masks with the original name and the noised name
 
-    # new_folder = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/raw_data/test-noised_ims'
+    # new_folder = '/path/to/kcd_data/data/seg_data/raw_data/test-noised_ims'
     # nf_im = os.path.join(new_folder,'images')
     # nf_mk = os.path.join(new_folder,'labels')
     #

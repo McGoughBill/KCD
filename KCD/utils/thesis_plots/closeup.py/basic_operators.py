@@ -7,7 +7,7 @@ plt.switch_backend('TkAgg')
 
 
 
-img = mpimg.imread('/Users/mcgoug01/Downloads/DSC_0564_BWsmall.png')
+img = mpimg.imread('/path/to/kcd_data/Downloads/DSC_0564_BWsmall.png')
 # plot the original image, and 3 altered versions.
 #first altered version - inverted intensity
 #second altered version - horizontal flip

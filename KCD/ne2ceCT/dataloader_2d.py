@@ -3,7 +3,7 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 if __name__ == '__main__':
     import os
-    os.environ['OV_DATA_BASE']='/Users/mcgoug01/Library/CloudStorage/OneDrive-CRUKCambridgeInstitute/SecondYear/Segmentation/seg_data'
+    os.environ['OV_DATA_BASE']='/path/to/kcd_data'
 import torchvision
 import pandas as pd
 import numpy as np
@@ -226,12 +226,12 @@ def collate_fn(batch):
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
     plt.switch_backend('TkAgg')
-    dataset_ne_path = '/Users/mcgoug01/Downloads/assess_ch/nc'
-    dataset_ce_path = '/Users/mcgoug01/Downloads/assess_ch/ce'
-    split_path = '/Users/mcgoug01/Downloads/assess_ch'
+    dataset_ne_path = '/path/to/kcd_data/Downloads/assess_ch/nc'
+    dataset_ce_path = '/path/to/kcd_data/Downloads/assess_ch/ce'
+    split_path = '/path/to/kcd_data/Downloads/assess_ch'
     # test the dataset
-    # ce_path = '/media/mcgoug01/Crucial X6/ovseg_test/preprocessed/coltea_art/coltea_art_2/images/'
-    # ne_path = '/media/mcgoug01/Crucial X6/ovseg_test/preprocessed/coltea_nat/coltea_nat_2/images/'
+    # ce_path = '/path/to/kcd_data/Crucial X6/ovseg_test/preprocessed/coltea_art/coltea_art_2/images/'
+    # ne_path = '/path/to/kcd_data/Crucial X6/ovseg_test/preprocessed/coltea_nat/coltea_nat_2/images/'
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     device='cpu'
     dataset = CrossPhaseDataset(dataset_ne_path, dataset_ce_path, split_path,

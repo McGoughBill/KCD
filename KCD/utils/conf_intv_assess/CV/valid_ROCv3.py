@@ -12,9 +12,9 @@ from skimage.segmentation import watershed
 # and the optimum size threshold for determining the presence of a cancerous region
 # we will do this by finding the threshold that maximises the dice score on a dataset
 
-path = '/Users/mcgoug01/Downloads/valid_v3'
-cancer_infp = '/Users/mcgoug01/Downloads/cross_validation_continuous'
-cancer_gt = '/Users/mcgoug01/Downloads/valid_v3/labels'
+path = '/path/to/kcd_data/Downloads/valid_v3'
+cancer_infp = '/path/to/kcd_data/Downloads/cross_validation_continuous'
+cancer_gt = '/path/to/kcd_data/Downloads/valid_v3/labels'
 print(path)
 
 confidence_thresholds = np.append(np.arange(0,0.1,0.01),np.arange(0.1, 0.9, 0.05))

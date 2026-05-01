@@ -43,10 +43,10 @@ def eval_ZS_seg(is_RCC,pred, gt, num_classes):
 
     return Dice, Sensitivity, Precision
 
-NCCT_path = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/predictions_npy/coreg_ncct/4,4,4mm_AA_False'
-CECT_path = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/predictions_npy/coreg_ncct/4,4,4mm_AA_True'
-labels_path = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/preprocessed/coreg_ncct/4mm_binary/labels'
-save_path = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/predictions_npy/coreg_ncct'
+NCCT_path = '/path/to/kcd_data/data/seg_data/predictions_npy/coreg_ncct/4,4,4mm_AA_False'
+CECT_path = '/path/to/kcd_data/data/seg_data/predictions_npy/coreg_ncct/4,4,4mm_AA_True'
+labels_path = '/path/to/kcd_data/data/seg_data/preprocessed/coreg_ncct/4mm_binary/labels'
+save_path = '/path/to/kcd_data/data/seg_data/predictions_npy/coreg_ncct'
 
 #extract files from each loc that ends in .npy
 NCCT_files = [f for f in os.listdir(NCCT_path) if f.endswith('.npy')]

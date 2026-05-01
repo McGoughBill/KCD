@@ -11,7 +11,7 @@ import warnings
 import pandas as pd
 import sys
 
-def train_cv_slice_model(home = '/Users/mcgoug01/Downloads/Data/',dataname='coreg_ncct',
+def train_cv_slice_model(home = '/path/to/kcd_data/Downloads/Data/',dataname='coreg_ncct',
                          splits:list=[0],folds=5,params:dict=None,train_folds=[0],
                          epochs = None,all_params=False):
     # Suppress warnings
@@ -69,7 +69,7 @@ def train_cv_slice_model(home = '/Users/mcgoug01/Downloads/Data/',dataname='core
             sys.stdout.flush()
 
             model = torch.load(
-                '/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data/training_info/masked_kits_add_nooverlap_v2/split_0/fold_0/PatchModel_merlin/model/PatchModel_merlin_5_5_0.001_allparamsTrue')
+                '/path/to/kcd_data/data/seg_data/training_info/masked_kits_add_nooverlap_v2/split_0/fold_0/PatchModel_merlin/model/PatchModel_merlin_5_5_0.001_allparamsTrue')
 
             if not all_params:
                 for param in model.features.parameters():
@@ -115,6 +115,6 @@ if __name__ == '__main__':
     epochs = 5
     # fold = int(sys.argv[1]) if len(sys.argv) > 1 else 0
     dataset = 'masked_coreg_v4_noised'
-    home = '/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data/'
+    home = '/path/to/kcd_data/data/seg_data/'
     train_cv_slice_model(home=home,dataname=dataset,splits=[0],train_folds=[0,1,2,3,4],epochs=epochs,
                          params=None,folds=5,all_params=True)

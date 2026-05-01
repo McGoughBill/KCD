@@ -7,11 +7,11 @@ import matplotlib.pyplot as plt
 
 small = False
 
-meta_folder = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions_v3/cect_test_ROCv3'
+meta_folder = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions_v3/cect_test_ROCv3'
 sub_folders = [os.path.join(meta_folder, f,'predictions.csv') for f in os.listdir(meta_folder) if os.path.isdir(os.path.join(meta_folder, f))]
 names_sub_folders = [float(f.split('/')[-2]) for f in sub_folders]
-seg_loc = '/Users/mcgoug01/Library/CloudStorage/OneDrive-CRUKCambridgeInstitute/SecondYear/Segmentation/seg_data/raw_data/test_set_cect/labels'
-save_loc = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/nat_paper'
+seg_loc = '/path/to/kcd_data/raw_data/test_set_cect/labels'
+save_loc = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/nat_paper'
 save_name = 'cect_test_ROC_small={}'.format( small)
 save_fp = os.path.join(save_loc,save_name)
 # sort sub_folders by names_sub_folders
@@ -19,18 +19,18 @@ sub_folders = [x for _,x in sorted(zip(names_sub_folders,sub_folders))]
 names_sub_folders = sorted(names_sub_folders)
 
 
-truth_csv_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/Bill/FD/internaltest_metadata_cect.csv'
-iztok_predfulldose_csv_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/iztokFD.csv'
-hania_predfulldose_csv_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/haniaFD.csv'
-cathal_predfulldose_csv_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/cathalFD.csv'
+truth_csv_fp = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/Bill/FD/internaltest_metadata_cect.csv'
+iztok_predfulldose_csv_fp = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/iztokFD.csv'
+hania_predfulldose_csv_fp = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/haniaFD.csv'
+cathal_predfulldose_csv_fp = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/cathalFD.csv'
 
 folders = [iztok_predfulldose_csv_fp, hania_predfulldose_csv_fp,cathal_predfulldose_csv_fp] + sub_folders
 names = ['Iztok','Hania','Cathal'] + names_sub_folders
 humans = ['Iztok','Hania','Cathal']
 
-high_acc_lowdose_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions_v3/lowdose_test_ROCv3/0.550/predictions.csv'
+high_acc_lowdose_fp = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions_v3/lowdose_test_ROCv3/0.550/predictions.csv'
 low_dose_predictions = pd.read_csv(high_acc_lowdose_fp)
-high_acc_fulldose_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions_v3/fulldose_test_ROCv3/0.550/predictions.csv'
+high_acc_fulldose_fp = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions_v3/fulldose_test_ROCv3/0.550/predictions.csv'
 full_dose_predictions = pd.read_csv(high_acc_fulldose_fp)
 
 # using full_dose_predictions, make a key of StudyID to OriginalID - dictionary
@@ -109,7 +109,7 @@ for high_acc_conditioning  in [False, True]:
     print('mean small size is',np.mean(pile))
 
     size_df = pd.DataFrame(sizes_dictlist)
-    size_df.to_csv('/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/Bill/internaltest_sizes.csv',index=False)
+    size_df.to_csv('/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/Bill/internaltest_sizes.csv',index=False)
 
     for name,pred_csv_fp in zip(names,folders):
 

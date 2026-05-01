@@ -8,8 +8,8 @@ import pandas as pd
 import sys
 import json
 
-new_fold = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/YKST/ROCs/v3_files'
-preds = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/YKST/ROCs/ykst_ROCv3'
+new_fold = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/YKST/ROCs/v3_files'
+preds = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/YKST/ROCs/ykst_ROCv3'
 
 # cancers : 10010791
 # 10110488

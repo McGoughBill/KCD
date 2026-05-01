@@ -11,9 +11,9 @@ from scipy import stats
 import sys
 from KCD.Detection.Preprocessing.AxialSlices import array_manipulation_utils as amu
 #
-# nii_label_loc = str(sys.argv[1]) # '/Users/mcgoug01/Downloads/inferences/[4 4 4]mm'
-# nii_image_loc = str(sys.argv[2]) # '/Users/mcgoug01/Library/CloudStorage/OneDrive-CRUKCambridgeInstitute/SecondYear/Segmentation/seg_data/raw_data/coreg_ncct/images'
-# save_loc =  str(sys.argv[3]) # '/Users/mcgoug01/Downloads/masked_coreg_ncct/images'
+# nii_label_loc = str(sys.argv[1]) # '/path/to/kcd_data/Downloads/inferences/[4 4 4]mm'
+# nii_image_loc = str(sys.argv[2]) # '/path/to/kcd_data/raw_data/coreg_ncct/images'
+# save_loc =  str(sys.argv[3]) # '/path/to/kcd_data/Downloads/masked_coreg_ncct/images'
 
 
 def mask_dataset(nii_image_loc,nii_label_loc,save_loc):

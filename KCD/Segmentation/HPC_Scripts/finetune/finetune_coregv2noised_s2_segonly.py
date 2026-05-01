@@ -1,6 +1,6 @@
 import os
 
-os.environ['OV_DATA_BASE'] = "/bask/projects/p/phwq4930-renal-canc/data/seg_data/"
+os.environ['OV_DATA_BASE'] = "/path/to/kcd_data/data/seg_data/"
 from KCD.Segmentation.ovseg.model.SegmentationModel import SegmentationModel
 from KCD.Segmentation.ovseg.model.model_parameters_segmentation import get_model_params_3d_res_encoder_U_Net
 import gc
@@ -76,7 +76,7 @@ model_params['data']['trn_dl_params']['min_biased_samples'] = model_params['data
 
 
 for vf in vfs:
-    # path_to_model = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/trained_models/masked_kits_add_nooverlap_v2_small/2mm_canceronly_customPP/6_tot_ch_talkative_cls1/fold_0/network_weights'
+    # path_to_model = '/path/to/kcd_data/data/seg_data/trained_models/masked_kits_add_nooverlap_v2_small/2mm_canceronly_customPP/6_tot_ch_talkative_cls1/fold_0/network_weights'
     # sd = torch.load(path_to_model, map_location=dev)
     # # remove keys from state_dict that contain 'fcs','class_pooling', and 'final_fc'
     #

@@ -22,7 +22,7 @@ import matplotlib.pyplot as plt
 
 #find the highest confidence that shows '1' in each kidney.
 
-home = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions_real/fulldose_ROC'
+home = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions_real/fulldose_ROC'
 sub_folders = [f for f in os.listdir(home) if os.path.isdir(os.path.join(home, f))]
 sub_folders = [os.path.join(home, f) for f in sub_folders]
 confidences = [float(f.split('/')[-1]) for f in sub_folders]
@@ -30,15 +30,15 @@ confidences = [float(f.split('/')[-1]) for f in sub_folders]
 # if rightcancer is positive in subfolder 0.1, but negative in 0.2, then the confidence is 0.1
 percase_confidences = {}
 
-label_loc = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/Bill/FD/internaltest_metadata_real.csv'
+label_loc = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/Bill/FD/internaltest_metadata_real.csv'
 labels = pd.read_csv(label_loc)
 #loop through patients and fill percase_confidences with correct labels
 for patient in labels.OriginalID:
     percase_confidences[patient] = {'RightCancer':0,'LeftCancer':0,'RLabel':labels.loc[labels.OriginalID==patient,'RightCancer'].values[0],'LLabel':labels.loc[labels.OriginalID==patient,'LeftCancer'].values[0],'size':0}
 
 import nibabel as nib
-seg_loc = '/Users/mcgoug01/Library/CloudStorage/OneDrive-CRUKCambridgeInstitute/SecondYear/Segmentation/seg_data/raw_data/test_set_v2/labels'
-kidney_seg_loc = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/AI/kidney_segs/'
+seg_loc = '/path/to/kcd_data/raw_data/test_set_v2/labels'
+kidney_seg_loc = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/AI/kidney_segs/'
 for key in percase_confidences.keys():
     # find case name fr0m labels
     case = key

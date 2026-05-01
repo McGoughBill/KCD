@@ -8,7 +8,7 @@ import nibabel as nib
 import scipy.ndimage
 import pandas as pd
 
-home = '/Users/mcgoug01/Downloads/oxcam/oxcam'
+home = '/path/to/kcd_data/Downloads/oxcam/oxcam'
 kidney = 'kidney_[2 2 2]mm'
 images = 'images'
 cancer = 'cancer_[2 2 2]mm'

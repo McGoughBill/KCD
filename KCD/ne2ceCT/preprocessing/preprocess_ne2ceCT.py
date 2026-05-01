@@ -1,5 +1,5 @@
 import os
-os.environ['OV_DATA_BASE'] = '/bask/projects/p/phwq4930-renal-canc/data/seg_data'
+os.environ['OV_DATA_BASE'] = '/path/to/kcd_data/data/seg_data'
 from KCD.Segmentation.ovseg.preprocessing.SegmentationPreprocessing import SegmentationPreprocessing
 import numpy as np
 import torch
@@ -97,11 +97,11 @@ def Segmentation_Preparation_AbdAtlas(home, seg_spacing=np.array([4,4,4]),
     print("")
 
     if is_cect:
-        dst = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/preprocessed/tciaandcoltea_cect/{}mm_AA_ISBI/images'.format(seg_spacing[0])
-        src = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/preprocessed/{}/{}/images'.format(data_name, preprocessed_name)
+        dst = '/path/to/kcd_data/data/seg_data/preprocessed/tciaandcoltea_cect/{}mm_AA_ISBI/images'.format(seg_spacing[0])
+        src = '/path/to/kcd_data/data/seg_data/preprocessed/{}/{}/images'.format(data_name, preprocessed_name)
     else:
-        dst = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/preprocessed/tciaandcoltea_ncct/{}mm_AA_ISBI/images'.format(seg_spacing[0])
-        src = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/preprocessed/{}/{}/images'.format(data_name,
+        dst = '/path/to/kcd_data/data/seg_data/preprocessed/tciaandcoltea_ncct/{}mm_AA_ISBI/images'.format(seg_spacing[0])
+        src = '/path/to/kcd_data/data/seg_data/preprocessed/{}/{}/images'.format(data_name,
                                                                                                     preprocessed_name)
     if not os.path.exists(dst):
         os.makedirs(dst)
@@ -159,8 +159,8 @@ def Segmentation_Preparation_SSL(home, seg_spacing=np.array([4,4,4]), background
 
     #copy all data from SSL_1 folder to PATH below
     if not is_cect:
-        dst = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/preprocessed/tciaandcoltea_ncct/{}mm_ISBI/images'.format(seg_spacing[0])
-        src = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/preprocessed/{}/{}/images'.format(data_name, preprocessed_name)
+        dst = '/path/to/kcd_data/data/seg_data/preprocessed/tciaandcoltea_ncct/{}mm_ISBI/images'.format(seg_spacing[0])
+        src = '/path/to/kcd_data/data/seg_data/preprocessed/{}/{}/images'.format(data_name, preprocessed_name)
 
         import shutil
         for file in [f for f in os.listdir(src) if os.path.isfile(os.path.join(src, f)) and f.endswith('.npy')]:

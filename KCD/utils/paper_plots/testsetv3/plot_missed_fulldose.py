@@ -9,7 +9,7 @@ from skimage.measure import label, regionprops
 
 import matplotlib.pyplot as plt
 
-meta_folder = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions_v3/fulldose_test_ROCv3'
+meta_folder = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions_v3/fulldose_test_ROCv3'
 sub_folders = [os.path.join(meta_folder, f,'predictions.csv') for f in os.listdir(meta_folder) if os.path.isdir(os.path.join(meta_folder, f))]
 names_sub_folders = [float(f.split('/')[-2]) for f in sub_folders]
 
@@ -18,25 +18,25 @@ sub_folders = [x for _,x in sorted(zip(names_sub_folders,sub_folders))]
 names_sub_folders = sorted(names_sub_folders)
 
 highacc_pred_csv_fp  = sub_folders[12]
-iztok_pred_csv_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/iztokFD.csv'
-cathal_pred_csv_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/cathalFD.csv'
-truth_csv_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/Bill/FD/internaltest_metadata.csv'
-hania_pred_csv_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/haniaFD.csv'
+iztok_pred_csv_fp = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/iztokFD.csv'
+cathal_pred_csv_fp = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/cathalFD.csv'
+truth_csv_fp = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/Bill/FD/internaltest_metadata.csv'
+hania_pred_csv_fp = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/haniaFD.csv'
 
-highacc_fd_pred_home = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions_v3/fulldose_test_ROCv3/0.550'
-fd_continuous_home = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions_v3/full_dose_continuous'
-ld_continuous_home = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions_v3/low_dose_continuous'
-highacc_ld_pred_home = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions_v3/lowdose_test_ROCv3/0.550'
-lowdose_image_path = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/Bill/LD/anon_noised/'
-fulldose_image_path = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/data/test_set_v2/images/'
+highacc_fd_pred_home = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions_v3/fulldose_test_ROCv3/0.550'
+fd_continuous_home = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions_v3/full_dose_continuous'
+ld_continuous_home = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions_v3/low_dose_continuous'
+highacc_ld_pred_home = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions_v3/lowdose_test_ROCv3/0.550'
+lowdose_image_path = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/Bill/LD/anon_noised/'
+fulldose_image_path = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/data/test_set_v2/images/'
 
-add_cect_path = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/data/all_add'
-add_label_path = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/data/all_add/manual_labels/'
-kits_cect_path = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/data/kits23/'
+add_cect_path = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/data/all_add'
+add_label_path = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/data/all_add/manual_labels/'
+kits_cect_path = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/data/kits23/'
 # find the StudyID where cancer was missed by each radiologist that were found by the AI
 
 
-save_loc = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/nat_paper'
+save_loc = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/nat_paper'
 # read in the AIpredictions
 highacc_pred = pd.read_csv(highacc_pred_csv_fp)
 

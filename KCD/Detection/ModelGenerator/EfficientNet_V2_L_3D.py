@@ -493,7 +493,7 @@ if __name__ == "__main__":
     model.train()
 
     from KCD.Detection.Dataloaders.slice_dataloader import SW_Data_labelled
-    dataset = SW_Data_labelled(path="/Users/mcgoug01/Downloads/Data",name="kits23_nooverlap",device='cpu')
+    dataset = SW_Data_labelled(path="/path/to/kcd_data/Downloads/Data",name="kits23_nooverlap",device='cpu')
     dataset.apply_foldsplit()
 
     im,label = dataset[0]

@@ -1,6 +1,6 @@
 import torch
 import os
-os.environ['OV_DATA_BASE'] = "/bask/projects/p/phwq4930-renal-canc/data/seg_data"
+os.environ['OV_DATA_BASE'] = "/path/to/kcd_data/data/seg_data"
 from torch.utils.data import DataLoader
 # import intel_extension_for_pytorch as ipex
 
@@ -95,10 +95,10 @@ def main_worker(args):
 
     model_T = get_3d_featureoutput_unet(1, out_dim, 6, filters=32, filters_max=1024).to(dev)
     model_T.load_state_dict(torch.load(
-        '/bask/projects/p/phwq4930-renal-canc/data/seg_data/trained_models/kits23/2.0mm_binary/6,3x3x3,32_longhigherlr/fold_0/network_weights',map_location=dev))
+        '/path/to/kcd_data/data/seg_data/trained_models/kits23/2.0mm_binary/6,3x3x3,32_longhigherlr/fold_0/network_weights',map_location=dev))
     model_S = get_3d_featureoutput_unet(1, out_dim, 6, filters=32, filters_max=1024).to(dev)
     model_S.load_state_dict(torch.load(
-        '/bask/projects/p/phwq4930-renal-canc/data/seg_data/trained_models/kits23/2.0mm_binary/6,3x3x3,32_longhigherlr/fold_0/network_weights',map_location=dev))
+        '/path/to/kcd_data/data/seg_data/trained_models/kits23/2.0mm_binary/6,3x3x3,32_longhigherlr/fold_0/network_weights',map_location=dev))
 
     model_T.eval()
     model_S.train()

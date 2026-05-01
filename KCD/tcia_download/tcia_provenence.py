@@ -1,9 +1,9 @@
 import pandas as pd
 import os
 
-save_home = '/bask/projects/p/phwq4930-renal-canc/data/TCIA/CT/'
+save_home = '/path/to/kcd_data/data/TCIA/CT/'
 collections = [folder for folder in os.listdir(save_home) if os.path.isdir(save_home + '/' + folder)]
-pp_dir = '/bask/projects/p/phwq4930-renal-canc/data/TCIA/tcia_PP'
+pp_dir = '/path/to/kcd_data/data/TCIA/tcia_PP'
 used = [file for file in os.listdir(pp_dir) if file.endswith('.npy') and not file.endswith('_noised.npy')]
 
 # tutorial on how to use the NBIA API: https://github.com/kirbyju/TCIA_Notebooks/blob/main/TCIA_REST_API_Downloads.ipynb

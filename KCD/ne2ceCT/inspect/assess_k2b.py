@@ -1,6 +1,6 @@
 import torch
 import os
-os.environ['OV_DATA_BASE'] = '/Users/mcgoug01/Downloads/assess_k2b'
+os.environ['OV_DATA_BASE'] = '/path/to/kcd_data/Downloads/assess_k2b'
 from KCD.ne2ceCT.dataloader_seg import CrossPhaseDataset
 from KCD.Segmentation.Inference import infer_network
 from KCD.ne2ceCT import loss_function_seg
@@ -24,18 +24,18 @@ def get_3d_featureoutput_unet(in_channels, out_channels, n_stages,filters=32, fi
 if __name__ == '__main__':
     # load model
     ce_model = get_3d_featureoutput_unet(1, 2, 7)
-    ce_model.load_state_dict(torch.load('/Users/mcgoug01/Downloads/assess_k2b/ce_model', map_location='cpu'))
+    ce_model.load_state_dict(torch.load('/path/to/kcd_data/Downloads/assess_k2b/ce_model', map_location='cpu'))
 
     nc2ceCT_model = get_3d_featureoutput_unet(1, 2, 7)
-    nc2ceCT_model.load_state_dict(torch.load('/Users/mcgoug01/Downloads/assess_k2b/network_weights', map_location='cpu'))
+    nc2ceCT_model.load_state_dict(torch.load('/path/to/kcd_data/Downloads/assess_k2b/network_weights', map_location='cpu'))
 
     ce_model.eval()
     nc2ceCT_model.eval()
 
-    ce_data_path = '/Users/mcgoug01/Downloads/assess_k2b/ce'
-    ne_data_path = '/Users/mcgoug01/Downloads/assess_k2b/nc'
-    split_path = '/Users/mcgoug01/Downloads/assess_k2b'
-    seg_ce_path = '/Users/mcgoug01/Downloads/assess_k2b/seg/images'
+    ce_data_path = '/path/to/kcd_data/Downloads/assess_k2b/ce'
+    ne_data_path = '/path/to/kcd_data/Downloads/assess_k2b/nc'
+    split_path = '/path/to/kcd_data/Downloads/assess_k2b'
+    seg_ce_path = '/path/to/kcd_data/Downloads/assess_k2b/seg/images'
 
 
     dataset = CrossPhaseDataset(ne_data_path, ce_data_path,split_path,seg_ce_path, device='cpu', is_train=False,

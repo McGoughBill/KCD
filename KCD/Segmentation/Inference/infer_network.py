@@ -1,7 +1,7 @@
 import torch.nn as nn
 if __name__ == '__main__':
     import os
-    os.environ['OV_DATA_BASE'] = '/Users/mcgoug01/Library/CloudStorage/OneDrive-CRUKCambridgeInstitute/SecondYear/Segmentation/seg_data'
+    os.environ['OV_DATA_BASE'] = '/path/to/kcd_data'
 from KCD.Segmentation.ovseg.networks.UNet import concat_attention, concat
 import numpy as np
 import torch

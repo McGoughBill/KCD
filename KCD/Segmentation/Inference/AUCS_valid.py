@@ -3,7 +3,7 @@ import numpy as np
 import os
 import matplotlib
 
-df = pd.read_csv('/Users/mcgoug01/Downloads/validation_data/results.csv', index_col=0)
+df = pd.read_csv('/path/to/kcd_data/Downloads/validation_data/results.csv', index_col=0)
 
 ROCs = []
 # create an ROC for each size_threshold

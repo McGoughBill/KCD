@@ -1,0 +1,20 @@
+# Copy this file to configs/paths.yaml and edit for your environment.
+# Alternatively, set environment variables: KCD_DATA_ROOT, KCD_OV_DATA_BASE, etc.
+# Environment variables override the YAML values.
+
+# Root for everything KCD-related
+data_root: /path/to/kcd_data
+
+# Required by the ovseg-based segmentation backend.
+# Code that imports from KCD/Segmentation/ovseg/ expects OV_DATA_BASE to be set;
+# get_paths() will export it automatically from this value.
+ov_data_base: /path/to/kcd_data/seg_data
+
+# Raw inputs (DICOM/NIfTI), organised under <ov_data_base>/raw_data/<dataset>/{images,labels}
+raw_data: /path/to/kcd_data/seg_data/raw_data
+
+# Where inference writes NIfTI predictions
+predictions: /path/to/kcd_data/predictions_nii
+
+# Trained model checkpoints (.torch files)
+model_weights: /path/to/kcd_data/model_weights

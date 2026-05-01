@@ -12,15 +12,15 @@
 #         - <filename>.npy
 
 import os
-os.environ['OV_DATA_BASE'] = "/bask/projects/p/phwq4930-renal-canc/data/seg_data/"
+os.environ['OV_DATA_BASE'] = "/path/to/kcd_data/data/seg_data/"
 import shutil
 import numpy as np
 from scipy.ndimage import label
 import matplotlib.pyplot as plt
 
 # define the folders to copy from and to
-src_dir = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/preprocessed/masked_kits_add_nooverlap_v2/2mm_canceronly_customPP'
-dest_dir = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/preprocessed/masked_kits_add_nooverlap_v2_small/2mm_canceronly_customPP'
+src_dir = '/path/to/kcd_data/data/seg_data/preprocessed/masked_kits_add_nooverlap_v2/2mm_canceronly_customPP'
+dest_dir = '/path/to/kcd_data/data/seg_data/preprocessed/masked_kits_add_nooverlap_v2_small/2mm_canceronly_customPP'
 
 if not os.path.exists(dest_dir):
     os.makedirs(dest_dir)

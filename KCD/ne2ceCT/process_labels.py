@@ -19,11 +19,11 @@ def remove_small_components(mask, min_size=100):
 # is less than 0. Then we want to fill in any holes in the labels. Then we want to dilate the labels 3 times.
 
 # image path and label path
-images_fp = '/Users/mcgoug01/Downloads/process_coregv2/coregistered_images'
-labels_fp = '/Users/mcgoug01/Downloads/process_coregv2/initial_labels'
+images_fp = '/path/to/kcd_data/Downloads/process_coregv2/coregistered_images'
+labels_fp = '/path/to/kcd_data/Downloads/process_coregv2/initial_labels'
 
-save_labels_fp = '/Users/mcgoug01/Downloads/process_coregv2/cleaned_labels'
-save_images_fp = '/Users/mcgoug01/Downloads/process_coregv2/cropped_images'
+save_labels_fp = '/path/to/kcd_data/Downloads/process_coregv2/cleaned_labels'
+save_images_fp = '/path/to/kcd_data/Downloads/process_coregv2/cropped_images'
 #all files are nifti
 image_files = [file for file in os.listdir(images_fp) if file.endswith('.nii.gz')]
 

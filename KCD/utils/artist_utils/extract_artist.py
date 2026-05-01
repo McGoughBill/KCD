@@ -1,8 +1,8 @@
 import zipfile
 import os
 
-src_dir = '/rds/project/rds-sDuALntK11g/IMAGING'
-dst_dir = '/rds/project/rds-sDuALntK11g/IMAGING_extracted'
+src_dir = '/path/to/kcd_data/IMAGING'
+dst_dir = '/path/to/kcd_data/IMAGING_extracted'
 
 src_files = [os.path.join(src_dir, f) for f in os.listdir(src_dir) if f.endswith('.zip')]
 for src_file in src_files:

@@ -1,7 +1,7 @@
 import SimpleITK as sitk
 import os
 
-path = '/Users/mcgoug01/Downloads/orcascore/Challenge data'
+path = '/path/to/kcd_data/Downloads/orcascore/Challenge data'
 subfolders = [folder for folder in os.listdir(path) if os.path.isdir(os.path.join(path, folder))]
 sv_folds = [folder for folder in os.listdir(path) if os.path.isdir(os.path.join(path, folder+'nii'))]
 print(subfolders)

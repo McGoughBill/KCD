@@ -11,13 +11,13 @@ import nibabel as nib
 import shutil
 import pandas as pd
 
-checkpath = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/YKST/error_analysis/high_acc/reviewed_potential_misses.csv'
-checkhomepath = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/YKST/error_analysis/high_acc/potential_misses_postprocessed'
-homepath = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/YKST/error_analysis/high_acc/post_processed_inferences'
-small_pred_path = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/YKST/error_analysis/high_acc/potential_misses_postprocessed_hc'
-sigfindings_path = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/YKST/sig_findings.csv'
-insigfindings_path = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/YKST/insig_findings.csv'
-cont_pred_path = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/YKST/error_analysis/high_acc/all_preds_cont'
+checkpath = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/YKST/error_analysis/high_acc/reviewed_potential_misses.csv'
+checkhomepath = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/YKST/error_analysis/high_acc/potential_misses_postprocessed'
+homepath = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/YKST/error_analysis/high_acc/post_processed_inferences'
+small_pred_path = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/YKST/error_analysis/high_acc/potential_misses_postprocessed_hc'
+sigfindings_path = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/YKST/sig_findings.csv'
+insigfindings_path = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/YKST/insig_findings.csv'
+cont_pred_path = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/YKST/error_analysis/high_acc/all_preds_cont'
 
 
 #open both sigfindings and insigfindings

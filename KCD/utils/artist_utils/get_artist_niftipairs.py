@@ -1,11 +1,11 @@
 import os
 
-path = '/rds/project/rds-sDuALntK11g/IMAGING_nifti'
-save_path = '/rds/project/rds-sDuALntK11g/IMAGING_niftipairs'
+path = '/path/to/kcd_data/IMAGING_nifti'
+save_path = '/path/to/kcd_data/IMAGING_niftipairs'
 
 #copy the nifti files to a new directory
 # src files have the following subdir schema:
-# /rds/project/rds-sDuALntK11g/IMAGING_nifti
+# /path/to/kcd_data/IMAGING_nifti
 #   -/subject_id/
 #       -/0/
 #           -/ce.nii.gz
@@ -15,7 +15,7 @@ save_path = '/rds/project/rds-sDuALntK11g/IMAGING_niftipairs'
 #           -/nc.nii.gz
 
 # dest files will have the following subdir schema:
-# /rds/project/rds-sDuALntK11g/IMAGING_niftipairs
+# /path/to/kcd_data/IMAGING_niftipairs
 #   -/cect/
 #       -/images/
 #           -/subject_id_0.nii.gz

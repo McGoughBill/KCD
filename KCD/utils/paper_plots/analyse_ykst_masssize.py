@@ -4,7 +4,7 @@ import numpy as np
 from matplotlib.patches import Patch
 
 # Load the data
-fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/YKST/ykst_mass_size.csv'
+fp = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/YKST/ykst_mass_size.csv'
 df = pd.read_csv(fp)
 
 # Discard 'id' and 'Notes', and set data types
@@ -114,7 +114,7 @@ for text in legend.get_texts():
     text.set_fontname('Helvetica')
     text.set_fontsize(16)
 
-plt.savefig('/Users/mcgoug01/Cambridge University Dropbox/William McGough/YKST/ykst_mass_size.png',dpi=300)
+plt.savefig('/path/to/kcd_data/Cambridge University Dropbox/William McGough/YKST/ykst_mass_size.png',dpi=300)
 plt.show()
 
 #make cmap from hex colour values
@@ -154,7 +154,7 @@ for text in legend.get_texts():
     text.set_fontsize(16)
 
 plt.tight_layout()
-plt.savefig('/Users/mcgoug01/Cambridge University Dropbox/William McGough/YKST/ykst_mass_size2.png',dpi=300)
+plt.savefig('/path/to/kcd_data/Cambridge University Dropbox/William McGough/YKST/ykst_mass_size2.png',dpi=300)
 plt.show()
 
 

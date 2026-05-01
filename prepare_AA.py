@@ -29,8 +29,8 @@ import os
 
 # the script also creates a csv file, 'nifti/labels.csv', which contains the mapping of organ to index in the mask
 
-path_to_AbdomenAtlas = '/Users/mcgoug01/Downloads/AbdomenAtlas/AbdomenAtlasMini1.0'
-save_path = '/Users/mcgoug01/Downloads/AbdomenAtlas/nifti'
+path_to_AbdomenAtlas = '/path/to/kcd_data/Downloads/AbdomenAtlas/AbdomenAtlasMini1.0'
+save_path = '/path/to/kcd_data/Downloads/AbdomenAtlas/nifti'
 im_path = os.path.join(save_path, 'images')
 label_path = os.path.join(save_path, 'labels')
 

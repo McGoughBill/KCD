@@ -1,6 +1,6 @@
 import torch
 import os
-os.environ['OV_DATA_BASE'] ='/bask/projects/p/phwq4930-renal-canc/data/seg_data'
+os.environ['OV_DATA_BASE'] ='/path/to/kcd_data/data/seg_data'
 from torch.utils.data import DataLoader
 import torch.multiprocessing as mp
 torch.multiprocessing.set_sharing_strategy('file_system')
@@ -137,7 +137,7 @@ def main_worker(gpu,args):
     dataset.apply_foldsplit()
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers=workers)
 
-    mod_path = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/trained_models/kits_add_nooverlap_v2/2mm_canceronly_customPP/7_tot/fold_0/network_weights'
+    mod_path = '/path/to/kcd_data/data/seg_data/trained_models/kits_add_nooverlap_v2/2mm_canceronly_customPP/7_tot/fold_0/network_weights'
     model_T = get_3d_featureoutput_unet(1, out_dim, 7, filters=32, filters_max=1024).cuda(args.gpu)
     model_T.load_state_dict(torch.load(mod_path))
     model_S = get_3d_featureoutput_unet(1, out_dim, 7, filters=32, filters_max=1024).cuda(args.gpu)

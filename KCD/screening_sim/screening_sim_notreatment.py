@@ -1118,5 +1118,5 @@ params = [   [2,0.005],      [4,0.005]]
 for intv,prev in params:
     print(f"Running simulation with interval {intv} and prevalence {prev}")
     run_multiple_simulations_with_sensitivity(n=1000, screen_interval=intv, initial_prevalence=prev,
-                                              csv_save_path=f'/Users/mcgoug01/Cambridge University Dropbox/William McGough/nat_paper/internal_distribution/supplementary_materials/microsimulation_result_{intv}_{prev}.csv')
+                                              csv_save_path=f'/path/to/kcd_data/Cambridge University Dropbox/William McGough/nat_paper/internal_distribution/supplementary_materials/microsimulation_result_{intv}_{prev}.csv')
     print()

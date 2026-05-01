@@ -7,7 +7,7 @@ plt.switch_backend('TkAgg')
 
 
 
-img = mpimg.imread('/Users/mcgoug01/Downloads/DSC_0564_BWsmall.png')
+img = mpimg.imread('/path/to/kcd_data/Downloads/DSC_0564_BWsmall.png')
 fig, (a0, a1) = plt.subplots(1, 2, gridspec_kw={'width_ratios': [1.5, 1]}, figsize = (15,5))
 # highlight a square in the image with a red box from (72,40), to (98,66)
 a0.imshow(img, cmap = 'gray')

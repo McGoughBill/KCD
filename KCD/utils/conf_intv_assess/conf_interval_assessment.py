@@ -7,10 +7,10 @@ from skimage.measure import label
 import pandas as pd
 
 
-home = '/Users/mcgoug01/Dropbox/conf_intv'
+home = '/path/to/kcd_data/Dropbox/conf_intv'
 # preds = os.path.join(home, 'preds_highspec')
 labels = os.path.join(home, 'labels')
-preds = '/Users/mcgoug01/Dropbox/conf_intv/preds_highsens'
+preds = '/path/to/kcd_data/Dropbox/conf_intv/preds_highsens'
 save_loc = os.path.join(home, 'conf_ROC_highsens.npy')
 csv_path = os.path.join(home, 'conf_ROC_highsens.csv')
 png_path = os.path.join(home, 'conf_ROC_highsens.png')

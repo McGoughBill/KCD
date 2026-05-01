@@ -56,7 +56,7 @@ def pp(im_path, pred_path, save_path):
 
 
 if __name__ == '__main__':
-    im_path = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/raw_data/ykst/images'
-    pred_path = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/detections/ykst/high_acc/positives_nii'
-    save_path = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/detections/ykst/high_acc/positives_pp_nii'
+    im_path = '/path/to/kcd_data/data/seg_data/raw_data/ykst/images'
+    pred_path = '/path/to/kcd_data/data/seg_data/detections/ykst/high_acc/positives_nii'
+    save_path = '/path/to/kcd_data/data/seg_data/detections/ykst/high_acc/positives_pp_nii'
     pp(im_path, pred_path, save_path)

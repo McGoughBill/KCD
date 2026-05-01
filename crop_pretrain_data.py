@@ -5,11 +5,11 @@ import shutil
 import nibabel as nib
 import numpy as np
 
-ce_dir = '/rds/project/rds-sDuALntK11g/raw_data/paired_combined_cect/images'
-nc_dir = '/rds/project/rds-sDuALntK11g/raw_data/paired_combined_ncct/images'
+ce_dir = '/path/to/kcd_data/raw_data/paired_combined_cect/images'
+nc_dir = '/path/to/kcd_data/raw_data/paired_combined_ncct/images'
 
-ce_save_dir = '/rds/project/rds-sDuALntK11g/raw_data/cropped_paired_combined_cect/images'
-nc_save_dir = '/rds/project/rds-sDuALntK11g/raw_data/cropped_paired_combined_ncct/images'
+ce_save_dir = '/path/to/kcd_data/raw_data/cropped_paired_combined_cect/images'
+nc_save_dir = '/path/to/kcd_data/raw_data/cropped_paired_combined_ncct/images'
 
 if not os.path.exists(ce_save_dir):
     os.makedirs(ce_save_dir)

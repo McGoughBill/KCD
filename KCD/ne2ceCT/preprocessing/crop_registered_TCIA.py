@@ -7,15 +7,15 @@ import numpy as np
 import nibabel as nib
 
 # define the path to the registered images
-registered_ncct_path = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/raw_data/masked_tcia_ncct/images'
-registered_cect_path = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/raw_data/masked_tcia_cect/images'
+registered_ncct_path = '/path/to/kcd_data/data/seg_data/raw_data/masked_tcia_ncct/images'
+registered_cect_path = '/path/to/kcd_data/data/seg_data/raw_data/masked_tcia_cect/images'
 
 # coregistered images have identical names, so we can use the same list for both
 registered_ncct_ims = [f for f in os.listdir(registered_ncct_path) if f.endswith('.nii.gz')]
 
 # define the path to save the cropped images
-cropped_ncct_path = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/raw_data/cropped_tcia_ncct/images'
-cropped_cect_path = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/raw_data/cropped_tcia_cect/images'
+cropped_ncct_path = '/path/to/kcd_data/data/seg_data/raw_data/cropped_tcia_ncct/images'
+cropped_cect_path = '/path/to/kcd_data/data/seg_data/raw_data/cropped_tcia_cect/images'
 
 # create the directories if they don't exist
 if not os.path.exists(cropped_ncct_path):

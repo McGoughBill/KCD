@@ -4,7 +4,7 @@ import numpy as np
 
 full_dose = False
 
-meta_folder = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions_v3/fulldose_test_ROCv3'
+meta_folder = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions_v3/fulldose_test_ROCv3'
 sub_folders = [os.path.join(meta_folder, f,'predictions.csv') for f in os.listdir(meta_folder) if os.path.isdir(os.path.join(meta_folder, f))]
 names_sub_folders = [float(f.split('/')[-2]) for f in sub_folders]
 
@@ -14,10 +14,10 @@ names_sub_folders = sorted(names_sub_folders)
 
 highacc_pred_csv_fp = sub_folders[12]
 print(highacc_pred_csv_fp)
-iztok_pred_csv_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/iztokFD.csv'
-cathal_pred_csv_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/cathalFD.csv'
-truth_csv_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/Bill/FD/internaltest_metadata.csv'
-hania_pred_csv_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/haniaFD.csv'
+iztok_pred_csv_fp = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/iztokFD.csv'
+cathal_pred_csv_fp = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/cathalFD.csv'
+truth_csv_fp = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/Bill/FD/internaltest_metadata.csv'
+hania_pred_csv_fp = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/haniaFD.csv'
 
 # find the StudyID where cancer was missed by each radiologist that were found by the AI
 

@@ -13,7 +13,7 @@ import torch.nn as nn
 from torch.nn.functional import softmax
 from os import *
 if __name__ == "__main__":
-    environ['OV_DATA_BASE'] = "/home/wcm23/rds/hpc-work/FineTuningKITS23"
+    environ['OV_DATA_BASE'] = "/path/to/kcd_data/FineTuningKITS23"
 
 from os.path import *
 import gc

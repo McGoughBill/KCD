@@ -8,9 +8,9 @@ import sys
 
 model = '6_finetune_l2-1e-05_cce1.0_cos1.0_2e-05lr_0.999997lg_16bs_2000ep_4gpus_efr_dfr100_seg_lr0.0001'
 
-home = '/bask/projects/p/phwq4930-renal-canc/data/seg_data'
-labels = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/raw_data/masked_coreg_v2_noised/labels/'
-preds = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/predictions/masked_coreg_v2_noised/2mm_cancerbinary_customPP/{}/cross_validation_continuous/'.format(model)
+home = '/path/to/kcd_data/data/seg_data'
+labels = '/path/to/kcd_data/data/seg_data/raw_data/masked_coreg_v2_noised/labels/'
+preds = '/path/to/kcd_data/data/seg_data/predictions/masked_coreg_v2_noised/2mm_cancerbinary_customPP/{}/cross_validation_continuous/'.format(model)
 new_fold = os.path.join(home, 'conv_intv', model)
 csv_path = os.path.join(new_fold, 'sizes.csv')
 

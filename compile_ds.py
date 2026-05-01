@@ -2,13 +2,13 @@
 import os
 import shutil
 
-# dir_a = '/rds/project/rds-sDuALntK11g/raw_data/tcia_cect/images'
-# dir_b = '/rds/project/rds-sDuALntK11g/raw_data/ce/images'
-# dir_c = '/rds/project/rds-sDuALntK11g/raw_data/paired_combined_cect/images'
+# dir_a = '/path/to/kcd_data/raw_data/tcia_cect/images'
+# dir_b = '/path/to/kcd_data/raw_data/ce/images'
+# dir_c = '/path/to/kcd_data/raw_data/paired_combined_cect/images'
 
-dir_a = '/rds/project/rds-sDuALntK11g/raw_data/successful_tcia_ncct_reg/images'
-dir_b = '/rds/project/rds-sDuALntK11g/raw_data/successful_artist_nc_reg/images'
-dir_c = '/rds/project/rds-sDuALntK11g/raw_data/paired_combined_ncct/images'
+dir_a = '/path/to/kcd_data/raw_data/successful_tcia_ncct_reg/images'
+dir_b = '/path/to/kcd_data/raw_data/successful_artist_nc_reg/images'
+dir_c = '/path/to/kcd_data/raw_data/paired_combined_ncct/images'
 
 
 if not os.path.exists(dir_c):

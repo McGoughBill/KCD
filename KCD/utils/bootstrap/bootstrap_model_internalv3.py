@@ -3,9 +3,9 @@ import pandas as pd
 import os
 
 
-sizes_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/Bill/internaltest_sizes.csv'
-ld_conf_per_patient_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions_v3/lowdose_test_ROCv3/percase_confidences.csv'
-fd_conf_per_patient_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions_v3/fulldose_test_ROCv3/percase_confidences.csv'
+sizes_fp = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/Bill/internaltest_sizes.csv'
+ld_conf_per_patient_fp = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions_v3/lowdose_test_ROCv3/percase_confidences.csv'
+fd_conf_per_patient_fp = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions_v3/fulldose_test_ROCv3/percase_confidences.csv'
 
 # load confidences
 ld_conf_per_patient = pd.read_csv(ld_conf_per_patient_fp)[['RightCancer', 'LeftCancer','RLabel', 'LLabel']]
@@ -199,11 +199,11 @@ ax1.tick_params(axis='both', which='major', labelsize=14)
 ax1.tick_params(axis='both', which='minor', labelsize=14)
 plt.tight_layout()
 
-plt.savefig('/Users/mcgoug01/Cambridge University Dropbox/William McGough/nat_paper/internal_bootstrap.png')
+plt.savefig('/path/to/kcd_data/Cambridge University Dropbox/William McGough/nat_paper/internal_bootstrap.png')
 plt.show()
 
 #save the results
 results = pd.DataFrame({'confidences': confidences, 'ld_sens': ld_means[:,0], 'ld_spec': ld_means[:,1], 'fd_sens': fd_means[:,0], 'fd_spec': fd_means[:,1],
                         'ld_sens_std': ld_stds[:,0], 'ld_spec_std': ld_stds[:,1], 'fd_sens_std': fd_stds[:,0], 'fd_spec_std': fd_stds[:,1]})
-results.to_csv('/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/Bill/bootstrap_results_internal.csv', index=False)
+results.to_csv('/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/Bill/bootstrap_results_internal.csv', index=False)
 

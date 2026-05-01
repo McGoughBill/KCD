@@ -4,15 +4,15 @@ import numpy as np
 import nibabel as nib
 
 
-meta_folder = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions_real/fulldose_ROC'
+meta_folder = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions_real/fulldose_ROC'
 sub_folders = [os.path.join(meta_folder, f,'predictions.csv') for f in os.listdir(meta_folder) if os.path.isdir(os.path.join(meta_folder, f))]
 names = [float(f.split('/')[-2]) for f in sub_folders]
 
 # sort sub_folders by names_sub_folders
 folders = [x for _,x in sorted(zip(names,sub_folders))]
 names_sub_folders = sorted(names)
-truth_csv_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/Bill/FD/internaltest_metadata_real.csv'
-sizes_fp ='/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions_real/fulldose_ROC/observations.csv'
+truth_csv_fp = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/Bill/FD/internaltest_metadata_real.csv'
+sizes_fp ='/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions_real/fulldose_ROC/observations.csv'
 sizes = pd.read_csv(sizes_fp)
 
 ai_results = [[100,0]]

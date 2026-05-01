@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --account phwq4930-renal-canc
+#SBATCH --account YOUR_SLURM_ACCOUNT
 #SBATCH --qos epsrc
 #SBATCH --time 0-24:00:00
 #SBATCH --nodes 1
@@ -13,7 +13,7 @@ module purge; module load baskerville
 module load bask-apps/test
 module load Miniconda3/4.10.3
 
-CONDA_ENV_PATH="/bask/projects/p/phwq4930-renal-canc/conda_env/KCD_env"
+CONDA_ENV_PATH="/path/to/kcd_data/conda_env/KCD_env"
 
 # Create the environment. Only required once.
 conda create --yes --prefix "${CONDA_ENV_PATH}"

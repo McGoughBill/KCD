@@ -16,11 +16,11 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import auc
 
 
-nii_label_loc = '/Users/mcgoug01/Downloads/labels_v1'
+nii_label_loc = '/path/to/kcd_data/Downloads/labels_v1'
 
-if not os.path.exists('/Users/mcgoug01/Downloads/valid_v1/sizes.csv'):
+if not os.path.exists('/path/to/kcd_data/Downloads/valid_v1/sizes.csv'):
 
-    with open('/Users/mcgoug01/Downloads/valid_v1/sizes.csv', 'w') as f:
+    with open('/path/to/kcd_data/Downloads/valid_v1/sizes.csv', 'w') as f:
         f.write('file,size\n')
     for file in os.listdir(nii_label_loc):
         if file.endswith('.nii.gz'):
@@ -37,16 +37,16 @@ if not os.path.exists('/Users/mcgoug01/Downloads/valid_v1/sizes.csv'):
             except ValueError:
                 size = 0
 
-            with open('/Users/mcgoug01/Downloads/valid_v1/sizes.csv', 'a') as f:
+            with open('/path/to/kcd_data/Downloads/valid_v1/sizes.csv', 'a') as f:
                 f.write(f'{file},{size}\n')
 
 
-sizes_fp = '/Users/mcgoug01/Downloads/valid_v1/sizes.csv'
+sizes_fp = '/path/to/kcd_data/Downloads/valid_v1/sizes.csv'
 sizes = pd.read_csv(sizes_fp, index_col=False)
-path = '/Users/mcgoug01/Downloads/valid_v1'
-cancer_infp = '/Users/mcgoug01/Downloads/continuous_v1'
+path = '/path/to/kcd_data/Downloads/valid_v1'
+cancer_infp = '/path/to/kcd_data/Downloads/continuous_v1'
 
-CV_results_fp = '/Users/mcgoug01/Downloads/valid_v1/results_CV.csv'
+CV_results_fp = '/path/to/kcd_data/Downloads/valid_v1/results_CV.csv'
 
 confidence_thresholds = np.append(np.arange(0,0.1,0.005),np.arange(0.1, 0.9, 0.1))
 confidence_thresholds = np.append(confidence_thresholds,np.arange(0.9,1.02,0.01))
@@ -208,6 +208,6 @@ plt.tight_layout()
 
 plt.xlim([-2, 100])
 plt.ylim([0, 102])
-plt.savefig('/Users/mcgoug01/Downloads/valid_v1/CVroc_seg.png')
+plt.savefig('/path/to/kcd_data/Downloads/valid_v1/CVroc_seg.png')
 
 plt.show()

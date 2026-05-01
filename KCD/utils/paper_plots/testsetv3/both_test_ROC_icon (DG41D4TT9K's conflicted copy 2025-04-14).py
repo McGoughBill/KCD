@@ -6,18 +6,18 @@ import matplotlib.patches as mpatches
 
 full_dose = False
 
-meta_folder = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions_v3/fulldose_test_ROCv3'
+meta_folder = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions_v3/fulldose_test_ROCv3'
 sub_folders = [os.path.join(meta_folder, f,'predictions.csv') for f in os.listdir(meta_folder) if os.path.isdir(os.path.join(meta_folder, f))]
 names = [float(f.split('/')[-2]) for f in sub_folders]
-save_loc = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/nat_paper'
+save_loc = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/nat_paper'
 # sort sub_folders by names_sub_folders
 folders = [x for _,x in sorted(zip(names,sub_folders))]
 names_sub_folders = sorted(names)
 
-truth_csv_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/Bill/FD/internaltest_metadata.csv'
-iztok_predfulldose_csv_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/iztokFD.csv'
-hania_predfulldose_csv_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/haniaFD.csv'
-cathal_predfulldose_csv_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/cathalFD.csv'
+truth_csv_fp = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/Bill/FD/internaltest_metadata.csv'
+iztok_predfulldose_csv_fp = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/iztokFD.csv'
+hania_predfulldose_csv_fp = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/haniaFD.csv'
+cathal_predfulldose_csv_fp = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/cathalFD.csv'
 folders = [iztok_predfulldose_csv_fp, hania_predfulldose_csv_fp,cathal_predfulldose_csv_fp] + folders
 names_sub_folders = ['Iztok','Hania','Cathal'] + names_sub_folders
 fulldose_ai_results = [[100,0]]
@@ -95,13 +95,13 @@ fd_auc = np.abs(np.trapz(fulldose_ai_results[:,0],fulldose_ai_results[:,1])/1000
 print(f'AUC: {fd_auc:.3f}')
 print(fulldose_ai_results)
 
-lowdose_folder =  '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions_v3/lowdose_test_ROCv3'
-truth_csv_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/Bill/LD/internaltest_metadata.csv'
+lowdose_folder =  '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions_v3/lowdose_test_ROCv3'
+truth_csv_fp = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/Bill/LD/internaltest_metadata.csv'
 ld_sub_folders = [os.path.join(lowdose_folder, f,'predictions.csv') for f in os.listdir(lowdose_folder) if os.path.isdir(os.path.join(lowdose_folder, f))]
 names_ld= [float(f.split('/')[-2]) for f in ld_sub_folders]
-iztok_predlowdose_csv_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/iztokLD.csv'
-cathal_predlowdose_csv_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/cathalLD.csv'
-hania_predlowdose_csv_fp = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/haniaLD.csv'
+iztok_predlowdose_csv_fp = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/iztokLD.csv'
+cathal_predlowdose_csv_fp = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/cathalLD.csv'
+hania_predlowdose_csv_fp = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/haniaLD.csv'
 ld_sub_folders = [x for _,x in sorted(zip(names_ld,ld_sub_folders))]
 names_ld_folders = sorted(names_ld)
 

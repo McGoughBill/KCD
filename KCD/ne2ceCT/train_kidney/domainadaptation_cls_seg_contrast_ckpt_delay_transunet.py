@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 import os
-os.environ['OV_DATA_BASE'] ="/rds/project/rds-sDuALntK11g"
+os.environ['OV_DATA_BASE'] ="/path/to/kcd_data"
 from torch.utils.data import DataLoader
 import torch.multiprocessing as mp
 torch.multiprocessing.set_sharing_strategy('file_system')
@@ -164,7 +164,7 @@ def main_worker(gpu,args):
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers=workers,
                             collate_fn=collate_fn)
 
-    mod_path = '/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data/trained_models/masked_kits_add_nooverlap_v2_small/2mm_canceronly_customPP/transunet_4layer_32filter_8bs_withcls_small/fold_0/network_weights'
+    mod_path = '/path/to/kcd_data/data/seg_data/trained_models/masked_kits_add_nooverlap_v2_small/2mm_canceronly_customPP/transunet_4layer_32filter_8bs_withcls_small/fold_0/network_weights'
     # print all key entries in the model state dict that start with 'unet_core.all_logits'
     if args.rank == 0:
         print('Loading model from', mod_path)

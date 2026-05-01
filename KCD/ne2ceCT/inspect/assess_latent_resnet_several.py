@@ -1,6 +1,6 @@
 import torch
 import os
-os.environ['OV_DATA_BASE'] = '/Users/mcgoug01/Downloads/assessing_latent'
+os.environ['OV_DATA_BASE'] = '/path/to/kcd_data/Downloads/assessing_latent'
 from KCD.ne2ceCT.dataloader_SSL import CrossPhaseDataset
 from KCD.Segmentation.Inference import infer_network
 import matplotlib.pyplot as plt
@@ -17,19 +17,19 @@ from fmcib.models import fmcib_model
 # 3 principal components of the CE model's latent space on CE data, assuming this is 'the answer'.
 
 if __name__ == '__main__':
-    os.chdir('/Users/mcgoug01/Downloads/assessing_latent_resnet')
+    os.chdir('/path/to/kcd_data/Downloads/assessing_latent_resnet')
     # load model
     ce_model = fmcib_model()
 
     mse,cos,cos_morebg = fmcib_model(), fmcib_model(), fmcib_model()
-    mse.load_state_dict(torch.load('/Users/mcgoug01/Downloads/assessing_latent_resnet/l1-0.2_l2-1.0_var0.01_cov0.2_cce0.0_cos0.0_clip0.0_2e-05lr_0.99998lg_80bs_1500ep_4gpus/network_weights', map_location='cpu'))
-    cos.load_state_dict(torch.load('/Users/mcgoug01/Downloads/assessing_latent_resnet/l1-0.2_l2-1.0_var0.01_cov0.2_cce0.0_cos1.0_clip0.0_2e-05lr_0.99998lg_80bs_1500ep_4gpus/network_weights', map_location='cpu'))
-    cos_morebg.load_state_dict(torch.load('/Users/mcgoug01/Downloads/assessing_latent_resnet/l1-0.2_l2-1.0_var0.01_cov0.2_cce0.0_cos1.0_clip0.0_2e-05lr_0.99998lg_80bs_1500ep_4gpus_0.5bgt/network_weights', map_location='cpu'))
+    mse.load_state_dict(torch.load('/path/to/kcd_data/Downloads/assessing_latent_resnet/l1-0.2_l2-1.0_var0.01_cov0.2_cce0.0_cos0.0_clip0.0_2e-05lr_0.99998lg_80bs_1500ep_4gpus/network_weights', map_location='cpu'))
+    cos.load_state_dict(torch.load('/path/to/kcd_data/Downloads/assessing_latent_resnet/l1-0.2_l2-1.0_var0.01_cov0.2_cce0.0_cos1.0_clip0.0_2e-05lr_0.99998lg_80bs_1500ep_4gpus/network_weights', map_location='cpu'))
+    cos_morebg.load_state_dict(torch.load('/path/to/kcd_data/Downloads/assessing_latent_resnet/l1-0.2_l2-1.0_var0.01_cov0.2_cce0.0_cos1.0_clip0.0_2e-05lr_0.99998lg_80bs_1500ep_4gpus_0.5bgt/network_weights', map_location='cpu'))
     ce_model.eval(), mse.eval(), cos.eval(), cos_morebg.eval()
 
-    ce_data_path = '/Users/mcgoug01/Downloads/assessing_latent_resnet/ce'
-    ne_data_path = '/Users/mcgoug01/Downloads/assessing_latent_resnet/nc'
-    split_path = '/Users/mcgoug01/Downloads/assessing_latent_resnet'
+    ce_data_path = '/path/to/kcd_data/Downloads/assessing_latent_resnet/ce'
+    ne_data_path = '/path/to/kcd_data/Downloads/assessing_latent_resnet/nc'
+    split_path = '/path/to/kcd_data/Downloads/assessing_latent_resnet'
 
     dataset = CrossPhaseDataset(ne_data_path, ce_data_path, split_path,
                                 device='cpu', is_train=False,patches_per_case=200,

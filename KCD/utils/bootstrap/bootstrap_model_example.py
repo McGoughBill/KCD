@@ -2,9 +2,9 @@ import numpy as np
 import pandas as pd
 import os
 
-sizes_fp = '/Users/mcgoug01/Downloads/bootstrap/sizes.csv'
-conf_per_patient_fp = '/Users/mcgoug01/Downloads/bootstrap/conf_per_patient.npy'
-conf_intervals_fp = '/Users/mcgoug01/Downloads/bootstrap/conf_ROC.csv'
+sizes_fp = '/path/to/kcd_data/Downloads/bootstrap/sizes.csv'
+conf_per_patient_fp = '/path/to/kcd_data/Downloads/bootstrap/conf_per_patient.npy'
+conf_intervals_fp = '/path/to/kcd_data/Downloads/bootstrap/conf_ROC.csv'
 large = pd.read_csv(sizes_fp)['size'].values > ((15**3)*np.pi*4/3)
 conf_per_patient = np.load(conf_per_patient_fp)
 conf_intervals = pd.read_csv(conf_intervals_fp)['Confidence'].values

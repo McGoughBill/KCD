@@ -22,7 +22,7 @@ import matplotlib.pyplot as plt
 
 #find the highest confidence that shows '1' in each kidney.
 
-home = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions_v3/fulldose_test_ROCv3'
+home = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/AI/predictions_v3/fulldose_test_ROCv3'
 sub_folders = [f for f in os.listdir(home) if os.path.isdir(os.path.join(home, f))]
 sub_folders = [os.path.join(home, f) for f in sub_folders]
 confidences = [float(f.split('/')[-1]) for f in sub_folders]
@@ -30,7 +30,7 @@ confidences = [float(f.split('/')[-1]) for f in sub_folders]
 # if rightcancer is positive in subfolder 0.1, but negative in 0.2, then the confidence is 0.1
 percase_confidences = {}
 
-label_loc = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/AI/full_labels.csv'
+label_loc = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/AI/full_labels.csv'
 labels = pd.read_csv(label_loc)
 #loop through patients and fill percase_confidences with correct labels
 for patient in labels.StudyID:
@@ -38,7 +38,7 @@ for patient in labels.StudyID:
     [labels.StudyID==patient,'SusMass'].values[0], 'size':0,'exophytic':0}
 
 import nibabel as nib
-seg_loc = '/Users/mcgoug01/Library/CloudStorage/OneDrive-CRUKCambridgeInstitute/SecondYear/Segmentation/seg_data/raw_data/test_set_v2/labels'
+seg_loc = '/path/to/kcd_data/raw_data/test_set_v2/labels'
 for key in percase_confidences.keys():
     # find case name fr0m labels
     case = labels.loc[labels.StudyID==key,'OriginalID'].values[0]

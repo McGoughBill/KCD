@@ -10,7 +10,7 @@ import numpy as np
 import warnings
 import pandas as pd
 
-def train_cv_slice_model_2d(home = '/Users/mcgoug01/Downloads/Data/',dataname='coreg_ncct',
+def train_cv_slice_model_2d(home = '/path/to/kcd_data/Downloads/Data/',dataname='coreg_ncct',
                          splits:list=[0],folds=5,params:dict=None,train_folds=[0],
                          epochs = None):
     # Suppress warnings
@@ -77,5 +77,5 @@ if __name__ == '__main__':
     epochs = int(sys.argv[1])
     fold = int(sys.argv[2])
     dataset = 'kits23_nooverlap'
-    home = '/bask/projects/p/phwq4930-renal-canc/KCD_data/Data'
+    home = '/path/to/kcd_data/KCD_data/Data'
     train_cv_slice_model_2d(home=home,dataname=dataset,splits=[0],train_folds=[fold],epochs=epochs)

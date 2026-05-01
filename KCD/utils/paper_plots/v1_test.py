@@ -4,7 +4,7 @@ import numpy as np
 import nibabel as nib
 from skimage.measure import label, regionprops
 
-meta_folder = '/Users/mcgoug01/Dropbox (Personal)/PhD/thesis_plots/V1segdetection'
+meta_folder = '/path/to/kcd_data/Dropbox (Personal)/PhD/thesis_plots/V1segdetection'
 sub_folders = [os.path.join(meta_folder, f,'predictions.csv') for f in os.listdir(meta_folder) if os.path.isdir(os.path.join(meta_folder, f))]
 names_sub_folders = [float(f.split('/')[-2]) for f in sub_folders]
 
@@ -12,10 +12,10 @@ names_sub_folders = [float(f.split('/')[-2]) for f in sub_folders]
 sub_folders = [x for _,x in sorted(zip(names_sub_folders,sub_folders))]
 names_sub_folders = sorted(names_sub_folders)
 
-truth_csv_fp = '/Users/mcgoug01/Dropbox (Personal)/PhD/thesis_plots/V1segdetection/labels.csv'
-sizes_fp = '/Users/mcgoug01/Dropbox (Personal)/PhD/thesis_plots/V1segdetection/sizes_test.csv'
+truth_csv_fp = '/path/to/kcd_data/Dropbox (Personal)/PhD/thesis_plots/V1segdetection/labels.csv'
+sizes_fp = '/path/to/kcd_data/Dropbox (Personal)/PhD/thesis_plots/V1segdetection/sizes_test.csv'
 if not os.path.exists(sizes_fp):
-    seg_path = '/Users/mcgoug01/Downloads/untitled folder'
+    seg_path = '/path/to/kcd_data/Downloads/untitled folder'
     with open(sizes_fp, 'w') as f:
         f.write('CaseID,size\n')
     for file in os.listdir(seg_path):
@@ -164,7 +164,7 @@ for size_constraint in [True,False]:
 marker = '*'
 
 #save largest_pred to csv
-largest_pred_fp = '/Users/mcgoug01/Dropbox (Personal)/PhD/thesis_plots/V1segdetection/largest_pred.csv'
+largest_pred_fp = '/path/to/kcd_data/Dropbox (Personal)/PhD/thesis_plots/V1segdetection/largest_pred.csv'
 largest_pred.to_csv(largest_pred_fp, index=False)
 
 #plot ROC curve, and plot the point for Iztok and Cathal
@@ -185,6 +185,6 @@ plt.tight_layout()
 plt.xlim([-2,100])
 plt.ylim([0,102])
 
-plt.savefig('/Users/mcgoug01/Downloads/testroc_seg.png')
+plt.savefig('/path/to/kcd_data/Downloads/testroc_seg.png')
 plt.show()
 

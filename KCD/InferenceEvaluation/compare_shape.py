@@ -8,8 +8,8 @@ Created on Tue Jul  4 22:12:29 2023
 import os 
 import pandas as pd
 import numpy as np
-pred_dir = '/Users/mcgoug01/Downloads/Data/inference/merged_training_set_split_0/test_set/ensemble_128_32_25_2_500_20000_100_0.001_0.001.csv'
-label_dir = '/Users/mcgoug01/Downloads/Data/objects/test_set/features_labelled.csv'
+pred_dir = '/path/to/kcd_data/Downloads/Data/inference/merged_training_set_split_0/test_set/ensemble_128_32_25_2_500_20000_100_0.001_0.001.csv'
+label_dir = '/path/to/kcd_data/Downloads/Data/objects/test_set/features_labelled.csv'
 
 preddf =pd.read_csv(pred_dir)
 labeldf = pd.read_csv(label_dir)
@@ -34,6 +34,6 @@ valdf = pd.DataFrame(vals)
 preddf['label'] = valdf.label
 preddf['size'] = valdf['size']
 
-preddf.to_csv('/Users/mcgoug01/Downloads/Data/inference/merged_training_set_split_0/test_set/compare_shape.csv')
+preddf.to_csv('/path/to/kcd_data/Downloads/Data/inference/merged_training_set_split_0/test_set/compare_shape.csv')
 # shape label for R22, R56, R187 the wrong way around for some reason. Potentially others too, just haven't checked
 # and are not relevant for the shape model, which predicts 0 for all other potentially incorrect cases.

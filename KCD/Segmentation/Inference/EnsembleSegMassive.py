@@ -13,7 +13,7 @@ import torch.nn as nn
 from torch.nn.functional import softmax
 from os import *
 if __name__ == "__main__":
-    environ['OV_DATA_BASE'] = '/media/mcgoug01/nvme/2stage_replica/'
+    environ['OV_DATA_BASE'] = '/path/to/kcd_data/'
 
 from os.path import *
 import gc

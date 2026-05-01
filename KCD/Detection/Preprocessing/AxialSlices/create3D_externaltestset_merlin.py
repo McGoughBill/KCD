@@ -2,9 +2,9 @@ import slice_generating_utils as generator
 import numpy as np
 
 data_name = 'ykst'
-path = "/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data/raw_data/{}/images".format(data_name)
-save_dir = "/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data/"
-segpath = "/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data/predictions_nii/{}/s1_[4 4 4]mm".format(data_name)
+path = "/path/to/kcd_data/data/seg_data/raw_data/{}/images".format(data_name)
+save_dir = "/path/to/kcd_data/data/seg_data/"
+segpath = "/path/to/kcd_data/data/seg_data/predictions_nii/{}/s1_[4 4 4]mm".format(data_name)
 
 overlap_mm = 40 ## this dictates the minimum distance apart between each slice! not the overlap.
 patch2d = 224 ## in plane slice spacing

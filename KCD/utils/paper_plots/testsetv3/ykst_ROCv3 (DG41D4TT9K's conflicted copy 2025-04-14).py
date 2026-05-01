@@ -6,8 +6,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 
-home = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/YKST/ROCs/v3_files'
-save_loc = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/nat_paper'
+home = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/YKST/ROCs/v3_files'
+save_loc = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/nat_paper'
 subfolders = [folder for folder in os.listdir(home) if os.path.isdir(os.path.join(home, folder))]
 cancers_sensspec = []
 masses_sensspec = []

@@ -17,7 +17,7 @@ import warnings
 import pandas as pd
 
 
-def eval_individual_slice_models(home='/Users/mcgoug01/Downloads/Data', trainname='coreg_ncct',
+def eval_individual_slice_models(home='/path/to/kcd_data/Downloads/Data', trainname='coreg_ncct',
                                  infername='test_set', params: dict = None, tr_split=0, tr_folds=5,
                                  spec_boundary=98, is_3D=True):
     warnings.filterwarnings("ignore")
@@ -84,7 +84,7 @@ def eval_individual_slice_models(home='/Users/mcgoug01/Downloads/Data', trainnam
 
 
 if __name__ == '__main__':
-    home = '/home/wcm23/rds/rds-early_rcc_ldct-HSfXDTkHyC0/data/seg_data'
+    home = '/path/to/kcd_data/data/seg_data'
     trainname = 'masked_coreg_v4_noised'
     infername = 'fulldose_test'
     eval_individual_slice_models(home=home, trainname=trainname, infername=infername)

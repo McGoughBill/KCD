@@ -4,7 +4,7 @@ import numpy as np
 import os
 import pandas as pd
 
-path_to_results = '/Users/mcgoug01/Downloads/test_data/results_finer.csv'
+path_to_results = '/path/to/kcd_data/Downloads/test_data/results_finer.csv'
 df = pd.read_csv(path_to_results)
 df = df[df['size_threshold']==400]
 

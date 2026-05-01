@@ -6,7 +6,7 @@ collections = nbia.getCollections()
 
 CT_series_list = []
 
-save_home = '/bask/projects/p/phwq4930-renal-canc/data/TCIA'
+save_home = '/path/to/kcd_data/data/TCIA'
 
 # tutorial on how to use the NBIA API: https://github.com/kirbyju/TCIA_Notebooks/blob/main/TCIA_REST_API_Downloads.ipynb
 

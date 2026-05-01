@@ -6,10 +6,10 @@ from sklearn.utils import resample
 import warnings
 warnings.filterwarnings("ignore")
 
-resnext_3d = pandas.read_csv('/Users/mcgoug01/Downloads/Data/inference/coreg_ncct_split_0/test_set/combined_results_resnext.csv')
-effnet_3d = pandas.read_csv('/Users/mcgoug01/Downloads/Data/inference/coreg_ncct_split_0/test_set/combined_results_effnet.csv')
-shape = pandas.read_csv('/Users/mcgoug01/Downloads/Data/inference/coreg_ncct_split_0/test_set/combined_results_shape.csv')
-tile2d = pandas.read_csv('/Users/mcgoug01/Downloads/Data/inference/coreg_ncct_split_0/test_set/combined_results_2d.csv')
+resnext_3d = pandas.read_csv('/path/to/kcd_data/Downloads/Data/inference/coreg_ncct_split_0/test_set/combined_results_resnext.csv')
+effnet_3d = pandas.read_csv('/path/to/kcd_data/Downloads/Data/inference/coreg_ncct_split_0/test_set/combined_results_effnet.csv')
+shape = pandas.read_csv('/path/to/kcd_data/Downloads/Data/inference/coreg_ncct_split_0/test_set/combined_results_shape.csv')
+tile2d = pandas.read_csv('/path/to/kcd_data/Downloads/Data/inference/coreg_ncct_split_0/test_set/combined_results_2d.csv')
 #drop unnamed
 resnext_3d = resnext_3d.drop([column for column in resnext_3d.columns if 'unnamed' in column.lower()],axis=1)
 effnet_3d = effnet_3d.drop([column for column in effnet_3d.columns if 'unnamed' in column.lower()],axis=1)

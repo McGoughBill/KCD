@@ -7,8 +7,8 @@ import os
 import nibabel as nib
 plt.switch_backend('TkAgg')
 
-home = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/Bill/QA'
-save_loc = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/nat_paper'
+home = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/Bill/QA'
+save_loc = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/nat_paper'
 hania_response = pd.read_csv(home + '/hania_qa.csv')
 iztok_response = pd.read_csv(home + '/iztok_qa.csv')
 cathal_response = pd.read_csv(home + '/cathal_qa.csv')
@@ -39,7 +39,7 @@ cathal_response['What type of image is this?'] = cathal_response['What type of i
 hania_response['Quality? (1-5)'] = hania_response['Quality? (1-5)'].astype(float)
 cathal_response['Quality? (1-5)'] = cathal_response['Quality? (1-5)'].astype(float)
 iztok_response['Quality? (1-5)'] = iztok_response['Quality? (1-5)'].astype(float)
-stddev = pd.read_csv('/Users/mcgoug01/Cambridge University Dropbox/William McGough/AIvsRad/Bill/QA/std_qa.csv')
+stddev = pd.read_csv('/path/to/kcd_data/Cambridge University Dropbox/William McGough/AIvsRad/Bill/QA/std_qa.csv')
 stddev['StudyID'] = stddev['StudyID'].astype(str).str[7:]
 
 labels = pd.read_csv(home + '/metadata.csv')

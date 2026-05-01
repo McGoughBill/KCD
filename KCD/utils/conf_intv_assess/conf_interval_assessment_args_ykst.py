@@ -8,8 +8,8 @@ import pandas as pd
 import sys
 import json
 
-home = '/bask/projects/p/phwq4930-renal-canc/data/seg_data'
-preds = '/bask/projects/p/phwq4930-renal-canc/data/seg_data/predictions_nii/masked_ykst/s2_[2 2 2]mm_cont'
+home = '/path/to/kcd_data/data/seg_data'
+preds = '/path/to/kcd_data/data/seg_data/predictions_nii/masked_ykst/s2_[2 2 2]mm_cont'
 new_fold = os.path.join(home, 'conv_intv', 'ykst_corrected_alt2')
 save_loc = os.path.join(new_fold, 'conf_ROC.npy')
 ppc_path = os.path.join(new_fold, 'conf_per_patient.npy')

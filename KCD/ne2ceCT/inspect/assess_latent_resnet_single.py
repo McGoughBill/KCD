@@ -1,6 +1,6 @@
 import torch
 import os
-os.environ['OV_DATA_BASE'] = '/Users/mcgoug01/Downloads/assessing_latent'
+os.environ['OV_DATA_BASE'] = '/path/to/kcd_data/Downloads/assessing_latent'
 from KCD.ne2ceCT.dataloader_SSL import CrossPhaseDataset
 from KCD.Segmentation.Inference import infer_network
 import matplotlib.pyplot as plt
@@ -18,18 +18,18 @@ from KCD.ne2ceCT.loss_function import LatentSimilarityLoss_resnet as LatentSimil
 # 3 principal components of the CE model's latent space on CE data, assuming this is 'the answer'.
 
 if __name__ == '__main__':
-    os.chdir('/Users/mcgoug01/Downloads/assessing_latent_resnet')
+    os.chdir('/path/to/kcd_data/Downloads/assessing_latent_resnet')
     # load model
     ce_model = fmcib_model()
 
     converted_dam = fmcib_model()
-    converted_dam.load_state_dict(torch.load('/Users/mcgoug01/Downloads/assessing_latent_resnet/l1-0.2_l2-1.0_var0.01_cov0.2_cce0.0_cos1.0_clip0.0_2e-05lr_0.99998lg_80bs_5000ep_4gpus/network_weights', map_location='cpu'))
+    converted_dam.load_state_dict(torch.load('/path/to/kcd_data/Downloads/assessing_latent_resnet/l1-0.2_l2-1.0_var0.01_cov0.2_cce0.0_cos1.0_clip0.0_2e-05lr_0.99998lg_80bs_5000ep_4gpus/network_weights', map_location='cpu'))
 
     ce_model.eval(), converted_dam.eval()
 
-    ce_data_path = '/Users/mcgoug01/Downloads/assessing_latent_resnet/ce'
-    ne_data_path = '/Users/mcgoug01/Downloads/assessing_latent_resnet/nc'
-    split_path = '/Users/mcgoug01/Downloads/assessing_latent_resnet'
+    ce_data_path = '/path/to/kcd_data/Downloads/assessing_latent_resnet/ce'
+    ne_data_path = '/path/to/kcd_data/Downloads/assessing_latent_resnet/nc'
+    split_path = '/path/to/kcd_data/Downloads/assessing_latent_resnet'
 
     dataset = CrossPhaseDataset(ne_data_path, ce_data_path, split_path,
                                 device='cpu', is_train=False,patches_per_case=200,

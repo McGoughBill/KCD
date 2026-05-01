@@ -9,14 +9,14 @@ def get_nifti_data(path):
     return nib.load(path).get_fdata()
 
 
-npy_infpath ='/Users/mcgoug01/Downloads/tcia_cect_segs/new_segs/'
-npy_cectpath = '/Users/mcgoug01/Downloads/tcia_cect_segs/cect/'
-npy_ncctpath = '/Users/mcgoug01/Downloads/tcia_cect_segs/images/'
-# nii_impath = '/Users/mcgoug01/Library/CloudStorage/OneDrive-CRUKCambridgeInstitute/SecondYear/Segmentation/seg_data/raw_data/all_add/images/'
-# nii_labpath = '/Users/mcgoug01/Library/CloudStorage/OneDrive-CRUKCambridgeInstitute/SecondYear/Segmentation/seg_data/raw_data/all_add/manual_labels/'
+npy_infpath ='/path/to/kcd_data/Downloads/tcia_cect_segs/new_segs/'
+npy_cectpath = '/path/to/kcd_data/Downloads/tcia_cect_segs/cect/'
+npy_ncctpath = '/path/to/kcd_data/Downloads/tcia_cect_segs/images/'
+# nii_impath = '/path/to/kcd_data/raw_data/all_add/images/'
+# nii_labpath = '/path/to/kcd_data/raw_data/all_add/manual_labels/'
 
-# save_impath = '/Users/mcgoug01/Library/CloudStorage/OneDrive-CRUKCambridgeInstitute/SecondYear/Segmentation/seg_data/raw_data/all_add/new_images/'
-save_labpath = '/Users/mcgoug01/Downloads/tcia_cect_segs/new_segs/'
+# save_impath = '/path/to/kcd_data/raw_data/all_add/new_images/'
+save_labpath = '/path/to/kcd_data/Downloads/tcia_cect_segs/new_segs/'
 npy_files = [file for file in os.listdir(npy_ncctpath) if file.endswith('.npy')]
 
 for file in npy_files:

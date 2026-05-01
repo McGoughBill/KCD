@@ -11,11 +11,11 @@ import nibabel as nib
 import shutil
 import pandas as pd
 
-homepath = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/YKST/error_analysis/high_acc/all_binary_preds'
-small_pred_path = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/YKST/error_analysis/high_acc/potential_misses'
-sigfindings_path = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/YKST/sig_findings.csv'
-insigfindings_path = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/YKST/insig_findings.csv'
-cont_pred_path = '/Users/mcgoug01/Cambridge University Dropbox/William McGough/YKST/error_analysis/high_acc/all_preds_cont'
+homepath = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/YKST/error_analysis/high_acc/all_binary_preds'
+small_pred_path = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/YKST/error_analysis/high_acc/potential_misses'
+sigfindings_path = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/YKST/sig_findings.csv'
+insigfindings_path = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/YKST/insig_findings.csv'
+cont_pred_path = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/YKST/error_analysis/high_acc/all_preds_cont'
 
 
 #open both sigfindings and insigfindings
