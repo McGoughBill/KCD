@@ -1,6 +1,6 @@
 import os
 from KCD.config import get_paths
-get_paths()  # populates OV_DATA_BASE from configs/paths.yaml or env
+_paths = get_paths()  # populates OV_DATA_BASE from configs/paths.yaml or env
 from KCD.Segmentation.Inference.endtoend import EnsembleSeg, masking
 import numpy as np
 from skimage.measure import label
@@ -15,7 +15,7 @@ def detection(home, pred_path, op_point,dataset, name):
     assert os.path.exists(pred_path), 'Path does not exist'
 
     predictions = [x for x in os.listdir(pred_path) if 'nii' in x]
-    save_path = os.path.join(home, 'detections',dataset+'_ROCv4', str(name))
+    save_path = os.path.join(home, 'detections',dataset+'_ROCv3', str(name))
 
     save_path_pos = os.path.join(save_path, 'positives_nii')
     save_path_neg = os.path.join(save_path, 'negatives_nii')
@@ -55,7 +55,7 @@ def detection(home, pred_path, op_point,dataset, name):
 
         # if any component is greater than 500mm^3, append to pos_csv the name of the file,
         # the number of components, and the volume of the components. Otherwise, append to neg_csv
-        component_volumes = [(pred_components == i).sum() * voxvol for i in range(1, np.max(pred_components) + 1)]
+        component_volumes = [(pred_components == i).sum() *voxvol for i in range(1, np.max(pred_components) + 1)]
 
         if any([x > 500 for x in component_volumes]):
             pos_csv.write(pred_fn + ',' + str(max(component_volumes)) + '\n')
@@ -79,8 +79,8 @@ def detection(home, pred_path, op_point,dataset, name):
 
 
 
-def EndToEnd(dataset, stage1_path, stage_2path, op_points = [0.001,0.01,0.02,0.03,0.04,0.05,0.1,0.2,0.228,0.3,0.4,0.5,0.6,0.7,0.8,0.899,0.9,0.95,0.96,0.97,0.98,0.99,0.997,0.999],
-             op_point_names = [0.001,0.01,0.02,0.03,0.04,0.05,0.1,0.2,'high_sens',0.3,0.4,0.5,0.6,0.7,0.8,'high_acc',0.9,0.95,0.96,0.97,0.98,0.99,'high_spec',0.999],cont_multiplier=1e5):
+def EndToEnd(dataset, stage1_path, stage_2path, op_points = [0.001,0.01,0.02,0.03,0.04,0.05,0.1,0.120,0.2,0.3,0.4,0.5,0.550,0.6,0.7,0.8,0.9,0.95,0.96,0.97,0.98,0.99,0.994,0.999],
+             op_point_names = [0.001,0.01,0.02,0.03,0.04,0.05,0.1,'high_sens',0.2,0.3,0.4,0.5,'high_acc',0.6,0.7,0.8,0.9,0.95,0.96,0.97,0.98,0.99,'high_spec',0.999],cont_multiplier=1e5):
 
     print('Running EndToEnd')
     print('\n' * 5)
@@ -89,7 +89,7 @@ def EndToEnd(dataset, stage1_path, stage_2path, op_points = [0.001,0.01,0.02,0.0
     print(f'Begin at {time.ctime()}')
     print('\n'*5)
 
-    s1 = EnsembleSeg.Ensemble_Seg(dataset,name='v4s1',
+    s1 = EnsembleSeg.Ensemble_Seg(dataset,name='v3s1',
                             seg_fp=stage1_path,
                             spacing=np.array([4] * 3),
                             do_prep=True, do_infer=True,
@@ -101,14 +101,14 @@ def EndToEnd(dataset, stage1_path, stage_2path, op_points = [0.001,0.01,0.02,0.0
 
 
     dataset_path = os.path.join(os.environ['OV_DATA_BASE'], 'raw_data', dataset, 'images')
-    masked_dataset_path = os.path.join(os.environ['OV_DATA_BASE'], 'raw_data', 'v4masked_' + dataset, 'images')
-    pred_path = os.path.join(os.environ['OV_DATA_BASE'], 'predictions_nii', dataset, 'v4s1_[4 4 4]mm')
+    masked_dataset_path = os.path.join(os.environ['OV_DATA_BASE'], 'raw_data', 'v3masked_' + dataset, 'images')
+    pred_path = os.path.join(os.environ['OV_DATA_BASE'], 'predictions_nii', dataset, 'v3s1_[4 4 4]mm')
 
     masking.mask_dataset(dataset_path, pred_path, masked_dataset_path)
 
     print('Finished masking dataset at', time.ctime())
 
-    s2 = EnsembleSeg.Ensemble_Seg('v4masked_' + dataset,name='v4s2',
+    s2 = EnsembleSeg.Ensemble_Seg('v3masked_' + dataset,name='v3s2',
                             seg_fp=stage_2path,
                             spacing=np.array([2] * 3),
                             do_prep=True, do_infer=True,
@@ -117,7 +117,7 @@ def EndToEnd(dataset, stage1_path, stage_2path, op_points = [0.001,0.01,0.02,0.0
 
     print('Finished second stage segmentation at', time.ctime())
 
-    cont_pred_path = os.path.join(os.environ['OV_DATA_BASE'], 'predictions_nii', 'v4masked_' + dataset, 'v4s2_[2 2 2]mm_cont')
+    cont_pred_path = os.path.join(os.environ['OV_DATA_BASE'], 'predictions_nii', 'v3masked_' + dataset, 'v3s2_[2 2 2]mm_cont')
 
     for i, op_point in enumerate(op_points):
         detection(os.environ['OV_DATA_BASE'], cont_pred_path, op_point*cont_multiplier,dataset, op_point_names[i])
@@ -133,7 +133,20 @@ def EndToEnd(dataset, stage1_path, stage_2path, op_points = [0.001,0.01,0.02,0.0
 
 
 if __name__ == '__main__':
-    s1_path = '/path/to/kcd_data/data/seg_data/trained_models/coreg_v4_noised/4mm_kidneybinary_customPP/6_finetune_trained'
-    s2_path = '/path/to/kcd_data/data/seg_data/trained_models/masked_coreg_v4_noised/2mm_cancerbinary_customPP/6_finetune_l2-1e-05_cce1.0_cos1.0_2e-05lr_0.999997lg_16bs_2000ep_4gpus_efr_dfr100_seg'
+    # Checkpoints used to produce the paper's ROC results.
+    # Download from the Zenodo release accompanying the paper, or point
+    # KCD_MODEL_WEIGHTS at a directory containing the same structure.
+    weights_root = _paths['model_weights']
+    s1_path = os.path.join(
+        weights_root,
+        'NCCT_LDCT_pipeline/coreg_v3_noised/4mm_kidneybinary_customPP/6_finetune_correct',
+    )
+    s2_path = os.path.join(
+        weights_root,
+        'NCCT_LDCT_pipeline/masked_coreg_v3_noised/2mm_cancbinary_customPP'
+        '/6_finetune_l2-1e-05_cce1.0_cos1.0_2e-05lr_0.999997lg_16bs_2000ep_4gpus_efr_dfr100_seg',
+    )
 
+    EndToEnd('lowdose_test', s1_path, s2_path)
+    EndToEnd('fulldose_test', s1_path, s2_path)
     EndToEnd('ykst', s1_path, s2_path)
