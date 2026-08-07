@@ -133,7 +133,29 @@ python KCD/Segmentation/Inference/End2End_ROC.py
 python KCD/utils/paper_plots/testsetv3/fd_test_ROC.py
 ```
 
-Trained model weights are not bundled in the repo. Contact the authors or download from the release artefact (TBD link) once available.
+### Pretrained weights
+
+Five-fold Stage 1 and Stage 2 checkpoints used to produce the paper's ROC results are archived on Zenodo:
+
+> **DOI:** [10.5281/zenodo.21836814](https://doi.org/10.5281/zenodo.21836814)
+> **Direct link:** https://zenodo.org/records/21836814
+> **File:** `NCCT_LDCT_pipeline_v3.tar.gz` (3.2 GB)
+
+Setup:
+
+```bash
+# 1. Download the archive from Zenodo, then extract into your model weights root
+mkdir -p $KCD_MODEL_WEIGHTS
+tar -xzvf NCCT_LDCT_pipeline_v3.tar.gz -C $KCD_MODEL_WEIGHTS
+
+# 2. Confirm structure — should look like:
+#    $KCD_MODEL_WEIGHTS/NCCT_LDCT_pipeline/coreg_v3_noised/.../fold_{0..4}
+#    $KCD_MODEL_WEIGHTS/NCCT_LDCT_pipeline/masked_coreg_v3_noised/.../fold_{0..4}
+```
+
+`End2End_ROC.py` will look for the weights under `KCD_MODEL_WEIGHTS/NCCT_LDCT_pipeline/…` automatically once this variable (or the `model_weights` key in `configs/paths.yaml`) is set.
+
+Optimizer state (`opt_parameters`) has been stripped from the release; it is only needed to resume training and is not required for inference.
 
 ## Citation
 
