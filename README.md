@@ -178,8 +178,6 @@ Third-party components included in this repository (for example the vendored `ov
 
 The pretrained weights are licensed separately from the code; the applicable terms are stated on the Zenodo record ([DOI: 10.5281/zenodo.21836814](https://doi.org/10.5281/zenodo.21836814)).
 
-Versions of this repository published before this change (up to and including tag `v1.0-public`) were released under CC BY-NC 4.0, and those versions remain available under that licence.
-
 ## Acknowledgements
 
 The segmentation backbone is built on the [`ovseg`](https://github.com/ThomasBudd/ovseg) library (vendored under `KCD/Segmentation/ovseg/`).
