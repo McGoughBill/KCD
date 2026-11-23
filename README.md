@@ -163,13 +163,20 @@ Manuscript under review. A formal citation will be added once the paper is accep
 
 ## License
 
-**Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)** — see [LICENSE](LICENSE) for full terms; short summary at https://creativecommons.org/licenses/by-nc/4.0/.
+The KCD code is released under the **PolyForm Strict License 1.0.0** — see [LICENSE](LICENSE) for the full terms, or https://polyformproject.org/licenses/strict/1.0.0.
 
-- **Attribution** — cite the paper and this repository when using the code or weights.
-- **NonCommercial** — you may not use the material for commercial purposes.
-- **Clinical use is not authorised** — the code and weights are research artefacts, not medical devices. Do not use for diagnosis or treatment.
+Required Notice: Copyright (c) 2026 Crispin Lab (https://github.com/McGoughBill/KCD)
 
-The same license applies to the pretrained weights released on Zenodo ([DOI: 10.5281/zenodo.21836814](https://doi.org/10.5281/zenodo.21836814)).
+In brief:
+
+- **Noncommercial use only** — you may use the code for noncommercial purposes, including academic and non-profit research.
+- **No redistribution, no derivative works** — the licence does not permit distributing the code or making changes or new works based on it.
+- **Commercial use requires a separate licence** — please contact the corresponding authors of the paper.
+- **Clinical use is not authorised** — the code and weights are research artefacts, not medical devices. Do not use them for diagnosis or treatment.
+
+Third-party components included in this repository (for example the vendored `ovseg` library) remain under their original licences; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
+The pretrained weights are licensed separately from the code; the applicable terms are stated on the Zenodo record ([DOI: 10.5281/zenodo.21836814](https://doi.org/10.5281/zenodo.21836814)).
 
 ## Acknowledgements
 

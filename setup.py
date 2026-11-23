@@ -16,6 +16,7 @@ setup(
     python_requires='>=3.10',
     description='Automated small kidney cancer detection in non-contrast CT',
     version='1.0',
+    license='PolyForm-Strict-1.0.0',
     url='https://github.com/McGoughBill/KCD',
     author='Bill McGough',
     author_email='billy.mcgough1@hotmail.com',
