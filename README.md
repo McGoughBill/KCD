@@ -165,7 +165,7 @@ Manuscript under review. A formal citation will be added once the paper is accep
 
 The KCD code is released under the **PolyForm Strict License 1.0.0** — see [LICENSE](LICENSE) for the full terms, or https://polyformproject.org/licenses/strict/1.0.0.
 
-Required Notice: Copyright (c) 2026 the KCD authors (https://github.com/McGoughBill/KCD)
+Required Notice: Copyright (c) 2026 Crispin Lab (https://github.com/McGoughBill/KCD)
 
 In brief:
 
