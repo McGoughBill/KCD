@@ -1,6 +1,6 @@
 # KCD — Kidney cancer screening in non-contrast CT via domain-adaptive deep learning
 
-Code accompanying the paper *Kidney cancer screening in non-contrast computed tomography via domain-adaptive deep learning* (manuscript under review).
+Code accompanying the paper *Kidney cancer screening in non-contrast computed tomography via domain-adaptive deep learning* (accepted in Nature Health).
 
 This repository contains the training, inference, and evaluation pipelines used to produce the results in the paper. The original investigation included a number of ablation studies and cohort-specific experiments; for the public release, we have kept the canonical pipeline scripts and removed cohort/site-specific variants. Background notes from the development of this work live in [`docs/literature_review.md`](docs/literature_review.md).
 
@@ -162,7 +162,7 @@ Optimizer state (`opt_parameters`) has been stripped from the release; it is onl
 
 ## Citation
 
-Manuscript under review. A formal citation will be added once the paper is accepted.
+The paper has been accepted in Nature Health. A formal citation will be added once it is published.
 
 ## License
 
