@@ -1,6 +1,6 @@
 # Literature Review and Lab Notes
 
-> Background notes accumulated during the development of *Kidney cancer screening in non-contrast computed tomography via domain-adaptive deep learning* (manuscript under review). Kept here for context — not user-facing documentation. See the project [README](../README.md) for setup and reproduction instructions.
+> Background notes accumulated during the development of *Kidney cancer screening in non-contrast computed tomography via domain-adaptive deep learning* (accepted in Nature Health). Kept here for context — not user-facing documentation. See the project [README](../README.md) for setup and reproduction instructions.
 
 ## Related work
 

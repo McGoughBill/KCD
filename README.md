@@ -1,6 +1,6 @@
 # KCD — Kidney cancer screening in non-contrast CT via domain-adaptive deep learning
 
-Code accompanying the paper *Kidney cancer screening in non-contrast computed tomography via domain-adaptive deep learning* (manuscript under review).
+Code accompanying the paper *Kidney cancer screening in non-contrast computed tomography via domain-adaptive deep learning* (accepted in Nature Health).
 
 This repository contains the training, inference, and evaluation pipelines used to produce the results in the paper. The original investigation included a number of ablation studies and cohort-specific experiments; for the public release, we have kept the canonical pipeline scripts and removed cohort/site-specific variants. Background notes from the development of this work live in [`docs/literature_review.md`](docs/literature_review.md).
 
@@ -140,11 +140,14 @@ Five-fold Stage 1 and Stage 2 checkpoints used to produce the paper's ROC result
 > **DOI:** [10.5281/zenodo.21836814](https://doi.org/10.5281/zenodo.21836814)
 > **Direct link:** https://zenodo.org/records/21836814
 > **File:** `NCCT_LDCT_pipeline_v3.tar.gz` (3.2 GB)
+> **Licence:** CC BY-NC-ND 4.0
+
+The files are access-controlled. To obtain them, sign in to Zenodo, open the record and submit an access request stating your name, institution, institutional email and intended use. Access is granted to researchers at non-profit and academic institutions for non-commercial research.
 
 Setup:
 
 ```bash
-# 1. Download the archive from Zenodo, then extract into your model weights root
+# 1. Once access is granted, download the archive from Zenodo, then extract into your model weights root
 mkdir -p $KCD_MODEL_WEIGHTS
 tar -xzvf NCCT_LDCT_pipeline_v3.tar.gz -C $KCD_MODEL_WEIGHTS
 
@@ -159,7 +162,7 @@ Optimizer state (`opt_parameters`) has been stripped from the release; it is onl
 
 ## Citation
 
-Manuscript under review. A formal citation will be added once the paper is accepted.
+The paper has been accepted in Nature Health. A formal citation will be added once it is published.
 
 ## License
 
@@ -176,7 +179,7 @@ In brief:
 
 Third-party components included in this repository (for example the vendored `ovseg` library) remain under their original licences; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
-The pretrained weights are licensed separately from the code; the applicable terms are stated on the Zenodo record ([DOI: 10.5281/zenodo.21836814](https://doi.org/10.5281/zenodo.21836814)).
+The pretrained weights are licensed separately from the code, under **Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)**, and are available on request through the Zenodo record ([DOI: 10.5281/zenodo.21836814](https://doi.org/10.5281/zenodo.21836814)).
 
 ## Acknowledgements
 
