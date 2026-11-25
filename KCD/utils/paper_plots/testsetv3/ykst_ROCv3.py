@@ -1,0 +1,114 @@
+#read csv for cancers, all solid tumors, and all potential malignancies
+#plot ROC curve for each mass type
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import os
+
+home = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/YKST/ROCs/v3_files'
+save_loc = '/path/to/kcd_data/Cambridge University Dropbox/William McGough/nat_paper'
+subfolders = [folder for folder in os.listdir(home) if os.path.isdir(os.path.join(home, folder))]
+cancers_sensspec = []
+masses_sensspec = []
+alls_sensspec = []
+fig = plt.figure(figsize=(6,6))
+print(subfolders)
+# for folder in subfolders:
+#     #cancers in cnacers_ROC.csv, all solid tumors in masses_ROC.csv, all potential malignancies in all_ROC.csv
+#     # open csvs as dataframes, append
+
+cancers = pd.read_csv(os.path.join(home, 'cancers_ROC.csv'))
+masses = pd.read_csv(os.path.join(home, 'masses_ROC.csv'))
+alls = pd.read_csv(os.path.join(home, 'all_ROC.csv'))
+
+# append to list of dataframes
+cancers_sens_spec = cancers[['Sensitivity','Specificity']].values
+masses_sens_spec = masses[['Sensitivity','Specificity']].values
+alls_sens_spec = alls[['Sensitivity','Specificity']].values
+
+cancers_sensspec.append(cancers_sens_spec)
+masses_sensspec.append(masses_sens_spec)
+alls_sensspec.append(alls_sens_spec)
+
+# concat the results into a single array per mass type
+cancers_sensspec = np.concatenate(cancers_sensspec)
+masses_sensspec = np.concatenate(masses_sensspec)
+alls_sensspec = np.concatenate(alls_sensspec)
+
+
+
+#add 0,100 and 100,0 to the start and end of the arrays
+cancers_sensspec = np.vstack((np.array([0,1]),cancers_sensspec,np.array([1,0])))
+masses_sensspec = np.vstack((np.array([0,1]),masses_sensspec,np.array([1,0])))
+alls_sensspec = np.vstack((np.array([0,1]),alls_sensspec,np.array([1,0])))
+
+# drop duplicates in the arrays
+cancers_sensspec = np.unique(cancers_sensspec, axis=0)
+masses_sensspec = np.unique(masses_sensspec, axis=0)
+alls_sensspec = np.unique(alls_sensspec, axis=0)
+
+# sort by sensitivity in ascending order
+cancers_sensspec = cancers_sensspec[np.argsort(cancers_sensspec[:,0])]
+#then sort by specificity in descending order
+cancers_sensspec = cancers_sensspec[np.argsort(cancers_sensspec[:,1])[::-1]]
+
+masses_sensspec = masses_sensspec[np.argsort(masses_sensspec[:,0])]
+masses_sensspec = masses_sensspec[np.argsort(masses_sensspec[:,1])[::-1]]
+
+alls_sensspec = alls_sensspec[np.argsort(alls_sensspec[:,0])]
+alls_sensspec = alls_sensspec[np.argsort(alls_sensspec[:,1])[::-1]]
+
+#use aestheically pleasing colors for the ROC curves
+colors = ['k','orange']
+#plot the ROC curves
+
+for name,data,c in zip(['Cancers\n','All Solid Masses\n'],
+                       [cancers_sensspec, masses_sensspec,],
+                       colors):
+    auc = np.abs(np.trapz(data[:,0], data[:,1]))
+    plt.plot(data[:,1]*100, data[:,0]*100, label=name+'(AUC = %.3f)' % auc, color=c, linewidth=2)
+plt.xlabel('Specificity / %',fontdict={'fontsize': 26,'family':'Helvetica'})
+plt.ylabel('Sensitivity / %',fontdict={'fontsize': 26,'family':'Helvetica'})
+plt.tick_params(axis='both', which='major', labelsize=20)
+plt.tick_params(axis='both', which='minor', labelsize=20)
+
+
+# do the same for the cancers_sensspec
+max_spec = np.max(cancers_sensspec[:,1][cancers_sensspec[:,0]==1.0])
+# plt.plot([max_spec*100,max_spec*100],[-2,100],color='gray',linestyle='--',linewidth=2)
+# # annotate this vertical line with 'High-Risk Cancer Prioritisation'
+# plt.text(max_spec*100 - 3, 40, 'High-Risk Cancer Prioritisation', rotation=90, verticalalignment='center',
+#             horizontalalignment='center', fontsize=20)
+plt.ylim([0,100.5])
+plt.xlim([0,100.5])
+# set spine on top and right to be invisible
+plt.gca().spines['right'].set_visible(False)
+plt.gca().spines['top'].set_visible(False)
+
+
+radiologist_cancer_sensspec = [100,100*(4019-(155-13))/4019]
+radiologist_mass_sensspec = [100*(24/25),100*(4019-155+25)/4019]
+radiologist_all_sensspec = [100*(36/42),100*(4019-155+42)/4019]
+
+# change all legend font and size to helvetica 16
+lt = plt.legend()
+for text in lt.get_texts():
+    text.set_fontsize('16')
+    text.set_fontname('Helvetica')
+
+# plt.plot(radiologist_cancer_sensspec[1],radiologist_cancer_sensspec[0],'ro',label='Radiologist Cancers',
+#             markersize=5)
+# plt.plot(radiologist_mass_sensspec[1],radiologist_mass_sensspec[0],'bo',label='Radiologist Masses',
+#             markersize=5)
+# plt.plot(radiologist_all_sensspec[1],radiologist_all_sensspec[0],'go',label='Radiologist All',
+#             markersize=5)
+# plt.title('ROC Curves for External Test: YKST',fontdict={'fontsize': 15})
+plt.tight_layout()
+plt.savefig(os.path.join(save_loc,'YKST_ROC.png'))
+plt.show()
+
+print(cancers_sensspec)
+# # loop through the meta dataframes, plot ROC curves
+# for df in zip(['Cancers','All Solid Masses','All Potential Malginancies'],[meta_cancers, meta_masses, meta_alls]):
+#     tpr = df

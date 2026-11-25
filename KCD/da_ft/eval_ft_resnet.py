@@ -1,0 +1,34 @@
+import pandas as pd
+import numpy as np
+import os
+os.environ['OV_DATA_BASE'] ='/path/to/kcd_data/data/seg_data'
+
+home = '/path/to/kcd_data/data/seg_data/3DSlice_data/training_info/coreg_ncct'
+splits = [subdir for subdir in os.listdir(home) if os.path.isdir(os.path.join(home,subdir))]
+combined_res = []
+for subdir in splits:
+    split = os.path.join(home, subdir)
+    folds = [subdir for subdir in os.listdir(split) if os.path.isdir(os.path.join(split,subdir))]
+    for fold in folds:
+        fold_path = os.path.join(split, fold,'PatchModel','csv')
+        files = [f for f in os.listdir(fold_path) if f.endswith('.csv')]
+        names = [f.split('_')[1:3] for f in files]
+        for file,(modeltype,preprocessing) in zip(files,names):
+            res = pd.read_csv(os.path.join(fold_path,file),index_col=0,header=0)
+            AUC = res[(res['dataset_loc']=='test') & (res['Voting Size']==1)]['AUC'].values[0]
+            combined_res.append({'modeltype':modeltype,
+                                 'preprocessing':preprocessing,
+                                 'AUC':AUC})
+
+# group and average where modeltype and preprocessing are the same
+ogdf = pd.DataFrame(combined_res)
+ogdf.to_csv(os.path.join(home,'raw_results.csv'),index=False)
+print(ogdf)
+df = ogdf.groupby(['modeltype','preprocessing']).mean().reset_index()
+df['std'] = ogdf.groupby(['modeltype','preprocessing'])['AUC'].std().reset_index()['AUC']
+print(df)
+df.to_csv(os.path.join(home,'combined_results.csv'),index=False)
+
+
+
+
