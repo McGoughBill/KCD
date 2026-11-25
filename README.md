@@ -140,9 +140,17 @@ Five-fold Stage 1 and Stage 2 checkpoints used to produce the paper's ROC result
 > **DOI:** [10.5281/zenodo.21836814](https://doi.org/10.5281/zenodo.21836814)
 > **Direct link:** https://zenodo.org/records/21836814
 > **File:** `NCCT_LDCT_pipeline_v3.tar.gz` (3.2 GB)
-> **Licence:** CC BY-NC-ND 4.0
+> **Licence:** custom terms, all rights reserved (see below)
 
-The files are access-controlled. To obtain them, sign in to Zenodo, open the record and submit an access request stating your name, institution, institutional email and intended use. Access is granted to researchers at non-profit and academic institutions for non-commercial research.
+**Availability and conditions of access.** The trained model weights are deposited in Zenodo under restricted access. All rights are reserved.
+
+Access requests will be considered on a case-by-case basis exclusively for independent scientific validation and reproduction of the results reported in the associated publication.
+
+Any access granted is limited to inference and evaluation using the original, unmodified model weights. Fine-tuning, retraining, transfer learning, modification, creation of derivative models, knowledge distillation, redistribution and commercial or clinical use are not permitted.
+
+Access is subject to prior approval and written acceptance of these conditions. No general licence for reuse or further model development is granted.
+
+To request access, sign in to Zenodo, open the record and submit an access request stating your name, institution, institutional email and intended use.
 
 Setup:
 
@@ -179,7 +187,7 @@ In brief:
 
 Third-party components included in this repository (for example the vendored `ovseg` library) remain under their original licences; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
-The pretrained weights are licensed separately from the code, under **Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)**, and are available on request through the Zenodo record ([DOI: 10.5281/zenodo.21836814](https://doi.org/10.5281/zenodo.21836814)).
+The pretrained weights are not covered by the code licence. All rights in the weights are reserved; access is by request through the Zenodo record ([DOI: 10.5281/zenodo.21836814](https://doi.org/10.5281/zenodo.21836814)) and is subject to the conditions set out under [Pretrained weights](#pretrained-weights).
 
 ## Acknowledgements
 
